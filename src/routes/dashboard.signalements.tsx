@@ -49,7 +49,7 @@ function ReportsPage() {
     if (!user) { setLoading(false); return; }
     const { data, error } = await supabase
       .from("product_reports")
-      .select("*, products(name, images)")
+      .select("*, products:seller_products(name, images)")
       .eq("seller_id", user.id)
       .order("created_at", { ascending: false });
     if (error) toast.error("Impossible de charger les signalements");

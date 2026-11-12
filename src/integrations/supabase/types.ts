@@ -80,7 +80,7 @@ export type Database = {
             foreignKeyName: "marketplace_listings_product_id_fkey"
             columns: ["product_id"]
             isOneToOne: true
-            referencedRelation: "products"
+            referencedRelation: "seller_products"
             referencedColumns: ["id"]
           },
         ]
@@ -152,7 +152,7 @@ export type Database = {
             foreignKeyName: "marketplace_orders_product_id_fkey"
             columns: ["product_id"]
             isOneToOne: false
-            referencedRelation: "products"
+            referencedRelation: "seller_products"
             referencedColumns: ["id"]
           },
         ]
@@ -202,12 +202,12 @@ export type Database = {
             foreignKeyName: "product_reports_product_id_fkey"
             columns: ["product_id"]
             isOneToOne: false
-            referencedRelation: "products"
+            referencedRelation: "seller_products"
             referencedColumns: ["id"]
           },
         ]
       }
-      products: {
+      seller_products: {
         Row: {
           attributes: Json | null
           bundle_items: Json | null
@@ -276,7 +276,7 @@ export type Database = {
         }
         Relationships: []
       }
-      profiles: {
+      seller_profiles: {
         Row: {
           account_type: string
           birth_date: string | null

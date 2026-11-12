@@ -55,7 +55,7 @@ function BoutiquePage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
       setEmail(user.email ?? "");
-      const { data } = await supabase.from("profiles").select("*").eq("id", user.id).maybeSingle();
+      const { data } = await supabase.from("seller_profiles").select("*").eq("id", user.id).maybeSingle();
       if (data) {
         const p = data as Profile;
         setProfile(p);
@@ -85,7 +85,7 @@ function BoutiquePage() {
       const { data: pub } = supabase.storage.from("product-images").getPublicUrl(path);
       const url = `${pub.publicUrl}?v=${Date.now()}`;
       const column = kind === "logo" ? "shop_logo_url" : "shop_banner_url";
-      const { error: upErr } = await supabase.from("profiles").update({ [column]: url } as any).eq("id", profile.id);
+      const { error: upErr } = await supabase.from("seller_profiles").update({ [column]: url } as any).eq("id", profile.id);
       if (upErr) throw upErr;
       setProfile({ ...profile, [column]: url } as Profile);
       toast.success(kind === "logo" ? "Logo mis à jour" : "Bannière mise à jour");
@@ -106,7 +106,7 @@ function BoutiquePage() {
         categories: form.categories,
       };
       if (!isEntreprise && form.categories[0]) payload.category = form.categories[0];
-      const { error } = await supabase.from("profiles").update(payload).eq("id", profile.id);
+      const { error } = await supabase.from("seller_profiles").update(payload).eq("id", profile.id);
       if (error) throw error;
       setProfile({ ...profile, ...payload });
       setEditing(false);

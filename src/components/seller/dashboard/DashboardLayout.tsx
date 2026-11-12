@@ -1,6 +1,7 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState, ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { ensureSellerProfile } from "@/lib/sellerProfile";
 import {
   LayoutDashboard, Store, Package, ShoppingCart, Users, CreditCard, Truck,
   BarChart3, Megaphone, Star, Bell, MessageSquare, Settings, HelpCircle, LogOut,
@@ -48,7 +49,8 @@ export function DashboardLayout({ title, subtitle, children }: { title: string; 
       const { data: { user } } = await supabase.auth.getUser();
       if (!mounted) return;
       if (!user) { navigate({ to: "/connexion", replace: true }); return; }
-      const { data } = await supabase.from("profiles").select("first_name").eq("id", user.id).maybeSingle();
+      await ensureSellerProfile(user);
+      const { data } = await supabase.from("seller_profiles").select("first_name").eq("id", user.id).maybeSingle();
       if (data?.first_name) setName(data.first_name);
       setAuthReady(true);
     })();
@@ -181,7 +183,7 @@ export function useSellerName() {
     (async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
-      const { data } = await supabase.from("profiles").select("first_name").eq("id", user.id).maybeSingle();
+      const { data } = await supabase.from("seller_profiles").select("first_name").eq("id", user.id).maybeSingle();
       if (data?.first_name) setName(data.first_name);
     })();
   }, []);

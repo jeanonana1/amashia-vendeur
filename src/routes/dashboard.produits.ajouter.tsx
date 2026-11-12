@@ -205,10 +205,10 @@ function AddProductPage() {
     (async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
-      const { data: list } = await supabase.from("products").select("id,name,price").eq("user_id", user.id).limit(100);
+      const { data: list } = await supabase.from("seller_products").select("id,name,price").eq("user_id", user.id).limit(100);
       setMyProducts((list as any) || []);
       if (editId) {
-        const { data: p } = await supabase.from("products").select("*").eq("id", editId).maybeSingle();
+        const { data: p } = await supabase.from("seller_products").select("*").eq("id", editId).maybeSingle();
         if (p) {
           setType(((p as any).product_type || "simple") as ProductType);
           setForm({
@@ -267,9 +267,9 @@ function AddProductPage() {
           status: editId ? form.status : "draft",
         };
         if (dbDraftId) {
-          await supabase.from("products").update(payload).eq("id", dbDraftId);
+          await supabase.from("seller_products").update(payload).eq("id", dbDraftId);
         } else {
-          const { data: created } = await supabase.from("products").insert(payload).select("id").maybeSingle();
+          const { data: created } = await supabase.from("seller_products").insert(payload).select("id").maybeSingle();
           if (created?.id) setDbDraftId(created.id);
         }
         setAutoSavedAt(new Date());
@@ -430,11 +430,11 @@ function AddProductPage() {
       };
 
       if (editId) {
-        const { error } = await supabase.from("products").update(payload).eq("id", editId);
+        const { error } = await supabase.from("seller_products").update(payload).eq("id", editId);
         if (error) throw error;
         toast.success("Produit mis à jour");
       } else {
-        const { error } = await supabase.from("products").insert(payload);
+        const { error } = await supabase.from("seller_products").insert(payload);
         if (error) throw error;
         toast.success(asDraft ? "Brouillon enregistré" : "Produit publié !");
       }

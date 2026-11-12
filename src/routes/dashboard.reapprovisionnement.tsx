@@ -42,7 +42,7 @@ function ReapproPage() {
     (async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user || !mounted) return;
-      const { data } = await supabase.from("products").select("id,name,category,price,stock,images,sku").eq("user_id", user.id).order("stock", { ascending: true });
+      const { data } = await supabase.from("seller_products").select("id,name,category,price,stock,images,sku").eq("user_id", user.id).order("stock", { ascending: true });
       if (mounted && data) setRows(data as Row[]);
     })();
     return () => { mounted = false; };
@@ -53,7 +53,7 @@ function ReapproPage() {
     if (!add || add <= 0) return toast.error("Indiquez une quantité valide");
     const next = r.stock + add;
     setSaving(r.id);
-    const { error } = await supabase.from("products").update({ stock: next }).eq("id", r.id);
+    const { error } = await supabase.from("seller_products").update({ stock: next }).eq("id", r.id);
     setSaving(null);
     if (error) return toast.error(error.message);
     setRows((prev) => prev.map((x) => (x.id === r.id ? { ...x, stock: next } : x)));

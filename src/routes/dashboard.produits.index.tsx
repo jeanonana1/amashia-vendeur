@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { DashboardLayout } from "@/components/seller/dashboard/DashboardLayout";
 import { Plus, Search, Filter, Edit, Trash2, Eye, Check, Pause, Boxes, X, Rocket } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { marketplaceProductUrl } from "@/lib/sellerProfile";
 import { toast } from "sonner";
 import { PublishAmashiaModal, type PublishProduct } from "@/components/seller/dashboard/PublishAmashiaModal";
 
@@ -24,6 +25,7 @@ interface Product {
   id: string; name: string; category: string | null; price: number; stock: number;
   status: string; sku: string | null; description: string | null; images: string[] | null;
   compare_at_price?: number | null; purchase_price?: number | null;
+  marketplace_product_id?: string | null;
   specifications?: any; attributes?: any; variant_images?: any;
 }
 
@@ -56,7 +58,7 @@ function ProduitsPage() {
     (async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user || !mounted) return;
-      const { data } = await supabase.from("products").select("*").eq("user_id", user.id).order("created_at", { ascending: false });
+      const { data } = await supabase.from("seller_products").select("*").eq("user_id", user.id).order("created_at", { ascending: false });
       if (mounted && data) setProducts(data as Product[]);
       if (!mounted) return;
 
@@ -83,7 +85,7 @@ function ProduitsPage() {
     if (!confirm("Supprimer ce produit ?")) return;
     const prev = products;
     setProducts((p) => p.filter((x) => x.id !== id));
-    const { error } = await supabase.from("products").delete().eq("id", id);
+    const { error } = await supabase.from("seller_products").delete().eq("id", id);
     if (error) {
       setProducts(prev);
       return toast.error(error.message);
@@ -94,7 +96,7 @@ function ProduitsPage() {
   async function toggleStatus(p: Product) {
     const next = p.status === "active" ? "draft" : "active";
     setProducts((prev) => prev.map((x) => x.id === p.id ? { ...x, status: next } : x));
-    const { error } = await supabase.from("products").update({ status: next }).eq("id", p.id);
+    const { error } = await supabase.from("seller_products").update({ status: next }).eq("id", p.id);
     if (error) return toast.error(error.message);
     toast.success(next === "active" ? "Produit publié" : "Produit désactivé");
   }
@@ -106,7 +108,7 @@ function ProduitsPage() {
     const target = stockEdit.product;
     const prev = products;
     setProducts((list) => list.map((x) => x.id === target.id ? { ...x, stock: value } : x));
-    const { error } = await supabase.from("products").update({ stock: value }).eq("id", target.id);
+    const { error } = await supabase.from("seller_products").update({ stock: value }).eq("id", target.id);
     setSavingStock(false);
     if (error) {
       setProducts(prev);
@@ -117,7 +119,11 @@ function ProduitsPage() {
   }
 
   function viewOnMarketplace(p: Product) {
-    window.open(`/p/${p.id}`, "_blank", "noopener");
+    if (!p.marketplace_product_id || p.status !== "active") {
+      toast.error("Ce produit n'est pas encore en ligne. Activez-le avec un titre, un prix et au moins une photo.");
+      return;
+    }
+    window.open(marketplaceProductUrl(p.marketplace_product_id), "_blank", "noopener");
   }
 
   const categories = Array.from(new Set(products.map((p) => p.category).filter(Boolean))) as string[];

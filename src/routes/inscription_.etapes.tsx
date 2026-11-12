@@ -69,7 +69,6 @@ function Page() {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
-  const [otpCode, setOtpCode] = useState("");
   const [data, setData] = useState<FormState>({
     firstName: "", lastName: "", email: "", phone: "", password: "", confirm: "",
     categories: [],
@@ -108,7 +107,7 @@ function Page() {
     if (!data.acceptTerms) { toast.error("Vous devez accepter les conditions"); return; }
     setLoading(true);
     try {
-      const metadata = { account_type: type, first_name: data.firstName, last_name: data.lastName, phone: data.phone };
+      const metadata = { account_type: type, first_name: data.firstName, last_name: data.lastName, phone: data.phone, seller_profile: buildProfile() };
       const result = otpSent
         ? await supabase.auth.resend({ type: "signup", email: data.email, options: { emailRedirectTo: `${window.location.origin}/connexion` } })
         : await supabase.auth.signUp({ email: data.email, password: data.password, options: { data: metadata, emailRedirectTo: `${window.location.origin}/connexion` } });
@@ -118,16 +117,18 @@ function Page() {
         return;
       }
       setOtpSent(true);
-      toast.success("Le code de confirmation a été envoyé par email.");
+      if (!otpSent && "user" in result.data && result.data.user && result.data.user.identities?.length === 0) {
+        toast.info("Cet email a déjà un compte Amashia. Cliquez sur « J'ai confirmé mon email » pour continuer avec votre mot de passe.");
+        return;
+      }
+      toast.success("Le lien de confirmation a été envoyé par email.");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Envoi impossible.");
     } finally { setLoading(false); }
   }
 
-  async function verifyCode() {
-    if (otpCode.length !== 6) { toast.error("Le code doit contenir 6 chiffres"); return; }
-    setLoading(true);
-    const profile = {
+  function buildProfile() {
+    return {
       account_type: type,
       first_name: data.firstName, last_name: data.lastName, phone: data.phone,
       category: data.categories[0] || null,
@@ -142,9 +143,22 @@ function Page() {
       region: data.region,
       share_location: data.shareLocation,
     };
+  }
+
+  async function verifyCode() {
+    setLoading(true);
+    const profile = buildProfile();
     try {
-      const { error: verificationError } = await supabase.auth.verifyOtp({ email: data.email, token: otpCode, type: "signup" });
-      if (verificationError) throw verificationError;
+      const { error: signInError } = await supabase.auth.signInWithPassword({ email: data.email, password: data.password });
+      if (signInError) {
+        if (/not confirmed/i.test(signInError.message)) {
+          throw new Error("Email pas encore confirmé : cliquez d'abord sur le lien reçu par email, puis revenez ici.");
+        }
+        if (/invalid login credentials/i.test(signInError.message)) {
+          throw new Error("Mot de passe incorrect pour ce compte. Revenez à l'étape 1 pour le corriger.");
+        }
+        throw signInError;
+      }
 
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
@@ -168,7 +182,8 @@ function Page() {
           }
         }
 
-        await supabase.from("profiles").update(profile).eq("id", user.id);
+        const { error: profileError } = await supabase.from("seller_profiles").upsert({ id: user.id, ...profile } as never);
+        if (profileError) throw profileError;
       }
     } catch (e) {
       console.error(e);
@@ -407,23 +422,18 @@ function Page() {
                   <div className="w-10 h-10 rounded-xl bg-primary/15 grid place-items-center"><Mail className="text-primary" size={18} /></div>
                   <div>
                     <p className="font-bold text-sm">Vérification par email</p>
-                    <p className="text-xs text-muted-foreground">Un code à 6 chiffres sera envoyé à <span className="text-primary font-semibold">{data.email}</span></p>
+                    <p className="text-xs text-muted-foreground">Un lien de confirmation sera envoyé à <span className="text-primary font-semibold">{data.email}</span></p>
                   </div>
                 </div>
                 {!otpSent ? (
                   <button onClick={sendCode} disabled={loading || !data.acceptTerms} className="w-full py-3 rounded-full bg-primary/20 border border-primary/40 text-primary font-semibold hover:bg-primary/30 transition flex items-center justify-center gap-2 disabled:opacity-50">
-                    <Send size={16} /> {loading ? "Envoi..." : "Envoyer le code de vérification"}
+                    <Send size={16} /> {loading ? "Envoi..." : "Envoyer le lien de confirmation"}
                   </button>
                 ) : (
-                  <div className="space-y-3">
-                    <input
-                      value={otpCode}
-                      onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                      placeholder="• • • • • •"
-                      className={`${inputCls} text-center text-2xl tracking-[0.5em] font-bold`}
-                      inputMode="numeric" maxLength={6} autoFocus
-                    />
-                    <button onClick={sendCode} disabled={loading} className="text-sm text-primary hover:underline">Renvoyer le code</button>
+                  <div className="space-y-3 text-sm">
+                    <p>📩 Ouvrez l'email reçu à <span className="font-semibold">{data.email}</span> et cliquez sur le lien de confirmation (pensez à vérifier les spams).</p>
+                    <p>Revenez ensuite sur cette page et cliquez sur <span className="font-semibold">« J'ai confirmé mon email »</span>.</p>
+                    <button onClick={sendCode} disabled={loading} className="text-sm text-primary hover:underline">Renvoyer l'email</button>
                   </div>
                 )}
               </div>
@@ -435,7 +445,7 @@ function Page() {
                 <input type="checkbox" checked={data.notifications} onChange={(e) => set("notifications", e.target.checked)} className="mt-1 accent-primary" />
                 <span>Recevoir des notifications sur les offres et nouveautés</span>
               </label>
-              <NavBtns back={back} next={verifyCode} disabled={!otpSent || otpCode.length !== 6 || loading} nextLabel={loading ? "Vérification..." : "Créer mon compte"} />
+              <NavBtns back={back} next={verifyCode} disabled={!otpSent || loading} nextLabel={loading ? "Vérification..." : "J'ai confirmé mon email"} />
             </div>
           )}
 

@@ -25,7 +25,16 @@ function Page() {
   const [loading, setLoading] = useState(false);
   const [recovery, setRecovery] = useState(false);
   useEffect(() => {
-    const { data } = supabase.auth.onAuthStateChange(event => { if (event === "PASSWORD_RECOVERY") setRecovery(true); });
+    // Retour depuis le lien de confirmation reçu par email : le compte est
+    // connecté automatiquement, on ouvre directement le tableau de bord.
+    const fromEmailLink = /access_token=|[?&]code=/.test(window.location.hash + window.location.search);
+    const { data } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "PASSWORD_RECOVERY") { setRecovery(true); return; }
+      if (fromEmailLink && session && (event === "SIGNED_IN" || event === "INITIAL_SESSION") && !/type=recovery/.test(window.location.hash)) {
+        toast.success("Email confirmé ! Bienvenue sur Amashia.");
+        navigate({ to: "/dashboard", replace: true });
+      }
+    });
     return () => data.subscription.unsubscribe();
   }, []);
 

@@ -11,7 +11,7 @@ export default defineConfig({
     tailwindcss(),
     tanstackStart({ server: { entry: "server" } }),
     react(),
-    nitro({ preset: "node-server" }),
+    nitro(),
   ],
   server: { host: "0.0.0.0", port: 8080 },
 });

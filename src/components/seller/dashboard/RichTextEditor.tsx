@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { cleanEditorHtml, hasForeignFormatting } from "@/lib/richText";
 import {
   Bold, Italic, Underline, Strikethrough, List, ListOrdered, Quote,
   Heading1, Heading2, Heading3, Link as LinkIcon, Undo, Redo,
@@ -19,9 +20,29 @@ export function RichTextEditor({ value, onChange, placeholder }: Props) {
 
   useEffect(() => {
     if (ref.current && ref.current.innerHTML !== value) {
-      ref.current.innerHTML = value || "";
+      // Une description déjà enregistrée avec des styles collés d'un autre site
+      // (fond blanc, couleurs, polices…) est nettoyée à l'ouverture.
+      const html = hasForeignFormatting(value) ? cleanEditorHtml(value) : value || "";
+      ref.current.innerHTML = html;
+      if (html !== (value || "")) onChange(html);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value]);
+
+  /** Collage : on garde la structure du texte (listes, gras, titres…) mais pas ses styles. */
+  const onPaste = (e: React.ClipboardEvent<HTMLDivElement>) => {
+    const html = e.clipboardData.getData("text/html");
+    const text = e.clipboardData.getData("text/plain");
+    if (!html && !text) return;
+    e.preventDefault();
+    if (html) {
+      document.execCommand("insertHTML", false, cleanEditorHtml(html));
+    } else {
+      document.execCommand("insertText", false, text);
+    }
+    if (ref.current) onChange(ref.current.innerHTML);
+    saveSelection();
+  };
 
   const saveSelection = () => {
     const sel = window.getSelection();
@@ -201,6 +222,7 @@ export function RichTextEditor({ value, onChange, placeholder }: Props) {
         contentEditable
         suppressContentEditableWarning
         onInput={(e) => { onChange((e.target as HTMLDivElement).innerHTML); saveSelection(); refreshState(); }}
+        onPaste={onPaste}
         onKeyUp={() => { saveSelection(); refreshState(); }}
         onMouseUp={() => { saveSelection(); refreshState(); }}
         onBlur={saveSelection}

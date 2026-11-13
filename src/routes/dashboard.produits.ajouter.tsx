@@ -429,10 +429,13 @@ function AddProductPage() {
         bundle_items: bundleItems, virtual_files: virtualFiles, variant_images: variantImages,
       };
 
-      if (editId) {
-        const { error } = await supabase.from("seller_products").update(payload).eq("id", editId);
+      // Le brouillon enregistré automatiquement pendant la saisie devient le
+      // produit final (au lieu de créer un second produit en double).
+      const targetId = editId || dbDraftId;
+      if (targetId) {
+        const { error } = await supabase.from("seller_products").update(payload).eq("id", targetId);
         if (error) throw error;
-        toast.success("Produit mis à jour");
+        toast.success(editId ? "Produit mis à jour" : asDraft ? "Brouillon enregistré" : "Produit publié !");
       } else {
         const { error } = await supabase.from("seller_products").insert(payload);
         if (error) throw error;

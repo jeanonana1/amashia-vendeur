@@ -11,9 +11,18 @@ export const Route = createFileRoute("/dashboard/clients")({
 });
 
 /** Client ayant acheté dans la boutique (aucune coordonnée personnelle : nom et quartier uniquement). */
+type ClientOrder = { order_number: string; created_at: string; amount: number; items: number; status: string; products: string[] };
 type Client = {
-  id: string; name: string; area: string; orders: number; items: number; spent: number;
-  first_order: string; last_order: string; products: string[];
+  id: string; code: string; name: string; area: string; orders: number; items: number; spent: number;
+  first_order: string; last_order: string; products: string[]; order_list: ClientOrder[];
+};
+
+const ORDER_STATUS: Record<string, { label: string; cls: string }> = {
+  pending: { label: "En attente", cls: "bg-amber-500/15 text-amber-400" },
+  preparing: { label: "Préparation", cls: "bg-blue-500/15 text-blue-400" },
+  shipped: { label: "Expédiée", cls: "bg-violet-500/15 text-violet-400" },
+  delivered: { label: "Livrée", cls: "bg-emerald-500/15 text-emerald-400" },
+  cancelled: { label: "Annulée", cls: "bg-red-500/15 text-red-400" },
 };
 
 function segment(c: Client): { label: string; cls: string } {
@@ -51,7 +60,7 @@ function ClientsPage() {
 
   const list = useMemo(() => {
     const term = q.trim().toLowerCase();
-    const l = (clients ?? []).filter((c) => !term || c.name.toLowerCase().includes(term) || c.area.toLowerCase().includes(term));
+    const l = (clients ?? []).filter((c) => !term || c.name.toLowerCase().includes(term) || c.area.toLowerCase().includes(term) || c.code.toLowerCase().includes(term.replace("#", "")));
     return [...l].sort((a, b) =>
       sort === "spent" ? b.spent - a.spent :
       sort === "orders" ? b.orders - a.orders :
@@ -79,7 +88,7 @@ function ClientsPage() {
         <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
           <div className="relative min-w-[220px] flex-1 sm:max-w-sm">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={15} />
-            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Rechercher un client ou une ville" className="w-full rounded-xl border border-border bg-background py-2.5 pl-9 pr-3 text-sm" />
+            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Rechercher un client, une ville ou un code" className="w-full rounded-xl border border-border bg-background py-2.5 pl-9 pr-3 text-sm" />
           </div>
           <select value={sort} onChange={(e) => setSort(e.target.value as keyof typeof SORTS)} className="rounded-xl border border-border bg-background px-3 py-2.5 text-sm">
             {Object.entries(SORTS).map(([k, v]) => <option key={k} value={k}>Trier : {v}</option>)}
@@ -115,7 +124,7 @@ function ClientsPage() {
                         <div className="flex items-center gap-3">
                           <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-primary/15 text-xs font-bold text-primary">{initials(c.name)}</span>
                           <div className="min-w-0">
-                            <p className="truncate font-semibold">{c.name}</p>
+                            <p className="truncate font-semibold">{c.name} <span className="ml-1 rounded bg-secondary px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground" title="Identifiant du compte client">#{c.code}</span></p>
                             <p className="flex items-center gap-1 text-xs text-muted-foreground"><MapPin size={11} /> {c.area || "—"}</p>
                           </div>
                         </div>
@@ -135,12 +144,12 @@ function ClientsPage() {
 
       {selected && (
         <div className="fixed inset-0 z-50 grid place-items-center bg-black/60 p-4 backdrop-blur-sm" onClick={() => setSelected(null)}>
-          <div className="w-full max-w-md rounded-2xl border border-border bg-card p-6" onClick={(e) => e.stopPropagation()}>
+          <div className="max-h-[92vh] w-full max-w-md overflow-y-auto rounded-2xl border border-border bg-card p-6" onClick={(e) => e.stopPropagation()}>
             <div className="mb-5 flex items-start justify-between">
               <div className="flex items-center gap-3">
                 <span className="grid h-12 w-12 place-items-center rounded-full bg-primary/15 font-bold text-primary">{initials(selected.name)}</span>
                 <div>
-                  <h3 className="text-lg font-bold">{selected.name}</h3>
+                  <h3 className="text-lg font-bold">{selected.name} <span className="ml-1 rounded bg-secondary px-1.5 py-0.5 text-[11px] font-medium text-muted-foreground">#{selected.code}</span></h3>
                   <p className="flex items-center gap-1 text-xs text-muted-foreground"><MapPin size={12} /> {selected.area || "—"}</p>
                 </div>
               </div>
@@ -152,12 +161,24 @@ function ClientsPage() {
               <Detail icon={Calendar} label="Premier achat" value={dateTime(selected.first_order)} />
               <Detail icon={Calendar} label="Dernier achat" value={dateTime(selected.last_order)} />
             </div>
-            {selected.products?.length > 0 && (
-              <div className="mt-4">
-                <p className="mb-2 text-xs font-semibold text-muted-foreground">Produits achetés</p>
-                <ul className="space-y-1 text-sm">{selected.products.map((p) => <li key={p} className="line-clamp-1">• {p}</li>)}</ul>
+            <div className="mt-4">
+              <p className="mb-2 text-xs font-semibold text-muted-foreground">Toutes ses commandes ({selected.order_list?.length ?? 0})</p>
+              <div className="max-h-64 space-y-2 overflow-y-auto pr-1">
+                {(selected.order_list ?? []).map((o) => {
+                  const st = ORDER_STATUS[o.status] ?? ORDER_STATUS.pending;
+                  return (
+                    <div key={o.order_number} className="rounded-xl border border-border p-3 text-sm">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="font-semibold">{o.order_number}</span>
+                        <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${st.cls}`}>{st.label}</span>
+                      </div>
+                      <p className="text-[11px] text-muted-foreground">{dateTime(o.created_at)} · {o.items} article{o.items > 1 ? "s" : ""} · <b className="text-foreground">{money(o.amount)}</b></p>
+                      <ul className="mt-1 text-xs text-muted-foreground">{o.products.map((p, i) => <li key={i} className="line-clamp-1">• {p}</li>)}</ul>
+                    </div>
+                  );
+                })}
               </div>
-            )}
+            </div>
             <p className="mt-5 text-[11px] text-muted-foreground">Par confidentialité, le téléphone et l'e-mail des clients ne sont pas communiqués aux vendeurs.</p>
           </div>
         </div>

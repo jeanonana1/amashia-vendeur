@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
 import { DashboardLayout } from "@/components/seller/dashboard/DashboardLayout";
-import { Wallet, ArrowDownToLine, Smartphone, Landmark, Plus, X, Trash2, History, Clock, CheckCircle2, XCircle, Star, ArrowUpRight } from "lucide-react";
+import { Wallet, ArrowDownToLine, Smartphone, Landmark, Plus, X, Trash2, Pencil, History, Clock, CheckCircle2, XCircle, Star, ArrowUpRight } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { dateTime, money, useSellerStats } from "@/lib/sellerStats";
@@ -38,6 +38,7 @@ function PaiementsPage() {
   const [loading, setLoading] = useState(true);
   const [openWithdraw, setOpenWithdraw] = useState(false);
   const [openMethod, setOpenMethod] = useState(false);
+  const [editMethod, setEditMethod] = useState<Method | null>(null);
   const [showAll, setShowAll] = useState(false);
 
   const load = useCallback(async () => {
@@ -135,6 +136,7 @@ function PaiementsPage() {
                       <p className="truncate text-xs text-muted-foreground">{m.bank_name ? `${m.bank_name} · ` : ""}{mask(m.account_number)} · {m.account_name}</p>
                       {m.is_default ? <span className="text-[10px] font-semibold text-primary">Par défaut</span> : <button onClick={() => void makeDefault(m.id)} className="flex items-center gap-1 text-[10px] text-muted-foreground hover:text-primary"><Star size={10} /> Définir par défaut</button>}
                     </div>
+                    <button onClick={() => setEditMethod(m)} className="grid h-8 w-8 place-items-center rounded-lg text-muted-foreground hover:bg-secondary hover:text-primary" aria-label="Modifier"><Pencil size={14} /></button>
                     <button onClick={() => void removeMethod(m.id)} className="grid h-8 w-8 place-items-center rounded-lg text-muted-foreground hover:bg-red-500/10 hover:text-red-400" aria-label="Supprimer"><Trash2 size={14} /></button>
                   </div>
                 );
@@ -145,7 +147,14 @@ function PaiementsPage() {
         </div>
       </div>
 
-      {openMethod && <MethodModal onClose={() => setOpenMethod(false)} onSaved={() => { setOpenMethod(false); void load(); }} isFirst={methods.length === 0} />}
+      {(openMethod || editMethod) && (
+        <MethodModal
+          initial={editMethod}
+          isFirst={methods.length === 0}
+          onClose={() => { setOpenMethod(false); setEditMethod(null); }}
+          onSaved={() => { setOpenMethod(false); setEditMethod(null); void load(); }}
+        />
+      )}
       {openWithdraw && (
         <WithdrawModal
           balance={balance}
@@ -213,40 +222,64 @@ function Modal({ title, onClose, children }: { title: string; onClose: () => voi
 
 const inp = "w-full rounded-xl border border-border bg-background px-4 py-3 text-sm focus:border-primary focus:outline-none";
 
-function MethodModal({ onClose, onSaved, isFirst }: { onClose: () => void; onSaved: () => void; isFirst: boolean }) {
-  const [kind, setKind] = useState<Kind>("orange_money");
-  const [f, setF] = useState({ label: "", account_name: "", account_number: "", bank_name: "" });
+function MethodModal({ initial, onClose, onSaved, isFirst }: { initial: Method | null; onClose: () => void; onSaved: () => void; isFirst: boolean }) {
+  const [kind, setKind] = useState<Kind>(initial?.kind ?? "orange_money");
+  const [f, setF] = useState({
+    label: initial?.label ?? "",
+    account_name: initial?.account_name ?? "",
+    account_number: initial?.account_number ?? "",
+    bank_name: initial?.bank_name ?? "",
+  });
   const [busy, setBusy] = useState(false);
-  async function save() {
+  async function save(e?: React.FormEvent) {
+    e?.preventDefault();
     const number = f.account_number.replace(/\s+/g, "");
-    if (!f.account_name.trim()) return toast.error("Indiquez le nom du titulaire.");
+    if (!f.account_name.trim()) return toast.error("Indiquez le nom du compte.");
     if (kind !== "bank" && !/^(\+?237)?6\d{8}$/.test(number)) return toast.error("Numéro mobile camerounais invalide (ex. 6XXXXXXXX).");
     if (kind === "bank" && (number.length < 10 || !f.bank_name.trim())) return toast.error("Indiquez la banque et le numéro de compte (RIB).");
     setBusy(true);
-    const { data: { user } } = await supabase.auth.getUser();
-    const { error } = await db().from("seller_payout_methods").insert({
-      user_id: user?.id, kind, label: f.label.trim() || null, account_name: f.account_name.trim(), account_number: number,
-      bank_name: kind === "bank" ? f.bank_name.trim() : null, is_default: isFirst,
-    });
+    const row = { kind, label: f.label.trim() || null, account_name: f.account_name.trim(), account_number: number, bank_name: kind === "bank" ? f.bank_name.trim() : null };
+    let error;
+    if (initial) {
+      ({ error } = await db().from("seller_payout_methods").update(row).eq("id", initial.id));
+    } else {
+      const { data: { user } } = await supabase.auth.getUser();
+      ({ error } = await db().from("seller_payout_methods").insert({ ...row, user_id: user?.id, is_default: isFirst }));
+    }
     setBusy(false);
     if (error) return toast.error(error.message);
-    toast.success("Moyen de retrait ajouté");
+    toast.success(initial ? "Moyen de retrait modifié" : "Moyen de retrait ajouté");
     onSaved();
   }
+  // Champs libres : on désactive les suggestions automatiques du navigateur (cartes bancaires, etc.)
+  const noFill = { autoComplete: "off", autoCorrect: "off", spellCheck: false, "data-lpignore": "true", "data-1p-ignore": "true", "data-form-type": "other" } as const;
+  const isBank = kind === "bank";
   return (
-    <Modal title="Ajouter un moyen de retrait" onClose={onClose}>
-      <div className="mb-4 grid grid-cols-3 gap-2">
-        {(Object.keys(KIND) as Kind[]).map((k) => (
-          <button key={k} onClick={() => setKind(k)} className={`rounded-xl border p-3 text-xs font-semibold transition ${kind === k ? "border-primary bg-primary/10 text-primary" : "border-border"}`}>{KIND[k].label}</button>
-        ))}
-      </div>
-      <div className="space-y-3">
-        {kind === "bank" && <input className={inp} placeholder="Nom de la banque" value={f.bank_name} onChange={(e) => setF({ ...f, bank_name: e.target.value })} />}
-        <input className={inp} placeholder="Nom du titulaire" value={f.account_name} onChange={(e) => setF({ ...f, account_name: e.target.value })} />
-        <input className={inp} placeholder={kind === "bank" ? "Numéro de compte / RIB" : "Numéro (6XXXXXXXX)"} inputMode={kind === "bank" ? "text" : "tel"} value={f.account_number} onChange={(e) => setF({ ...f, account_number: e.target.value })} />
-        <input className={inp} placeholder="Nom (facultatif, ex. Mon Orange Money)" value={f.label} onChange={(e) => setF({ ...f, label: e.target.value })} />
-      </div>
-      <button onClick={save} disabled={busy} className="mt-5 w-full rounded-full bg-gradient-primary py-3 text-sm font-semibold text-white disabled:opacity-60">{busy ? "Enregistrement…" : "Enregistrer"}</button>
+    <Modal title={initial ? "Modifier le moyen de retrait" : "Ajouter un moyen de retrait"} onClose={onClose}>
+      <form onSubmit={save} autoComplete="off">
+        <div className="mb-4 grid grid-cols-3 gap-2">
+          {(Object.keys(KIND) as Kind[]).map((k) => (
+            <button type="button" key={k} onClick={() => setKind(k)} className={`rounded-xl border p-3 text-xs font-semibold transition ${kind === k ? "border-primary bg-primary/10 text-primary" : "border-border"}`}>{KIND[k].label}</button>
+          ))}
+        </div>
+        <div className="space-y-3">
+          {isBank && (
+            <label className="block text-xs font-semibold">Banque
+              <input {...noFill} name="amashia-payout-bank" className={`${inp} mt-1`} placeholder="Ex. Afriland First Bank" value={f.bank_name} onChange={(e) => setF({ ...f, bank_name: e.target.value })} />
+            </label>
+          )}
+          <label className="block text-xs font-semibold">{isBank ? "Nom du compte bancaire" : "Nom enregistré sur le compte Mobile Money"}
+            <input {...noFill} name="amashia-payout-owner" className={`${inp} mt-1`} placeholder="Ex. Jean Onana" value={f.account_name} onChange={(e) => setF({ ...f, account_name: e.target.value })} />
+          </label>
+          <label className="block text-xs font-semibold">{isBank ? "Numéro de compte / RIB" : `Numéro ${KIND[kind].label}`}
+            <input {...noFill} name="amashia-payout-ref" type="text" className={`${inp} mt-1`} placeholder={isBank ? "Ex. 10005 00001 01234567890 12" : "Ex. 690 00 00 00"} inputMode={isBank ? "text" : "tel"} value={f.account_number} onChange={(e) => setF({ ...f, account_number: e.target.value })} />
+          </label>
+          <label className="block text-xs font-semibold">Nom de ce moyen <span className="font-normal text-muted-foreground">(facultatif)</span>
+            <input {...noFill} name="amashia-payout-label" className={`${inp} mt-1`} placeholder="Ex. Mon Orange Money" value={f.label} onChange={(e) => setF({ ...f, label: e.target.value })} />
+          </label>
+        </div>
+        <button type="submit" disabled={busy} className="mt-5 w-full rounded-full bg-gradient-primary py-3 text-sm font-semibold text-white disabled:opacity-60">{busy ? "Enregistrement…" : initial ? "Enregistrer les modifications" : "Enregistrer"}</button>
+      </form>
     </Modal>
   );
 }

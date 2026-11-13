@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { imgProps } from "@/lib/img";
 import { useEffect, useMemo, useState } from "react";
 import { DashboardLayout } from "@/components/seller/dashboard/DashboardLayout";
 import { TrendingUp, Eye, ShoppingCart, Users, Package, Wallet, Percent, MousePointerClick } from "lucide-react";
@@ -171,7 +172,7 @@ function AnalytiquePage() {
                   <tr key={i} className="border-b border-border/50">
                     <td className="py-3">
                       <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 shrink-0 overflow-hidden rounded-lg bg-white">{p.image && <img src={p.image} alt="" className="h-full w-full object-cover" />}</div>
+                        <div className="h-10 w-10 shrink-0 overflow-hidden rounded-lg bg-white">{p.image && <img {...imgProps(p.image, { width: 64 })} loading="lazy" alt="" className="h-full w-full object-cover" />}</div>
                         <span className="line-clamp-2 max-w-[260px]">{p.title}</span>
                       </div>
                     </td>

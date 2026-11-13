@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { imgProps } from "@/lib/img";
 import { useEffect, useMemo, useState } from "react";
 import { DashboardLayout } from "@/components/seller/dashboard/DashboardLayout";
 import { Star, MessageSquare, BadgeCheck, Search } from "lucide-react";
@@ -114,7 +115,7 @@ function AvisPage() {
             <article key={r.id} className="rounded-xl border border-border p-4">
               <div className="flex gap-3">
                 <div className="h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-white">
-                  {r.product_image && <img src={r.product_image} alt="" className="h-full w-full object-cover" />}
+                  {r.product_image && <img {...imgProps(r.product_image, { width: 64 })} loading="lazy" alt="" className="h-full w-full object-cover" />}
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="line-clamp-1 text-xs text-muted-foreground">{r.product_title}</p>
@@ -127,7 +128,7 @@ function AvisPage() {
                   {r.comment && <p className="mt-2 whitespace-pre-line text-sm">{r.comment}</p>}
                   {Array.isArray(r.photos) && r.photos.length > 0 && (
                     <div className="mt-2 flex gap-2">
-                      {r.photos.map((src, i) => <a key={i} href={src} target="_blank" rel="noreferrer"><img src={src} alt={`Photo ${i + 1}`} className="h-16 w-16 rounded-lg border border-border object-cover" /></a>)}
+                      {r.photos.map((src, i) => <a key={i} href={src} target="_blank" rel="noreferrer"><img {...imgProps(src, { width: 64 })} loading="lazy" alt={`Photo ${i + 1}`} className="h-16 w-16 rounded-lg border border-border object-cover" /></a>)}
                     </div>
                   )}
                 </div>

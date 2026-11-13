@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { imgProps } from "@/lib/img";
 import { useEffect, useState } from "react";
 import { DashboardLayout } from "@/components/seller/dashboard/DashboardLayout";
 import { PackagePlus, Search } from "lucide-react";
@@ -103,7 +104,7 @@ function ReapproPage() {
               return (
                 <div key={r.id} className="flex flex-col sm:flex-row sm:items-center gap-3 border border-border rounded-xl p-3">
                   <div className="w-14 h-14 rounded-xl overflow-hidden bg-secondary shrink-0">
-                    {r.images?.[0] ? <img src={r.images[0]} alt={r.name} loading="lazy" className="w-full h-full object-cover" /> : <div className="w-full h-full bg-gradient-primary opacity-40" />}
+                    {r.images?.[0] ? <img {...imgProps(r.images[0], { width: 128 })} alt={r.name} loading="lazy" className="w-full h-full object-cover" /> : <div className="w-full h-full bg-gradient-primary opacity-40" />}
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="font-semibold text-sm leading-snug line-clamp-2">{r.name}</p>

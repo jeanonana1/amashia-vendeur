@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { imgProps } from "@/lib/img";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { DashboardLayout, useSellerName } from "@/components/seller/dashboard/DashboardLayout";
 import {
@@ -154,7 +155,7 @@ function DashboardOverview() {
                     <tr key={o.id} onClick={() => setOpenOrder(o)} className="cursor-pointer border-b border-border/50 transition hover:bg-secondary/30" title="Voir le détail de la commande">
                       <td className="py-4 font-semibold">
                         <span className="flex items-center gap-2">
-                          {o.product_image && <img src={o.product_image} alt="" className="h-8 w-8 rounded-md object-cover" />}
+                          {o.product_image && <img {...imgProps(o.product_image, { width: 64 })} loading="lazy" alt="" className="h-8 w-8 rounded-md object-cover" />}
                           {o.order_number}
                         </span>
                       </td>

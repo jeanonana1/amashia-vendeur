@@ -1,6 +1,6 @@
 /**
  * Prépare une image avant envoi : redimensionnée (côté le plus long ≤ maxSide)
- * et compressée en JPEG (ou PNG si transparence). Les photos de téléphone de
+ * et compressée en WebP (repli JPEG/PNG). Les photos de téléphone de
  * 5 à 15 Mo deviennent quelques centaines de Ko, sans perte visible.
  * Si le navigateur ne sait pas lire le format, le fichier d'origine est renvoyé.
  */
@@ -19,14 +19,22 @@ export async function compressImage(file: File, maxSide = 1600, quality = 0.85):
     ctx.drawImage(bitmap, 0, 0, w, h);
     if ("close" in bitmap && typeof bitmap.close === "function") bitmap.close();
 
-    const keepAlpha = file.type === "image/png" || file.type === "image/webp";
-    const type = keepAlpha && hasTransparency(ctx, w, h) ? "image/png" : "image/jpeg";
-    const blob: Blob | null = await new Promise((res) => canvas.toBlob(res, type, quality));
+    // WebP : 3 à 10 fois plus léger que le PNG, garde la transparence.
+    // Les navigateurs qui ne savent pas l'encoder renvoient un autre format :
+    // on retombe alors sur JPEG (ou PNG si l'image est transparente).
+    let blob: Blob | null = await new Promise((res) => canvas.toBlob(res, "image/webp", quality));
+    let type = "image/webp";
+    if (!blob || blob.type !== "image/webp") {
+      const keepAlpha = file.type === "image/png" || file.type === "image/webp";
+      type = keepAlpha && hasTransparency(ctx, w, h) ? "image/png" : "image/jpeg";
+      blob = await new Promise((res) => canvas.toBlob(res, type, quality));
+    }
     if (!blob) return file;
     // garder l'original s'il est déjà plus léger et pas trop grand
     if (blob.size >= file.size && scale === 1) return file;
     const base = file.name.replace(/\.[^.]+$/, "") || "image";
-    return new File([blob], `${base}.${type === "image/png" ? "png" : "jpg"}`, { type });
+    const ext = type === "image/webp" ? "webp" : type === "image/png" ? "png" : "jpg";
+    return new File([blob], `${base}.${ext}`, { type });
   } catch {
     return file;
   }

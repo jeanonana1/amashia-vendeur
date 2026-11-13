@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { imgProps } from "@/lib/img";
 import { useEffect, useState } from "react";
 import { DashboardLayout } from "@/components/seller/dashboard/DashboardLayout";
 import { supabase } from "@/integrations/supabase/client";
@@ -112,7 +113,7 @@ function ReportsPage() {
                 className="text-left bg-card border border-border rounded-2xl p-4 flex gap-4 hover:border-primary/50 transition"
               >
                 <div className="w-16 h-16 shrink-0 rounded-xl overflow-hidden bg-secondary grid place-items-center">
-                  {img ? <img src={img} alt={r.products?.name || "Produit"} className="w-full h-full object-cover" /> : <Package size={20} className="text-muted-foreground" />}
+                  {img ? <img {...imgProps(img, { width: 64 })} loading="lazy" alt={r.products?.name || "Produit"} className="w-full h-full object-cover" /> : <Package size={20} className="text-muted-foreground" />}
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-start justify-between gap-2">

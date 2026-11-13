@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { imgProps } from "@/lib/img";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { DashboardLayout } from "@/components/seller/dashboard/DashboardLayout";
 import { ExternalLink, PackageCheck, Search, ShoppingBag, TrendingUp } from "lucide-react";
@@ -112,7 +113,7 @@ function CommandesPage() {
               >
                 <div className="flex min-w-0 flex-1 gap-3">
                   <div className="h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-white">
-                    {order.product_image ? <img src={order.product_image} alt="" className="h-full w-full object-cover" /> : <div className="grid h-full w-full place-items-center bg-secondary"><ShoppingBag size={18} className="text-muted-foreground" /></div>}
+                    {order.product_image ? <img {...imgProps(order.product_image, { width: 64 })} loading="lazy" alt="" className="h-full w-full object-cover" /> : <div className="grid h-full w-full place-items-center bg-secondary"><ShoppingBag size={18} className="text-muted-foreground" /></div>}
                   </div>
                   <div className="min-w-0">
                     <p className="flex flex-wrap items-center gap-2 font-bold">

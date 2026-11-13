@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { imgProps, imgUrl } from "@/lib/img";
 import { useEffect, useRef, useState } from "react";
 import { DashboardLayout } from "@/components/seller/dashboard/DashboardLayout";
 import { Store, MapPin, Phone, Mail, Star, Eye, Heart, Edit, Camera, Loader2, Check, X, ExternalLink } from "lucide-react";
@@ -92,7 +93,7 @@ function BoutiquePage() {
       const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
       // RLS exige que le 1er dossier == auth.uid()
       const path = `${profile.id}/shop-${kind}-${Date.now()}.${ext}`;
-      const { error } = await supabase.storage.from("product-images").upload(path, file, { cacheControl: "3600", contentType: file.type || "image/jpeg" });
+      const { error } = await supabase.storage.from("product-images").upload(path, file, { cacheControl: "31536000", contentType: file.type || "image/jpeg" });
       if (error) throw error;
       const { data: pub } = supabase.storage.from("product-images").getPublicUrl(path);
       const url = `${pub.publicUrl}?v=${Date.now()}`;
@@ -165,7 +166,7 @@ function BoutiquePage() {
       <div className="bg-card border border-border rounded-2xl overflow-hidden mb-6">
         <div
           className="relative h-56 sm:h-64 md:h-80 bg-gradient-primary bg-center bg-cover"
-          style={profile?.shop_banner_url ? { backgroundImage: `url(${profile.shop_banner_url})` } : undefined}
+          style={profile?.shop_banner_url ? { backgroundImage: `url(${imgUrl(profile.shop_banner_url, 1600)})` } : undefined}
         >
           <div className="absolute bottom-4 right-4 flex items-center gap-2">
             <span className="hidden md:inline px-3 py-1.5 rounded-full bg-black/60 backdrop-blur text-white text-[11px]">Recommandé : 1600 × 600 px (réduite automatiquement)</span>
@@ -189,7 +190,7 @@ function BoutiquePage() {
           <div className="relative -mt-14 md:-mt-16 self-start md:self-auto">
             <div className="w-24 h-24 md:w-28 md:h-28 rounded-2xl bg-card border-4 border-card grid place-items-center overflow-hidden shadow-elegant relative">
               {profile?.shop_logo_url ? (
-                <img src={profile.shop_logo_url} alt="logo" className="w-full h-full object-cover" />
+                <img {...imgProps(profile.shop_logo_url, { width: 128 })} alt="logo" className="w-full h-full object-cover" />
               ) : (
                 <Store className="text-primary" size={40} />
               )}

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { imgProps } from "@/lib/img";
 import { X, MapPin, CreditCard, Clock, User, Package } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -89,7 +90,7 @@ export function OrderDetailModal({ line, onClose, onChanged }: { line: SellerOrd
             return (
               <div key={l.id} className="flex gap-3 rounded-xl border border-border p-3">
                 <div className="h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-white">
-                  {l.product_image ? <img src={l.product_image} alt="" className="h-full w-full object-cover" /> : <div className="grid h-full w-full place-items-center text-muted-foreground"><Package size={18} /></div>}
+                  {l.product_image ? <img {...imgProps(l.product_image, { width: 128 })} alt="" className="h-full w-full object-cover" /> : <div className="grid h-full w-full place-items-center text-muted-foreground"><Package size={18} /></div>}
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="line-clamp-2 text-sm font-semibold">{l.product_title}</p>

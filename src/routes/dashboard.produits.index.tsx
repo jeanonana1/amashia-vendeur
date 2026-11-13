@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { imgProps } from "@/lib/img";
 import { useEffect, useState } from "react";
 import { DashboardLayout } from "@/components/seller/dashboard/DashboardLayout";
 import { Plus, Search, Filter, Edit, Trash2, Eye, Check, Pause, Boxes, X, Rocket } from "lucide-react";
@@ -201,7 +202,7 @@ function ProduitsPage() {
                 <article key={p.id} className="group bg-background/40 border border-border rounded-2xl overflow-hidden flex flex-col hover:border-primary/50 transition">
                   <div className="relative w-full aspect-square overflow-hidden bg-secondary">
                     {p.images && p.images[0] ? (
-                      <img src={p.images[0]} alt={p.name} loading="lazy" className="absolute inset-0 w-full h-full object-cover object-center" />
+                      <img {...imgProps(p.images[0], { width: 256, sizes: "(max-width: 768px) 50vw, 240px" })} alt={p.name} loading="lazy" className="absolute inset-0 w-full h-full object-cover object-center" />
                     ) : (
                       <div className="absolute inset-0 bg-gradient-primary opacity-40" />
                     )}

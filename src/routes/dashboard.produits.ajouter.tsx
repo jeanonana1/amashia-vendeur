@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
+import { imgProps } from "@/lib/img";
 import { useEffect, useRef, useState } from "react";
 import { DashboardLayout } from "@/components/seller/dashboard/DashboardLayout";
 import { ArrowLeft, ArrowRight, Upload, X, Check, Package, Layers, Cloud, Boxes, Plus, Trash2, FileText, TrendingUp, ChevronLeft, ChevronRight, Star, Sparkles } from "lucide-react";
@@ -366,7 +367,7 @@ function AddProductPage() {
         const small = await compressImage(f, 1600);
         const ext = small.name.split(".").pop() || "jpg";
         const path = `${user.id}/variant-${groupId}-${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-        const { error } = await supabase.storage.from("product-images").upload(path, small, { contentType: small.type || "image/jpeg" });
+        const { error } = await supabase.storage.from("product-images").upload(path, small, { cacheControl: "31536000", contentType: small.type || "image/jpeg" });
         if (error) throw error;
         const { data: pub } = supabase.storage.from("product-images").getPublicUrl(path);
         urls.push(pub.publicUrl);
@@ -441,7 +442,7 @@ function AddProductPage() {
         const toSend = await compressImage(img.file, 1600);
         const ext = toSend.name.split(".").pop() || "jpg";
         const path = `${user.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-        const { error: upErr } = await supabase.storage.from("product-images").upload(path, toSend, { contentType: toSend.type || "image/jpeg" });
+        const { error: upErr } = await supabase.storage.from("product-images").upload(path, toSend, { cacheControl: "31536000", contentType: toSend.type || "image/jpeg" });
         if (!upErr) {
           const { data } = supabase.storage.from("product-images").getPublicUrl(path);
           urls.push(data.publicUrl);
@@ -582,7 +583,7 @@ function AddProductPage() {
                   <div className="grid grid-cols-3 md:grid-cols-4 gap-3 mb-4">
                     {images.map((img, i) => (
                       <div key={i} className="relative group border border-border rounded-xl overflow-hidden">
-                        <img src={img.preview} className="w-full aspect-square object-cover" />
+                        <img {...imgProps(img.preview, { width: 256 })} className="w-full aspect-square object-cover" />
                         {i === 0 && (
                           <span className="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-primary text-white text-[10px] font-bold flex items-center gap-1"><Star size={10} /> Principale</span>
                         )}
@@ -825,7 +826,7 @@ function AddProductPage() {
                         <div className="flex flex-wrap gap-2">
                           {g.images.map((u) => (
                             <div key={u} className="relative w-20 h-20 rounded-xl overflow-hidden border border-border">
-                              <img src={u} alt={g.label} className="w-full h-full object-cover" />
+                              <img {...imgProps(u, { width: 128 })} alt={g.label} className="w-full h-full object-cover" />
                               <button
                                 onClick={() => setVariantImages((prev) => prev.map((x) => x.id === g.id ? { ...x, images: x.images.filter((i) => i !== u) } : x))}
                                 className="absolute top-1 right-1 w-5 h-5 grid place-items-center rounded-full bg-destructive text-white"
@@ -974,7 +975,7 @@ function AddProductPage() {
         <div className="lg:sticky lg:top-6 lg:self-start space-y-4">
           <div className="bg-card border border-border rounded-2xl overflow-hidden">
             <div className="aspect-square bg-secondary relative">
-              {images[0] ? <img src={images[0].preview} className="w-full h-full object-cover" /> : <div className="w-full h-full grid place-items-center text-muted-foreground text-sm">Aperçu image</div>}
+              {images[0] ? <img {...imgProps(images[0].preview, { width: 384 })} className="w-full h-full object-cover" /> : <div className="w-full h-full grid place-items-center text-muted-foreground text-sm">Aperçu image</div>}
               <span className="absolute top-3 left-3 px-3 py-1 rounded-full bg-primary text-white text-xs font-bold">{type}</span>
             </div>
             <div className="p-4 space-y-2">

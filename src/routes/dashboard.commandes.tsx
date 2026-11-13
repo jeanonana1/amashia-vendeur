@@ -1,11 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { DashboardLayout } from "@/components/seller/dashboard/DashboardLayout";
 import { ExternalLink, PackageCheck, Search, ShoppingBag, TrendingUp } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { marketplaceProductUrl } from "@/lib/sellerProfile";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { ORDER_FIELDS, ORDER_STATUS, OrderDetailModal, colorName, type SellerOrderLine } from "@/components/seller/dashboard/OrderDetailModal";
+import { dateTime } from "@/lib/sellerStats";
+import { X } from "lucide-react";
 
 export const Route = createFileRoute("/dashboard/commandes")({
   head: () => ({ meta: [
@@ -20,7 +23,7 @@ export const Route = createFileRoute("/dashboard/commandes")({
 });
 
 type Listing = { id: string; product_id: string; title: string; price: number; status: string; published_at: string; images: string[] };
-type Order = { id: string; order_number: string; listing_id: string; customer_name: string; delivery_area: string | null; product_title: string; color: string | null; options: string | null; quantity: number; amount: number; status: string; paid: boolean; created_at: string };
+type Order = SellerOrderLine & { listing_id: string };
 
 const labels: Record<string, string> = { published: "Publiée", paused: "En pause", archived: "Archivée", pending: "En attente", preparing: "Préparation", shipped: "Expédiée", delivered: "Livrée", cancelled: "Annulée" };
 const statusClass: Record<string, string> = { published: "bg-emerald-500/15 text-emerald-400", paused: "bg-amber-500/15 text-amber-400", archived: "bg-muted text-muted-foreground", pending: "bg-amber-500/15 text-amber-400", preparing: "bg-blue-500/15 text-blue-400", shipped: "bg-violet-500/15 text-violet-400", delivered: "bg-emerald-500/15 text-emerald-400", cancelled: "bg-destructive/15 text-destructive" };
@@ -31,6 +34,10 @@ function CommandesPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
+  const [openOrder, setOpenOrder] = useState<Order | null>(null);
+  // récapitulatif affiché à l'arrivée sur la page
+  const [summaryOpen, setSummaryOpen] = useState(false);
+  const summaryShown = useRef(false);
 
   async function load() {
     const { data: { user } } = await supabase.auth.getUser();
@@ -38,12 +45,13 @@ function CommandesPage() {
     const marketplace = supabase as any;
     const [{ data: listingData, error: listingError }, { data: orderData, error: orderError }] = await Promise.all([
       marketplace.from("seller_listings").select("id,product_id,title,price,status,published_at,images").eq("seller_id", user.id).order("published_at", { ascending: false }),
-      marketplace.from("seller_orders").select("id,order_number,listing_id,customer_name,delivery_area,product_title,quantity,amount,status,paid,created_at,color,options").eq("seller_id", user.id).order("created_at", { ascending: false }),
+      marketplace.from("seller_orders").select(`${ORDER_FIELDS},listing_id`).eq("seller_id", user.id).order("created_at", { ascending: false }),
     ]);
     if (listingError || orderError) toast.error(listingError?.message || orderError?.message || "Chargement impossible");
     setListings(listingData || []);
     setOrders(orderData || []);
     setLoading(false);
+    if (!summaryShown.current && !listingError && !orderError) { summaryShown.current = true; setSummaryOpen(true); }
   }
 
   useEffect(() => {
@@ -79,7 +87,82 @@ function CommandesPage() {
         {loading ? <p className="py-10 text-center text-sm text-muted-foreground">Chargement…</p> : rows.length === 0 ? <p className="py-10 text-center text-sm text-muted-foreground">Aucune fiche publiée pour le moment.</p> : <div className="grid gap-3">{rows.map(({ listing, count, amount }) => <article key={listing.id} className="grid gap-3 rounded-lg border border-border p-3 sm:grid-cols-[52px_1fr_auto] sm:items-center"><div className="h-13 w-13 overflow-hidden rounded-md bg-secondary">{listing.images?.[0] && <img src={listing.images[0]} alt="" className="h-full w-full object-cover" />}</div><div className="min-w-0"><h3 className="truncate font-semibold">{listing.title}</h3><div className="mt-1 flex flex-wrap items-center gap-2 text-xs"><span className={`rounded-full px-2 py-0.5 font-semibold ${statusClass[listing.status]}`}>{labels[listing.status]}</span><span className="text-muted-foreground">{count} commande{count === 1 ? "" : "s"}</span><span className="font-semibold text-primary">{money(amount)}</span></div></div><Button asChild variant="outline" size="sm"><a href={marketplaceProductUrl(listing.id)} target="_blank" rel="noreferrer"><ExternalLink /> Voir la fiche</a></Button></article>)}</div>}
       </section>
 
-      <section className="rounded-xl border border-border bg-card p-4 sm:p-6"><h2 className="mb-5 font-bold">Ventes reçues</h2>{orders.length === 0 ? <p className="py-10 text-center text-sm text-muted-foreground">Les commandes passées par les clients sur Amashia apparaîtront ici.</p> : <div className="grid gap-3">{orders.map((order) => <article key={order.id} className="flex flex-col gap-3 rounded-lg border border-border p-4 md:flex-row md:items-center"><div className="flex-1"><p className="font-bold">{order.order_number}</p><p className="text-sm font-medium">{order.product_title}</p>{(order.color || order.options) && <p className="text-xs text-primary">{[order.color ? `Couleur : ${order.color.replace(/\s*#[0-9a-f]{3,8}$/i, "")}` : "", order.options ?? ""].filter(Boolean).join(" · ")}</p>}<p className="text-xs text-muted-foreground">{order.customer_name}{order.delivery_area ? ` (${order.delivery_area})` : ""} · {order.quantity} article{order.quantity > 1 ? "s" : ""} · {new Date(order.created_at).toLocaleString("fr-FR")}</p></div><p className="font-bold text-primary">{money(order.amount)}</p><span className={`w-fit rounded-full px-2.5 py-1 text-xs font-semibold ${statusClass[order.status]}`}>{labels[order.status]}</span><select value={order.status} onChange={(e) => void updateOrder(order.id, e.target.value)} className="rounded-lg border border-border bg-background px-3 py-2 text-xs"><option value="pending">En attente</option><option value="preparing">Préparation</option><option value="shipped">Expédiée</option><option value="delivered">Livrée</option><option value="cancelled">Annulée</option></select></article>)}</div>}</section>
+      <section className="rounded-xl border border-border bg-card p-4 sm:p-6">
+        <h2 className="mb-1 font-bold">Ventes reçues</h2>
+        <p className="mb-5 text-xs text-muted-foreground">Touchez une commande pour voir son détail.</p>
+        {orders.length === 0 ? (
+          <p className="py-10 text-center text-sm text-muted-foreground">Les commandes passées par les clients sur Amashia apparaîtront ici.</p>
+        ) : (
+          <div className="grid gap-3">
+            {orders.map((order) => (
+              <article
+                key={order.id}
+                onClick={() => setOpenOrder(order)}
+                className="flex cursor-pointer flex-col gap-3 rounded-lg border border-border p-3 transition hover:border-primary/50 hover:bg-secondary/20 md:flex-row md:items-center md:p-4"
+              >
+                <div className="flex min-w-0 flex-1 gap-3">
+                  <div className="h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-white">
+                    {order.product_image ? <img src={order.product_image} alt="" className="h-full w-full object-cover" /> : <div className="grid h-full w-full place-items-center bg-secondary"><ShoppingBag size={18} className="text-muted-foreground" /></div>}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="font-bold">{order.order_number}</p>
+                    <p className="line-clamp-1 text-sm font-medium">{order.product_title}</p>
+                    {(order.color || order.options) && <p className="text-xs text-primary">{[order.color ? `Couleur : ${colorName(order.color)}` : "", order.options ?? ""].filter(Boolean).join(" · ")}</p>}
+                    <p className="text-xs text-muted-foreground">{order.customer_name}{order.delivery_area ? ` (${order.delivery_area})` : ""} · {order.quantity} article{order.quantity > 1 ? "s" : ""}</p>
+                    <p className="text-xs text-muted-foreground">{dateTime(order.created_at)}</p>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between gap-3 md:justify-end" onClick={(e) => e.stopPropagation()}>
+                  <p className="font-bold text-primary">{money(order.amount)}</p>
+                  <span className={`w-fit rounded-full px-2.5 py-1 text-xs font-semibold ${statusClass[order.status]}`}>{labels[order.status]}</span>
+                  <select value={order.status} onChange={(e) => void updateOrder(order.id, e.target.value)} className="rounded-lg border border-border bg-background px-3 py-2 text-xs" aria-label="Changer le statut">
+                    {Object.entries(ORDER_STATUS).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
+                  </select>
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
+      </section>
+
+      {openOrder && <OrderDetailModal line={openOrder} onClose={() => setOpenOrder(null)} onChanged={() => void load()} />}
+
+      {summaryOpen && <OrdersSummary orders={orders} onClose={() => setSummaryOpen(false)} />}
     </DashboardLayout>
+  );
+}
+
+/** Récapitulatif affiché à l'arrivée : nombre de commandes reçues et leur état. */
+function OrdersSummary({ orders, onClose }: { orders: SellerOrderLine[]; onClose: () => void }) {
+  const byOrder = new Map<string, string[]>();
+  for (const o of orders) byOrder.set(o.order_id, [...(byOrder.get(o.order_id) ?? []), o.status]);
+  const total = byOrder.size;
+  const count = (st: string) => orders.filter((o) => o.status === st).length;
+  const today = orders.filter((o) => new Date(o.created_at).toDateString() === new Date().toDateString());
+  const todayOrders = new Set(today.map((o) => o.order_id)).size;
+  const rows = [
+    ["pending", "À traiter"], ["preparing", "En préparation"], ["shipped", "Expédiés"], ["delivered", "Livrés"], ["cancelled", "Annulés"],
+  ] as const;
+  return (
+    <div className="fixed inset-0 z-[110] grid place-items-center bg-black/60 p-4 backdrop-blur-sm" onClick={onClose}>
+      <div className="w-full max-w-sm rounded-2xl border border-border bg-card p-6 text-center" onClick={(e) => e.stopPropagation()}>
+        <button onClick={onClose} className="float-right -mr-2 -mt-2 grid h-8 w-8 place-items-center rounded-full hover:bg-secondary" aria-label="Fermer"><X size={16} /></button>
+        <div className="mx-auto mb-3 grid h-14 w-14 place-items-center rounded-2xl bg-primary/15 text-primary"><ShoppingBag size={26} /></div>
+        <p className="text-sm text-muted-foreground">Vous avez reçu</p>
+        <p className="text-5xl font-extrabold">{total}</p>
+        <p className="mb-4 text-sm font-semibold">commande{total > 1 ? "s" : ""} au total</p>
+        {todayOrders > 0 && <p className="mb-4 rounded-full bg-emerald-500/15 px-3 py-1 text-xs font-semibold text-emerald-400">dont {todayOrders} aujourd'hui 🎉</p>}
+        <div className="grid grid-cols-2 gap-2 text-left text-sm">
+          {rows.map(([k, label]) => (
+            <div key={k} className="flex items-center justify-between rounded-xl bg-secondary/50 px-3 py-2">
+              <span className="text-muted-foreground">{label}</span>
+              <span className={`font-bold ${k === "pending" && count(k) > 0 ? "text-amber-400" : ""}`}>{count(k)}</span>
+            </div>
+          ))}
+        </div>
+        <p className="mt-2 text-[11px] text-muted-foreground">Nombre d'articles par état</p>
+        <button onClick={onClose} className="mt-5 w-full rounded-full bg-gradient-primary py-2.5 text-sm font-semibold text-white">Voir mes commandes</button>
+      </div>
+    </div>
   );
 }

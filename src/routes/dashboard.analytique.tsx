@@ -1,7 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { DashboardLayout } from "@/components/seller/dashboard/DashboardLayout";
-import { TrendingUp, Eye, ShoppingCart, Users } from "lucide-react";
+import { TrendingUp, Eye, ShoppingCart, Users, Package, Wallet, Percent, MousePointerClick } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { money, num } from "@/lib/sellerStats";
 
 export const Route = createFileRoute("/dashboard/analytique")({
   head: () => ({
@@ -17,192 +19,235 @@ export const Route = createFileRoute("/dashboard/analytique")({
   component: AnalytiquePage,
 });
 
+type Grain = "day" | "week" | "month";
+type Analytics = {
+  revenue: number; orders: number; items: number; customers: number; avg_order: number;
+  visits: number; visitors: number; cart_adds: number; grain: Grain;
+  series: { at: string; revenue: number; orders: number; visits: number }[];
+  sources: { source: string; visits: number }[];
+  categories: { category: string; revenue: number; items: number }[];
+  top_products: { title: string; image: string | null; views: number; carts: number; items: number; revenue: number }[];
+};
+
+const SOURCES: Record<string, string> = {
+  search: "Recherche Amashia", category: "Pages catégories", home: "Page d'accueil", shop: "Votre boutique",
+  product: "Autres fiches produit", external: "Autres sites (réseaux sociaux, liens…)", direct: "Accès direct", other: "Autres pages Amashia",
+};
+const CATEGORIES: Record<string, string> = { electronics: "Électronique", fashion: "Mode", "home-garden": "Maison & Jardin", beauty: "Beauté", "kitchen-home": "Cuisine & Maison", autre: "Autre" };
+const PRESETS = [
+  { id: "7", label: "7 jours", days: 7, grain: "day" as Grain },
+  { id: "30", label: "30 jours", days: 30, grain: "day" as Grain },
+  { id: "90", label: "3 mois", days: 90, grain: "week" as Grain },
+  { id: "365", label: "12 mois", days: 365, grain: "month" as Grain },
+];
+
+const iso = (d: Date) => d.toISOString().slice(0, 10);
+const DAY = 86_400_000;
 
 function AnalytiquePage() {
+  const today = useMemo(() => new Date(), []);
+  const [preset, setPreset] = useState<string>("30");
+  const [from, setFrom] = useState(iso(new Date(today.getTime() - 29 * DAY)));
+  const [to, setTo] = useState(iso(today));
+  const [grain, setGrain] = useState<Grain>("day");
+  const [data, setData] = useState<Analytics | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  function applyPreset(id: string) {
+    const p = PRESETS.find((x) => x.id === id);
+    setPreset(id);
+    if (!p) return;
+    setFrom(iso(new Date(today.getTime() - (p.days - 1) * DAY)));
+    setTo(iso(today));
+    setGrain(p.grain);
+  }
+
+  useEffect(() => {
+    let alive = true;
+    setLoading(true);
+    const load = async () => {
+      const { data, error } = await (supabase as any).rpc("seller_analytics", { _from: from, _to: to, _grain: grain });
+      if (!alive) return;
+      if (error) setError(error.message); else { setData(data as Analytics); setError(null); }
+      setLoading(false);
+    };
+    void load();
+    const t = window.setInterval(load, 60_000);
+    return () => { alive = false; window.clearInterval(t); };
+  }, [from, to, grain]);
+
+  // les commandes passées avant le début du suivi des visites peuvent dépasser les visiteurs : plafond à 100 %
+  const conv = data && data.visitors > 0 ? Math.min(100, (data.customers / data.visitors) * 100) : 0;
+  const kpis = data ? [
+    { icon: Wallet, label: "Chiffre d'affaires", value: money(data.revenue) },
+    { icon: ShoppingCart, label: "Commandes", value: num(data.orders) },
+    { icon: Package, label: "Articles vendus", value: num(data.items) },
+    { icon: TrendingUp, label: "Panier moyen", value: money(data.avg_order) },
+    { icon: Eye, label: "Visites", value: num(data.visits) },
+    { icon: Users, label: "Visiteurs uniques", value: num(data.visitors) },
+    { icon: MousePointerClick, label: "Ajouts au panier", value: num(data.cart_adds) },
+    { icon: Percent, label: "Taux de conversion", value: `${conv.toFixed(1).replace(".", ",")} %` },
+  ] : [];
+
   return (
-    <DashboardLayout title="Analytique" subtitle="Analysez les performances de votre boutique">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
-        {[
-          { icon: Eye, label: "Vues totales", value: "245k", trend: "+12.5%", color: "text-blue-400 bg-blue-500/10" },
-          { icon: Users, label: "Visiteurs uniques", value: "67k", trend: "+8.2%", color: "text-violet-400 bg-violet-500/10" },
-          { icon: ShoppingCart, label: "Conversions", value: "3,245", trend: "+23.1%", color: "text-primary bg-primary/10" },
-          { icon: TrendingUp, label: "Taux conversion", value: "4.8%", trend: "+1.2%", color: "text-emerald-400 bg-emerald-500/10" },
-        ].map((s) => {
-          const Icon = s.icon;
-          return (
-            <div key={s.label} className="bg-card border border-border rounded-2xl p-5">
-              <div className="flex justify-between items-start mb-4">
-                <div className={`w-11 h-11 rounded-xl grid place-items-center ${s.color}`}><Icon size={20} /></div>
-                <span className="text-xs font-semibold text-emerald-400">{s.trend}</span>
-              </div>
-              <p className="text-sm text-muted-foreground">{s.label}</p>
-              <p className="text-2xl font-extrabold mt-1">{s.value}</p>
-            </div>
-          );
-        })}
-      </div>
-
-      <div className="grid lg:grid-cols-2 gap-5 mb-6">
-        <div className="bg-card border border-border rounded-2xl p-6">
-          <SalesEvolution />
-        </div>
-
-        <div className="bg-card border border-border rounded-2xl p-6">
-          <h3 className="font-bold mb-4">Sources de trafic</h3>
-          <div className="space-y-4 mt-6">
-            {[
-              { label: "Recherche directe", pct: 45, color: "bg-primary" },
-              { label: "Réseaux sociaux", pct: 28, color: "bg-blue-500" },
-              { label: "Référents", pct: 18, color: "bg-violet-500" },
-              { label: "Autres", pct: 9, color: "bg-emerald-500" },
-            ].map((s) => (
-              <div key={s.label}>
-                <div className="flex justify-between text-sm mb-1.5">
-                  <span>{s.label}</span><span className="font-semibold">{s.pct}%</span>
-                </div>
-                <div className="h-2 rounded-full bg-secondary overflow-hidden">
-                  <div className={`h-full ${s.color}`} style={{ width: `${s.pct}%` }} />
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      <div className="bg-card border border-border rounded-2xl p-6">
-        <h3 className="font-bold mb-4">Top produits</h3>
-        <div className="space-y-3">
-          {[
-            { name: "Robe Wax Élégante", sales: 234, revenue: "8,190,000" },
-            { name: "Chemise en Coton Bio", sales: 189, revenue: "2,835,000" },
-            { name: "Boucles d'oreilles", sales: 156, revenue: "1,326,000" },
-          ].map((p, i) => (
-            <div key={p.name} className="flex items-center gap-4 p-3 rounded-xl hover:bg-secondary/30 transition">
-              <span className="w-8 h-8 rounded-lg bg-primary/15 text-primary grid place-items-center font-bold">{i + 1}</span>
-              <div className="flex-1">
-                <p className="font-semibold">{p.name}</p>
-                <p className="text-xs text-muted-foreground">{p.sales} ventes</p>
-              </div>
-              <p className="font-bold">{p.revenue} FCFA</p>
-            </div>
+    <DashboardLayout title="Analytique" subtitle="Les vraies performances de votre boutique sur Amashia">
+      {/* Filtres */}
+      <div className="mb-6 flex flex-wrap items-end gap-3 rounded-2xl border border-border bg-card p-4">
+        <div className="flex flex-wrap rounded-full bg-secondary p-1 text-xs">
+          {PRESETS.map((p) => (
+            <button key={p.id} onClick={() => applyPreset(p.id)} className={`rounded-full px-3 py-1.5 ${preset === p.id ? "bg-primary font-semibold text-white" : "text-muted-foreground"}`}>{p.label}</button>
           ))}
         </div>
+        <label className="text-xs text-muted-foreground">Du
+          <input type="date" value={from} max={to} onChange={(e) => { setFrom(e.target.value); setPreset("custom"); }} className="mt-1 block rounded-lg border border-border bg-background px-2 py-1.5 text-sm text-foreground" />
+        </label>
+        <label className="text-xs text-muted-foreground">Au
+          <input type="date" value={to} min={from} max={iso(today)} onChange={(e) => { setTo(e.target.value); setPreset("custom"); }} className="mt-1 block rounded-lg border border-border bg-background px-2 py-1.5 text-sm text-foreground" />
+        </label>
+        <label className="text-xs text-muted-foreground">Regrouper par
+          <select value={grain} onChange={(e) => setGrain(e.target.value as Grain)} className="mt-1 block rounded-lg border border-border bg-background px-2 py-1.5 text-sm text-foreground">
+            <option value="day">Jour</option><option value="week">Semaine</option><option value="month">Mois</option>
+          </select>
+        </label>
+        {loading && <span className="text-xs text-muted-foreground">Mise à jour…</span>}
+      </div>
+
+      {error && <p className="mb-4 rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-400">Chargement impossible : {error}</p>}
+
+      <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
+        {(data ? kpis : Array.from({ length: 8 })).map((k, i) =>
+          k ? (
+            <div key={(k as (typeof kpis)[number]).label} className="rounded-2xl border border-border bg-card p-4">
+              {(() => { const K = k as (typeof kpis)[number]; return <><K.icon size={17} className="mb-2 text-primary" /><p className="text-xl font-extrabold">{K.value}</p><p className="text-[11px] text-muted-foreground">{K.label}</p></>; })()}
+            </div>
+          ) : <div key={i} className="h-[98px] animate-pulse rounded-2xl border border-border bg-card" />,
+        )}
+      </div>
+
+      <div className="mb-6 rounded-2xl border border-border bg-card p-6">
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+          <h3 className="font-bold">Évolution des ventes</h3>
+          <div className="flex gap-4 text-xs text-muted-foreground">
+            <span className="flex items-center gap-1.5"><span className="h-2 w-3 rounded-sm bg-primary" /> Chiffre d'affaires</span>
+            <span className="flex items-center gap-1.5"><span className="h-0.5 w-3 bg-sky-400" /> Visites</span>
+          </div>
+        </div>
+        {data ? <SalesChart data={data} /> : <div className="h-64 animate-pulse rounded-xl bg-secondary/40" />}
+      </div>
+
+      <div className="mb-6 grid grid-cols-1 gap-5 lg:grid-cols-2">
+        <div className="rounded-2xl border border-border bg-card p-6">
+          <h3 className="mb-4 font-bold">Sources de trafic</h3>
+          {data && data.sources.length > 0 ? (
+            <Bars rows={data.sources.map((s) => ({ label: SOURCES[s.source] ?? s.source, value: s.visits, text: `${num(s.visits)} visite${s.visits > 1 ? "s" : ""}` }))} />
+          ) : <Empty text="Les origines de vos visiteurs apparaîtront ici." />}
+        </div>
+        <div className="rounded-2xl border border-border bg-card p-6">
+          <h3 className="mb-4 font-bold">Ventes par catégorie</h3>
+          {data && data.categories.length > 0 ? (
+            <Bars rows={data.categories.map((c) => ({ label: CATEGORIES[c.category] ?? c.category, value: c.revenue, text: `${money(c.revenue)} · ${num(c.items)} art.` }))} />
+          ) : <Empty text="Aucune vente sur cette période." />}
+        </div>
+      </div>
+
+      <div className="rounded-2xl border border-border bg-card p-6">
+        <h3 className="mb-4 font-bold">Top produits</h3>
+        {data && data.top_products.length > 0 ? (
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[620px] text-sm">
+              <thead>
+                <tr className="border-b border-border text-[11px] uppercase text-muted-foreground">
+                  <th className="py-3 text-left font-semibold">Produit</th>
+                  <th className="py-3 text-right font-semibold">Vues</th>
+                  <th className="py-3 text-right font-semibold">Ajouts panier</th>
+                  <th className="py-3 text-right font-semibold">Vendus</th>
+                  <th className="py-3 text-right font-semibold">Conversion</th>
+                  <th className="py-3 text-right font-semibold">Revenu</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data.top_products.map((p, i) => (
+                  <tr key={i} className="border-b border-border/50">
+                    <td className="py-3">
+                      <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 shrink-0 overflow-hidden rounded-lg bg-white">{p.image && <img src={p.image} alt="" className="h-full w-full object-cover" />}</div>
+                        <span className="line-clamp-2 max-w-[260px]">{p.title}</span>
+                      </div>
+                    </td>
+                    <td className="text-right">{num(p.views)}</td>
+                    <td className="text-right">{num(p.carts)}</td>
+                    <td className="text-right">{num(p.items)}</td>
+                    <td className="text-right">{p.views ? `${Math.min(100, (p.items / p.views) * 100).toFixed(1).replace(".", ",")} %` : "—"}</td>
+                    <td className="text-right font-semibold">{money(p.revenue)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : <Empty text="Vos produits en ligne apparaîtront ici avec leurs statistiques." />}
       </div>
     </DashboardLayout>
   );
 }
 
-type Grain = "day" | "week" | "month" | "year";
-
-const DAY = 86400000;
-const iso = (d: Date) => d.toISOString().slice(0, 10);
-const fmt = (n: number) => n.toLocaleString("fr-FR");
-
-/** Ventes pseudo-réelles déterministes par jour (stables entre les rendus). */
-function dailySales(dateKey: string) {
-  let h = 0;
-  for (let i = 0; i < dateKey.length; i++) h = (h * 31 + dateKey.charCodeAt(i)) % 100000;
-  const weekday = new Date(dateKey + "T00:00:00Z").getUTCDay();
-  const weekendBoost = weekday === 0 || weekday === 6 ? 1.35 : 1;
-  return Math.round((15000 + (h % 85000)) * weekendBoost);
+function Empty({ text }: { text: string }) {
+  return <p className="py-8 text-center text-sm text-muted-foreground">{text}</p>;
 }
 
-function SalesEvolution() {
-  const today = new Date();
-  const [grain, setGrain] = useState<Grain>("month");
-  const [from, setFrom] = useState(iso(new Date(today.getTime() - 364 * DAY)));
-  const [to, setTo] = useState(iso(today));
-
-  const { bars, total, avg } = useMemo(() => {
-    const start = new Date(from + "T00:00:00Z");
-    const end = new Date(to + "T00:00:00Z");
-    if (isNaN(start.getTime()) || isNaN(end.getTime()) || end < start) return { bars: [], total: 0, avg: 0 };
-
-    const buckets = new Map<string, { label: string; value: number }>();
-    for (let t = start.getTime(); t <= end.getTime(); t += DAY) {
-      const d = new Date(t);
-      const key = iso(d);
-      const v = dailySales(key);
-      let bk = key;
-      let label = d.toLocaleDateString("fr-FR", { day: "2-digit", month: "short", timeZone: "UTC" });
-      if (grain === "week") {
-        const monday = new Date(t - ((d.getUTCDay() + 6) % 7) * DAY);
-        bk = iso(monday);
-        label = `S. ${monday.toLocaleDateString("fr-FR", { day: "2-digit", month: "short", timeZone: "UTC" })}`;
-      } else if (grain === "month") {
-        bk = key.slice(0, 7);
-        label = d.toLocaleDateString("fr-FR", { month: "short", year: "2-digit", timeZone: "UTC" });
-      } else if (grain === "year") {
-        bk = key.slice(0, 4);
-        label = key.slice(0, 4);
-      }
-      const cur = buckets.get(bk);
-      if (cur) cur.value += v;
-      else buckets.set(bk, { label, value: v });
-    }
-    const bars = [...buckets.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([, v]) => v);
-    const total = bars.reduce((s, b) => s + b.value, 0);
-    return { bars, total, avg: bars.length ? Math.round(total / bars.length) : 0 };
-  }, [from, to, grain]);
-
-  const max = Math.max(1, ...bars.map((b) => b.value));
-
-  function applyPreset(g: Grain) {
-    setGrain(g);
-    const days = g === "day" ? 30 : g === "week" ? 84 : g === "month" ? 364 : 1095;
-    setFrom(iso(new Date(today.getTime() - days * DAY)));
-    setTo(iso(today));
-  }
-
+function Bars({ rows }: { rows: { label: string; value: number; text: string }[] }) {
+  const max = Math.max(1, ...rows.map((r) => r.value));
   return (
-    <div>
-      <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-        <h3 className="font-bold">Évolution des ventes</h3>
-        <div className="inline-flex rounded-full bg-secondary p-1 text-xs font-semibold">
-          {([["day", "Jour"], ["week", "Semaine"], ["month", "Mois"], ["year", "Année"]] as [Grain, string][]).map(([g, l]) => (
-            <button key={g} onClick={() => applyPreset(g)} className={`px-3 py-1.5 rounded-full transition ${grain === g ? "bg-gradient-primary text-white" : "text-muted-foreground hover:text-foreground"}`}>{l}</button>
-          ))}
+    <div className="space-y-3">
+      {rows.map((r) => (
+        <div key={r.label}>
+          <div className="mb-1 flex justify-between gap-3 text-xs"><span className="text-muted-foreground">{r.label}</span><span className="whitespace-nowrap font-semibold">{r.text}</span></div>
+          <div className="h-2 overflow-hidden rounded-full bg-secondary"><div className="h-full rounded-full bg-primary" style={{ width: `${(r.value / max) * 100}%` }} /></div>
         </div>
-      </div>
+      ))}
+    </div>
+  );
+}
 
-      <div className="flex flex-wrap items-end gap-3 mb-5">
-        <label className="text-xs">
-          <span className="block text-muted-foreground mb-1">Du</span>
-          <input type="date" value={from} max={to} onChange={(e) => setFrom(e.target.value)} className="bg-secondary rounded-xl px-3 py-2 text-xs border border-border" />
-        </label>
-        <label className="text-xs">
-          <span className="block text-muted-foreground mb-1">Au</span>
-          <input type="date" value={to} min={from} max={iso(today)} onChange={(e) => setTo(e.target.value)} className="bg-secondary rounded-xl px-3 py-2 text-xs border border-border" />
-        </label>
-        <div className="ml-auto text-right">
-          <p className="text-[11px] text-muted-foreground">Total période</p>
-          <p className="font-extrabold">{fmt(total)} FCFA</p>
-          <p className="text-[11px] text-muted-foreground">Moy. {fmt(avg)} FCFA</p>
-        </div>
-      </div>
+function label(at: string, grain: Grain) {
+  const d = new Date(at);
+  if (grain === "month") return d.toLocaleDateString("fr-FR", { month: "short", year: "2-digit" }).replace(".", "");
+  return d.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit" });
+}
 
-      {bars.length === 0 ? (
-        <p className="text-sm text-muted-foreground py-10 text-center">Sélectionnez une période valide.</p>
-      ) : (
-        <div className="overflow-x-auto">
-          <div className="flex items-end gap-1.5 h-56 min-w-full" style={{ minWidth: bars.length > 24 ? bars.length * 14 : undefined }}>
-            {bars.map((b, i) => (
-              <div
-                key={i}
-                title={`${b.label} · ${fmt(b.value)} FCFA`}
-                className="flex-1 min-w-[6px] bg-gradient-to-t from-primary to-primary-glow rounded-t-md hover:opacity-80 transition"
-                style={{ height: `${Math.max(4, (b.value / max) * 100)}%` }}
-              />
-            ))}
-          </div>
-          <div className="flex justify-between text-[10px] text-muted-foreground mt-2 gap-2">
-            <span>{bars[0]!.label}</span>
-            {bars.length > 2 && <span>{bars[Math.floor(bars.length / 2)]!.label}</span>}
-            <span>{bars[bars.length - 1]!.label}</span>
-          </div>
+function SalesChart({ data }: { data: Analytics }) {
+  const [hover, setHover] = useState<number | null>(null);
+  const s = data.series;
+  const maxR = Math.max(1, ...s.map((p) => p.revenue));
+  const maxV = Math.max(1, ...s.map((p) => p.visits));
+  const w = 100, h = 60, bw = (w / Math.max(1, s.length)) * 0.6;
+  const x = (i: number) => (i + 0.5) * (w / Math.max(1, s.length));
+  const empty = s.every((p) => !p.revenue && !p.visits);
+  const step = Math.max(1, Math.ceil(s.length / 10));
+  const hp = hover !== null ? s[hover] : null;
+  return (
+    <div className="relative h-64">
+      <svg viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" className="h-[85%] w-full"
+        onMouseLeave={() => setHover(null)}
+        onMouseMove={(e) => { const r = (e.currentTarget as SVGSVGElement).getBoundingClientRect(); setHover(Math.max(0, Math.min(s.length - 1, Math.floor(((e.clientX - r.left) / r.width) * s.length)))); }}>
+        {[0.25, 0.5, 0.75].map((g) => <line key={g} x1="0" x2={w} y1={h * g} y2={h * g} stroke="currentColor" strokeWidth="0.15" className="text-border" />)}
+        {s.map((p, i) => (
+          <rect key={p.at} x={x(i) - bw / 2} y={h - (p.revenue / maxR) * (h - 4)} width={bw} height={(p.revenue / maxR) * (h - 4)} rx="0.6" className={hover === i ? "fill-primary" : "fill-primary/70"} />
+        ))}
+        <path d={s.map((p, i) => `${i ? "L" : "M"}${x(i)},${h - (p.visits / maxV) * (h - 4)}`).join(" ")} stroke="oklch(0.75 0.13 230)" strokeWidth="0.7" fill="none" vectorEffect="non-scaling-stroke" />
+      </svg>
+      <div className="mt-2 flex justify-between text-[10px] text-muted-foreground">
+        {s.map((p, i) => (i % step === 0 || i === s.length - 1 ? <span key={p.at}>{label(p.at, data.grain)}</span> : null))}
+      </div>
+      {empty && <p className="absolute inset-x-0 top-1/3 text-center text-sm text-muted-foreground">Pas encore d'activité sur cette période.</p>}
+      {hp && (
+        <div className="pointer-events-none absolute right-2 top-0 rounded-xl border border-border bg-background/95 px-3 py-2 text-xs shadow-lg">
+          <p className="mb-1 font-semibold">{label(hp.at, data.grain)}</p>
+          <p>Chiffre d'affaires : <b>{money(hp.revenue)}</b></p>
+          <p>Commandes : <b>{hp.orders}</b></p>
+          <p>Visites : <b>{hp.visits}</b></p>
         </div>
       )}
     </div>
   );
 }
-

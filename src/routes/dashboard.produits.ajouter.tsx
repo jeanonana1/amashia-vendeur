@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { RichTextEditor } from "@/components/seller/dashboard/RichTextEditor";
 import { ColorPicker, ColorSwatch, colorParts } from "@/components/seller/dashboard/ColorPicker";
+import { compressImage } from "@/lib/imageCompress";
 import { AiSeoModal } from "@/components/seller/dashboard/AiSeoModal";
 import { AiImageModal } from "@/components/seller/dashboard/AiImageModal";
 
@@ -361,10 +362,11 @@ function AddProductPage() {
       const urls: string[] = [];
       for (const f of files.slice(0, 6)) {
         if (!f.type.startsWith("image/")) continue;
-        if (f.size > 5 * 1024 * 1024) { toast.error(`${f.name} dépasse 5 Mo`); continue; }
-        const ext = f.name.split(".").pop() || "jpg";
+        if (f.size > 30 * 1024 * 1024) { toast.error(`${f.name} dépasse 30 Mo`); continue; }
+        const small = await compressImage(f, 1600);
+        const ext = small.name.split(".").pop() || "jpg";
         const path = `${user.id}/variant-${groupId}-${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-        const { error } = await supabase.storage.from("product-images").upload(path, f, { upsert: true });
+        const { error } = await supabase.storage.from("product-images").upload(path, small, { contentType: small.type || "image/jpeg" });
         if (error) throw error;
         const { data: pub } = supabase.storage.from("product-images").getPublicUrl(path);
         urls.push(pub.publicUrl);
@@ -436,9 +438,10 @@ function AddProductPage() {
       for (const img of images) {
         if (img.existing) { urls.push(img.preview); continue; }
         if (!img.file) continue;
-        const ext = img.file.name.split(".").pop() || "jpg";
+        const toSend = await compressImage(img.file, 1600);
+        const ext = toSend.name.split(".").pop() || "jpg";
         const path = `${user.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-        const { error: upErr } = await supabase.storage.from("product-images").upload(path, img.file);
+        const { error: upErr } = await supabase.storage.from("product-images").upload(path, toSend, { contentType: toSend.type || "image/jpeg" });
         if (!upErr) {
           const { data } = supabase.storage.from("product-images").getPublicUrl(path);
           urls.push(data.publicUrl);

@@ -5,7 +5,8 @@ import {
   Wallet, Package, ShoppingCart, Users, TrendingUp, TrendingDown, ArrowUpRight, Eye, Radio, MousePointerClick, ExternalLink, Minus,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { MARKETPLACE_URL, money, num, trend, useLiveVisitors, useSellerStats, type SellerStats } from "@/lib/sellerStats";
+import { MARKETPLACE_URL, dateTime, money, num, trend, useLiveVisitors, useSellerStats, type SellerStats } from "@/lib/sellerStats";
+import { ORDER_FIELDS, OrderDetailModal, type SellerOrderLine } from "@/components/seller/dashboard/OrderDetailModal";
 
 export const Route = createFileRoute("/dashboard/")({
   head: () => ({ meta: [{ title: "Tableau de bord — Amashia Seller" }, { name: "description", content: "Tableau de bord : votre espace vendeur Amashia pour gérer votre activité." }, { property: "og:title", content: "Tableau de bord — Amashia Seller" }, { property: "og:description", content: "Tableau de bord : votre espace vendeur Amashia pour gérer votre activité." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
@@ -27,7 +28,7 @@ const STATUS: Record<string, { label: string; cls: string }> = {
   cancelled: { label: "Annulée", cls: "bg-red-500/20 text-red-400" },
 };
 
-type RecentOrder = { id: string; order_number: string; customer_name: string; product_title: string; amount: number; status: string; created_at: string; options: string | null; color: string | null };
+
 
 function DashboardOverview() {
   const name = useSellerName();
@@ -36,14 +37,15 @@ function DashboardOverview() {
   const { stats, loading, error } = useSellerStats(days);
   const live = useLiveVisitors(stats?.shop?.id);
 
-  const [orders, setOrders] = useState<RecentOrder[] | null>(null);
+  const [orders, setOrders] = useState<SellerOrderLine[] | null>(null);
+  const [openOrder, setOpenOrder] = useState<SellerOrderLine | null>(null);
   useEffect(() => {
     let alive = true;
     const load = async () => {
       const { data } = await (supabase as any).from("seller_orders")
-        .select("id,order_number,customer_name,product_title,amount,status,created_at,options,color")
+        .select(ORDER_FIELDS)
         .order("created_at", { ascending: false }).limit(6);
-      if (alive) setOrders((data as RecentOrder[]) || []);
+      if (alive) setOrders((data as SellerOrderLine[]) || []);
     };
     void load();
     const t = window.setInterval(load, 30_000);
@@ -142,15 +144,20 @@ function DashboardOverview() {
                   <th className="py-3 text-left font-semibold">Produit</th>
                   <th className="py-3 text-left font-semibold">Montant</th>
                   <th className="py-3 text-left font-semibold">Statut</th>
-                  <th className="py-3 text-left font-semibold">Date</th>
+                  <th className="py-3 text-left font-semibold">Date et heure</th>
                 </tr>
               </thead>
               <tbody>
                 {orders.map((o) => {
                   const st = STATUS[o.status] ?? STATUS.pending;
                   return (
-                    <tr key={o.id} className="border-b border-border/50 transition hover:bg-secondary/30">
-                      <td className="py-4 font-semibold">{o.order_number}</td>
+                    <tr key={o.id} onClick={() => setOpenOrder(o)} className="cursor-pointer border-b border-border/50 transition hover:bg-secondary/30" title="Voir le détail de la commande">
+                      <td className="py-4 font-semibold">
+                        <span className="flex items-center gap-2">
+                          {o.product_image && <img src={o.product_image} alt="" className="h-8 w-8 rounded-md object-cover" />}
+                          {o.order_number}
+                        </span>
+                      </td>
                       <td>{o.customer_name}</td>
                       <td className="max-w-[220px] text-muted-foreground">
                         <span className="line-clamp-1">{o.product_title}</span>
@@ -158,7 +165,7 @@ function DashboardOverview() {
                       </td>
                       <td className="font-semibold">{money(Number(o.amount))}</td>
                       <td><span className={`rounded-full px-3 py-1 text-xs font-semibold ${st.cls}`}>{st.label}</span></td>
-                      <td className="text-muted-foreground">{new Date(o.created_at).toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" })}</td>
+                      <td className="whitespace-nowrap text-muted-foreground">{dateTime(o.created_at)}</td>
                     </tr>
                   );
                 })}
@@ -167,6 +174,7 @@ function DashboardOverview() {
           </div>
         )}
       </div>
+      {openOrder && <OrderDetailModal line={openOrder} onClose={() => setOpenOrder(null)} />}
     </DashboardLayout>
   );
 }

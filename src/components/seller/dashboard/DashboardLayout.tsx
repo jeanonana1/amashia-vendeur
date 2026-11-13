@@ -2,7 +2,7 @@ import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState, ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { ensureSellerProfile } from "@/lib/sellerProfile";
-import { money, useSellerStats } from "@/lib/sellerStats";
+import { money, useNavBadges, useSellerStats } from "@/lib/sellerStats";
 import {
   LayoutDashboard, Store, Package, ShoppingCart, Users, CreditCard, Truck,
   BarChart3, Megaphone, Star, Bell, MessageSquare, Settings, HelpCircle, LogOut,
@@ -31,6 +31,7 @@ const NAV = [
 ] as const;
 
 export function DashboardLayout({ title, subtitle, children }: { title: string; subtitle?: string; children: ReactNode }) {
+  const badges = useNavBadges();
   // Solde disponible réel : ventes livrées (le montant en attente apparaît au survol)
   const { stats: balanceStats } = useSellerStats(30, 120_000);
   const navigate = useNavigate();
@@ -86,10 +87,16 @@ export function DashboardLayout({ title, subtitle, children }: { title: string; 
         {NAV.map((item) => {
           const Icon = item.icon;
           const active = path === item.to || (item.to !== "/dashboard" && path.startsWith(item.to));
+          const badge = item.to === "/dashboard/signalements" ? badges.reports : item.to === "/dashboard/commandes" ? badges.orders : 0;
           return (
             <Link key={item.to} to={item.to} className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition ${active ? "bg-primary/15 text-primary font-semibold" : "text-muted-foreground hover:bg-secondary hover:text-foreground"}`}>
               <Icon size={18} />
-              {item.label}
+              <span className="flex-1">{item.label}</span>
+              {badge > 0 && (
+                <span className={`min-w-[20px] rounded-full px-1.5 py-0.5 text-center text-[10px] font-bold leading-none text-white ${item.to === "/dashboard/signalements" ? "bg-red-500" : "bg-primary"}`}>
+                  {badge > 99 ? "99+" : badge}
+                </span>
+              )}
             </Link>
           );
         })}

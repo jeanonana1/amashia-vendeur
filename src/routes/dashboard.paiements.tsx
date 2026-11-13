@@ -1,202 +1,285 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { DashboardLayout } from "@/components/seller/dashboard/DashboardLayout";
-import { Wallet, ArrowDownToLine, CreditCard, Smartphone, Plus, X, Trash2, History } from "lucide-react";
+import { Wallet, ArrowDownToLine, Smartphone, Landmark, Plus, X, Trash2, History, Clock, CheckCircle2, XCircle, Star, ArrowUpRight } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { dateTime, money, useSellerStats } from "@/lib/sellerStats";
 
 export const Route = createFileRoute("/dashboard/paiements")({
   head: () => ({ meta: [{ title: "Paiements — Amashia Seller" }, { name: "description", content: "Paiements : votre espace vendeur Amashia pour gérer votre activité." }, { property: "og:title", content: "Paiements — Amashia Seller" }, { property: "og:description", content: "Paiements : votre espace vendeur Amashia pour gérer votre activité." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   component: PaiementsPage,
 });
 
-type Method = { id: string; type: "mobile" | "card"; label: string; details: Record<string, string> };
-type Withdrawal = { id: string; amount: number; methodLabel: string; date: string; status: "completed" | "pending" };
-type Tx = { id: string; type: "credit" | "debit"; desc: string; amount: number; date: string };
+type Kind = "orange_money" | "mtn_momo" | "bank";
+type Method = { id: string; kind: Kind; label: string | null; account_name: string; account_number: string; bank_name: string | null; is_default: boolean; created_at: string };
+type Withdrawal = { id: string; amount: number; method: { kind: Kind; label?: string | null; account_number?: string; bank_name?: string | null }; status: "pending" | "paid" | "rejected"; note: string | null; created_at: string; processed_at: string | null };
+type Sale = { id: string; order_number: string; product_title: string; amount: number; created_at: string };
 
-const initialBalance = 125500;
+const KIND: Record<Kind, { label: string; icon: typeof Smartphone; cls: string }> = {
+  orange_money: { label: "Orange Money", icon: Smartphone, cls: "bg-orange-500/15 text-orange-400" },
+  mtn_momo: { label: "MTN Mobile Money", icon: Smartphone, cls: "bg-yellow-500/15 text-yellow-400" },
+  bank: { label: "Virement bancaire", icon: Landmark, cls: "bg-blue-500/15 text-blue-400" },
+};
+const WSTATUS = {
+  pending: { label: "En cours de traitement", icon: Clock, cls: "text-amber-400" },
+  paid: { label: "Payé", icon: CheckCircle2, cls: "text-emerald-400" },
+  rejected: { label: "Refusé", icon: XCircle, cls: "text-red-400" },
+} as const;
+
+const mask = (n: string) => (n.length > 4 ? `•••• ${n.slice(-4)}` : n);
+const db = () => supabase as any;
 
 function PaiementsPage() {
+  const { stats, reload: reloadStats } = useSellerStats(30, 60_000);
   const [methods, setMethods] = useState<Method[]>([]);
   const [withdrawals, setWithdrawals] = useState<Withdrawal[]>([]);
-  const [txs, setTxs] = useState<Tx[]>([]);
+  const [sales, setSales] = useState<Sale[]>([]);
+  const [loading, setLoading] = useState(true);
   const [openWithdraw, setOpenWithdraw] = useState(false);
-  const [openMethod, setOpenMethod] = useState<"mobile" | "card" | null>(null);
-  const [openHistory, setOpenHistory] = useState(false);
+  const [openMethod, setOpenMethod] = useState(false);
+  const [showAll, setShowAll] = useState(false);
 
-  const [wAmount, setWAmount] = useState(""); const [wMethod, setWMethod] = useState("");
-  const [mForm, setMForm] = useState({ operator: "MTN", phone: "", holder: "", number: "", expiry: "", cvc: "" });
-
-  useEffect(() => {
-    setMethods(JSON.parse(localStorage.getItem("pay-methods") || "[]"));
-    setWithdrawals(JSON.parse(localStorage.getItem("pay-withdrawals") || "[]"));
-    setTxs(JSON.parse(localStorage.getItem("pay-txs") || JSON.stringify([
-      { id: "1", type: "credit", desc: "Vente #12345", amount: 45000, date: "10 Jan 2025" },
-      { id: "2", type: "credit", desc: "Vente #12343", amount: 62000, date: "09 Jan 2025" },
-    ])));
+  const load = useCallback(async () => {
+    const [m, w, s] = await Promise.all([
+      db().from("seller_payout_methods").select("*").order("is_default", { ascending: false }).order("created_at"),
+      db().from("seller_withdrawals").select("*").order("created_at", { ascending: false }),
+      db().from("seller_orders").select("id,order_number,product_title,amount,created_at").eq("status", "delivered").order("created_at", { ascending: false }).limit(50),
+    ]);
+    setMethods(m.data || []);
+    setWithdrawals(w.data || []);
+    setSales(s.data || []);
+    setLoading(false);
   }, []);
+  useEffect(() => { void load(); }, [load]);
 
-  function saveMethods(n: Method[]) { setMethods(n); localStorage.setItem("pay-methods", JSON.stringify(n)); }
-  function saveWithdrawals(n: Withdrawal[]) { setWithdrawals(n); localStorage.setItem("pay-withdrawals", JSON.stringify(n)); }
+  const balance = stats?.balance ?? 0;
+  const pendingOut = withdrawals.filter((w) => w.status === "pending").reduce((s, w) => s + w.amount, 0);
+  const paidOut = withdrawals.filter((w) => w.status === "paid").reduce((s, w) => s + w.amount, 0);
 
-  const balance = initialBalance - withdrawals.filter(w => w.status === "completed").reduce((a, w) => a + w.amount, 0);
+  // historique : ventes livrées (crédits) + retraits (débits)
+  const txs = [
+    ...sales.map((s) => ({ id: `s-${s.id}`, credit: true, desc: `Vente ${s.order_number} · ${s.product_title}`, amount: Number(s.amount), date: s.created_at, status: null as null | Withdrawal["status"] })),
+    ...withdrawals.map((w) => ({ id: `w-${w.id}`, credit: false, desc: `Retrait vers ${KIND[w.method.kind]?.label ?? "votre compte"}${w.method.account_number ? ` (${mask(w.method.account_number)})` : ""}`, amount: w.amount, date: w.created_at, status: w.status })),
+  ].sort((a, b) => b.date.localeCompare(a.date));
 
-  function addMethod() {
-    if (openMethod === "mobile") {
-      if (!mForm.phone || !mForm.holder) return toast.error("Numéro et nom requis");
-      const m: Method = { id: crypto.randomUUID(), type: "mobile", label: `${mForm.operator} ${mForm.phone.slice(-4).padStart(mForm.phone.length, "•")}`, details: { operator: mForm.operator, phone: mForm.phone, holder: mForm.holder } };
-      saveMethods([...methods, m]);
-    } else {
-      if (!mForm.number || !mForm.holder || !mForm.expiry) return toast.error("Champs carte requis");
-      const last4 = mForm.number.slice(-4);
-      const m: Method = { id: crypto.randomUUID(), type: "card", label: `Carte •••• ${last4}`, details: { holder: mForm.holder, last4, expiry: mForm.expiry } };
-      saveMethods([...methods, m]);
-    }
-    toast.success("Méthode ajoutée");
-    setOpenMethod(null); setMForm({ operator: "MTN", phone: "", holder: "", number: "", expiry: "", cvc: "" });
+  async function removeMethod(id: string) {
+    if (!confirm("Supprimer ce moyen de retrait ?")) return;
+    const { error } = await db().from("seller_payout_methods").delete().eq("id", id);
+    if (error) return toast.error(error.message);
+    toast.success("Moyen de retrait supprimé");
+    void load();
   }
-  function delMethod(id: string) { if (confirm("Supprimer ?")) saveMethods(methods.filter((m) => m.id !== id)); }
-
-  function submitWithdraw() {
-    const amt = Number(wAmount);
-    if (!amt || amt <= 0) return toast.error("Montant invalide");
-    if (amt > balance) return toast.error("Solde insuffisant");
-    if (!wMethod) return toast.error("Choisissez une méthode");
-    const m = methods.find((x) => x.id === wMethod);
-    const w: Withdrawal = { id: crypto.randomUUID(), amount: amt, methodLabel: m?.label || "—", date: new Date().toLocaleDateString("fr-FR"), status: "completed" };
-    saveWithdrawals([w, ...withdrawals]);
-    toast.success(`Retrait de ${amt.toLocaleString()} FCFA effectué`);
-    setOpenWithdraw(false); setWAmount(""); setWMethod("");
+  async function makeDefault(id: string) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    await db().from("seller_payout_methods").update({ is_default: false }).eq("user_id", user.id);
+    await db().from("seller_payout_methods").update({ is_default: true }).eq("id", id);
+    void load();
   }
 
   return (
-    <DashboardLayout title="Paiements" subtitle="Portefeuille, retraits et méthodes de paiement">
-      <div className="grid lg:grid-cols-3 gap-5 mb-6">
-        <div className="lg:col-span-2 bg-gradient-primary text-white rounded-2xl p-7">
-          <div className="flex items-center gap-3 mb-4 opacity-90"><Wallet size={20} /><span className="text-sm font-semibold">Solde disponible</span></div>
-          <p className="text-5xl font-extrabold">{balance.toLocaleString()} <span className="text-2xl opacity-80">FCFA</span></p>
-          <div className="flex flex-wrap gap-3 mt-6">
-            <button onClick={() => setOpenWithdraw(true)} className="px-5 py-2.5 rounded-full bg-white text-primary font-semibold flex items-center gap-2 text-sm"><ArrowDownToLine size={16} /> Retirer</button>
-            <button onClick={() => setOpenHistory(true)} className="px-5 py-2.5 rounded-full bg-white/20 text-white font-semibold flex items-center gap-2 text-sm border border-white/30"><History size={16} /> Historique retraits</button>
+    <DashboardLayout title="Paiements" subtitle="Votre solde, vos moyens de retrait et l'historique de vos gains">
+      <div className="mb-6 grid grid-cols-1 gap-5 lg:grid-cols-3">
+        <div className="rounded-2xl bg-gradient-primary p-6 text-white lg:col-span-2">
+          <div className="mb-4 flex items-center gap-3 opacity-90"><Wallet size={20} /><span className="text-sm font-semibold">Solde disponible</span></div>
+          <p className="text-4xl font-extrabold">{stats ? money(balance) : "…"}</p>
+          <p className="mt-1 text-xs opacity-80">Ventes livrées, moins les retraits demandés ou déjà payés.</p>
+          <div className="mt-5 flex flex-wrap gap-2">
+            <button
+              onClick={() => (methods.length ? setOpenWithdraw(true) : (toast.info("Ajoutez d'abord un moyen de retrait."), setOpenMethod(true)))}
+              disabled={!stats || balance < 1000}
+              className="flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-bold text-black disabled:opacity-50"
+            >
+              <ArrowDownToLine size={16} /> Retirer mon argent
+            </button>
+            {stats && balance < 1000 && <span className="self-center text-xs opacity-80">Retrait possible à partir de 1 000 FCFA</span>}
           </div>
         </div>
-        <div className="space-y-4">
-          <div className="bg-card border border-border rounded-2xl p-5">
-            <p className="text-sm text-muted-foreground">Total retiré</p>
-            <p className="text-2xl font-extrabold mt-1 text-red-400">{withdrawals.reduce((a, w) => a + w.amount, 0).toLocaleString()} FCFA</p>
-          </div>
-          <div className="bg-card border border-border rounded-2xl p-5">
-            <p className="text-sm text-muted-foreground">Retraits totaux</p>
-            <p className="text-2xl font-extrabold mt-1">{withdrawals.length}</p>
-          </div>
-        </div>
-      </div>
-
-      <div className="grid lg:grid-cols-3 gap-5">
-        <div className="lg:col-span-2 bg-card border border-border rounded-2xl p-6">
-          <h3 className="font-bold mb-4">Transactions récentes</h3>
-          <div className="divide-y divide-border">
-            {[...withdrawals.map(w => ({ id: w.id, type: "debit" as const, desc: `Retrait vers ${w.methodLabel}`, amount: w.amount, date: w.date })), ...txs].slice(0, 8).map((t) => (
-              <div key={t.id} className="flex items-center justify-between py-3">
-                <div>
-                  <p className="font-semibold text-sm">{t.desc}</p>
-                  <p className="text-xs text-muted-foreground">{t.date}</p>
-                </div>
-                <p className={`font-extrabold ${t.type === "credit" ? "text-emerald-400" : "text-red-400"}`}>{t.type === "credit" ? "+" : "-"}{t.amount.toLocaleString()} FCFA</p>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="bg-card border border-border rounded-2xl p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-bold">Méthodes de paiement</h3>
-          </div>
-          <div className="space-y-3">
-            {methods.map((m) => (
-              <div key={m.id} className="border border-border rounded-xl p-4 flex items-center gap-3">
-                {m.type === "mobile" ? <Smartphone className="text-primary" /> : <CreditCard className="text-primary" />}
-                <div className="flex-1">
-                  <p className="font-semibold text-sm">{m.label}</p>
-                  <p className="text-xs text-muted-foreground">{m.type === "mobile" ? m.details.holder : `Exp. ${m.details.expiry}`}</p>
-                </div>
-                <button onClick={() => delMethod(m.id)} className="w-8 h-8 grid place-items-center rounded-lg bg-destructive/10 text-destructive"><Trash2 size={14} /></button>
-              </div>
-            ))}
-            <button onClick={() => setOpenMethod("mobile")} className="w-full py-2.5 rounded-xl border border-dashed border-border text-sm flex items-center justify-center gap-2 hover:border-primary"><Plus size={14} /> Mobile Money</button>
-            <button onClick={() => setOpenMethod("card")} className="w-full py-2.5 rounded-xl border border-dashed border-border text-sm flex items-center justify-center gap-2 hover:border-primary"><Plus size={14} /> Carte bancaire</button>
-          </div>
+        <div className="grid grid-cols-1 gap-3">
+          <Kpi label="En attente de livraison" value={money(stats?.pending_balance ?? 0)} hint="Ventes pas encore livrées" />
+          <Kpi label="Retraits en cours" value={money(pendingOut)} hint="En cours de traitement" />
+          <Kpi label="Déjà versé" value={money(paidOut)} hint="Retraits payés" />
         </div>
       </div>
 
-      {openWithdraw && (
-        <Modal title="Retirer des fonds" onClose={() => setOpenWithdraw(false)}>
-          <div className="bg-secondary rounded-xl p-3 text-sm flex justify-between"><span className="text-muted-foreground">Solde</span><span className="font-bold">{balance.toLocaleString()} FCFA</span></div>
-          <F label="Montant (FCFA)"><input type="number" value={wAmount} onChange={(e) => setWAmount(e.target.value)} className={inp} /></F>
-          <F label="Méthode de réception">
-            <select value={wMethod} onChange={(e) => setWMethod(e.target.value)} className={inp}>
-              <option value="">Choisir...</option>
-              {methods.map((m) => <option key={m.id} value={m.id}>{m.label}</option>)}
-            </select>
-          </F>
-          {methods.length === 0 && <p className="text-xs text-amber-400">Ajoutez d'abord une méthode de paiement.</p>}
-          <button onClick={submitWithdraw} className="w-full py-3 rounded-full bg-gradient-primary text-white font-semibold">Confirmer le retrait</button>
-        </Modal>
-      )}
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
+        <div className="rounded-2xl border border-border bg-card p-6 lg:col-span-2">
+          <div className="mb-4 flex items-center justify-between">
+            <h3 className="font-bold">Historique</h3>
+            {txs.length > 6 && <button onClick={() => setShowAll(true)} className="flex items-center gap-1 text-xs text-primary"><History size={13} /> Tout voir</button>}
+          </div>
+          {loading ? <div className="h-32 animate-pulse rounded-xl bg-secondary/40" /> : txs.length === 0 ? (
+            <p className="py-10 text-center text-sm text-muted-foreground">Aucun mouvement pour le moment. Vos ventes livrées et vos retraits apparaîtront ici.</p>
+          ) : <TxList txs={txs.slice(0, 6)} />}
+        </div>
 
-      {openMethod && (
-        <Modal title={openMethod === "mobile" ? "Ajouter Mobile Money" : "Ajouter une carte"} onClose={() => setOpenMethod(null)}>
-          {openMethod === "mobile" ? (
-            <>
-              <F label="Opérateur"><select value={mForm.operator} onChange={(e) => setMForm({ ...mForm, operator: e.target.value })} className={inp}><option>MTN</option><option>Orange</option><option>Express Union</option></select></F>
-              <F label="Numéro *"><input value={mForm.phone} onChange={(e) => setMForm({ ...mForm, phone: e.target.value })} placeholder="+237 6XX XX XX XX" className={inp} /></F>
-              <F label="Nom du bénéficiaire *"><input value={mForm.holder} onChange={(e) => setMForm({ ...mForm, holder: e.target.value })} className={inp} /></F>
-            </>
+        <div className="rounded-2xl border border-border bg-card p-6">
+          <div className="mb-4 flex items-center justify-between">
+            <h3 className="font-bold">Moyens de retrait</h3>
+            <button onClick={() => setOpenMethod(true)} className="grid h-8 w-8 place-items-center rounded-full bg-primary/15 text-primary" aria-label="Ajouter"><Plus size={16} /></button>
+          </div>
+          {methods.length === 0 ? (
+            <button onClick={() => setOpenMethod(true)} className="w-full rounded-xl border border-dashed border-border py-8 text-sm text-muted-foreground hover:border-primary hover:text-primary">
+              Ajouter Orange Money, MTN MoMo ou un compte bancaire
+            </button>
           ) : (
-            <>
-              <F label="Nom sur la carte *"><input value={mForm.holder} onChange={(e) => setMForm({ ...mForm, holder: e.target.value })} className={inp} /></F>
-              <F label="Numéro de carte *"><input value={mForm.number} onChange={(e) => setMForm({ ...mForm, number: e.target.value.replace(/\D/g, "") })} placeholder="1234 5678 9012 3456" maxLength={16} className={inp} /></F>
-              <div className="grid grid-cols-2 gap-3">
-                <F label="Expiration *"><input value={mForm.expiry} onChange={(e) => setMForm({ ...mForm, expiry: e.target.value })} placeholder="MM/AA" className={inp} /></F>
-                <F label="CVC *"><input value={mForm.cvc} onChange={(e) => setMForm({ ...mForm, cvc: e.target.value })} placeholder="123" maxLength={4} className={inp} /></F>
-              </div>
-            </>
-          )}
-          <button onClick={addMethod} className="w-full py-3 rounded-full bg-gradient-primary text-white font-semibold">Ajouter</button>
-        </Modal>
-      )}
-
-      {openHistory && (
-        <Modal title="Historique des retraits" onClose={() => setOpenHistory(false)}>
-          {withdrawals.length === 0 ? <p className="text-sm text-muted-foreground text-center py-6">Aucun retrait pour l'instant.</p> : (
-            <div className="divide-y divide-border max-h-96 overflow-y-auto">
-              {withdrawals.map((w) => (
-                <div key={w.id} className="py-3 flex justify-between items-center">
-                  <div>
-                    <p className="font-semibold text-sm">{w.methodLabel}</p>
-                    <p className="text-xs text-muted-foreground">{w.date}</p>
+            <div className="space-y-2">
+              {methods.map((m) => {
+                const k = KIND[m.kind];
+                return (
+                  <div key={m.id} className="flex items-center gap-3 rounded-xl border border-border p-3">
+                    <span className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl ${k.cls}`}><k.icon size={18} /></span>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-semibold">{m.label || k.label}</p>
+                      <p className="truncate text-xs text-muted-foreground">{m.bank_name ? `${m.bank_name} · ` : ""}{mask(m.account_number)} · {m.account_name}</p>
+                      {m.is_default ? <span className="text-[10px] font-semibold text-primary">Par défaut</span> : <button onClick={() => void makeDefault(m.id)} className="flex items-center gap-1 text-[10px] text-muted-foreground hover:text-primary"><Star size={10} /> Définir par défaut</button>}
+                    </div>
+                    <button onClick={() => void removeMethod(m.id)} className="grid h-8 w-8 place-items-center rounded-lg text-muted-foreground hover:bg-red-500/10 hover:text-red-400" aria-label="Supprimer"><Trash2 size={14} /></button>
                   </div>
-                  <div className="text-right">
-                    <p className="font-extrabold text-red-400">-{w.amount.toLocaleString()} FCFA</p>
-                    <span className="text-xs text-emerald-400">Complété</span>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
+          <p className="mt-4 text-[11px] text-muted-foreground">Les retraits sont traités par l'équipe Amashia sous 48 h ouvrées vers le moyen choisi.</p>
+        </div>
+      </div>
+
+      {openMethod && <MethodModal onClose={() => setOpenMethod(false)} onSaved={() => { setOpenMethod(false); void load(); }} isFirst={methods.length === 0} />}
+      {openWithdraw && (
+        <WithdrawModal
+          balance={balance}
+          methods={methods}
+          onClose={() => setOpenWithdraw(false)}
+          onDone={() => { setOpenWithdraw(false); void load(); void reloadStats(); }}
+        />
+      )}
+      {showAll && (
+        <Modal title="Historique complet" onClose={() => setShowAll(false)}>
+          <div className="max-h-[60vh] overflow-y-auto"><TxList txs={txs} /></div>
         </Modal>
       )}
     </DashboardLayout>
   );
 }
-const inp = "w-full bg-background border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary";
-function F({ label, children }: { label: string; children: React.ReactNode }) { return <div><label className="block text-sm mb-2 font-medium">{label}</label>{children}</div>; }
+
+function TxList({ txs }: { txs: { id: string; credit: boolean; desc: string; amount: number; date: string; status: Withdrawal["status"] | null }[] }) {
+  return (
+    <div className="divide-y divide-border">
+      {txs.map((t) => {
+        const st = t.status ? WSTATUS[t.status] : null;
+        return (
+          <div key={t.id} className="flex items-center gap-3 py-3">
+            <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-full ${t.credit ? "bg-emerald-500/15 text-emerald-400" : "bg-secondary text-foreground"}`}>
+              {t.credit ? <ArrowUpRight size={15} className="rotate-180" /> : <ArrowDownToLine size={15} />}
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="line-clamp-1 text-sm font-medium">{t.desc}</p>
+              <p className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                {dateTime(t.date)}
+                {st && <span className={`flex items-center gap-1 ${st.cls}`}><st.icon size={11} /> {st.label}</span>}
+              </p>
+            </div>
+            <p className={`whitespace-nowrap text-sm font-bold ${t.credit ? "text-emerald-400" : t.status === "rejected" ? "text-muted-foreground line-through" : ""}`}>
+              {t.credit ? "+" : "−"}{money(t.amount)}
+            </p>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function Kpi({ label, value, hint }: { label: string; value: string; hint: string }) {
+  return (
+    <div className="rounded-2xl border border-border bg-card p-4">
+      <p className="text-xs text-muted-foreground">{label}</p>
+      <p className="text-lg font-extrabold">{value}</p>
+      <p className="text-[10px] text-muted-foreground">{hint}</p>
+    </div>
+  );
+}
+
 function Modal({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
   return (
-    <div className="fixed inset-0 bg-black/60 grid place-items-center z-50 p-4 overflow-y-auto" onClick={onClose}>
-      <div onClick={(e) => e.stopPropagation()} className="bg-card border border-border rounded-2xl p-6 w-full max-w-md space-y-4 my-8">
-        <div className="flex items-center justify-between"><h3 className="text-xl font-bold">{title}</h3><button onClick={onClose} className="w-8 h-8 grid place-items-center rounded-lg hover:bg-secondary"><X size={16} /></button></div>
+    <div className="fixed inset-0 z-50 grid place-items-end bg-black/60 backdrop-blur-sm sm:place-items-center sm:p-4" onClick={onClose}>
+      <div className="w-full max-w-md rounded-t-2xl border border-border bg-card p-6 sm:rounded-2xl" onClick={(e) => e.stopPropagation()}>
+        <div className="mb-5 flex items-center justify-between"><h3 className="text-lg font-bold">{title}</h3><button onClick={onClose} className="grid h-8 w-8 place-items-center rounded-lg hover:bg-secondary" aria-label="Fermer"><X size={16} /></button></div>
         {children}
       </div>
     </div>
+  );
+}
+
+const inp = "w-full rounded-xl border border-border bg-background px-4 py-3 text-sm focus:border-primary focus:outline-none";
+
+function MethodModal({ onClose, onSaved, isFirst }: { onClose: () => void; onSaved: () => void; isFirst: boolean }) {
+  const [kind, setKind] = useState<Kind>("orange_money");
+  const [f, setF] = useState({ label: "", account_name: "", account_number: "", bank_name: "" });
+  const [busy, setBusy] = useState(false);
+  async function save() {
+    const number = f.account_number.replace(/\s+/g, "");
+    if (!f.account_name.trim()) return toast.error("Indiquez le nom du titulaire.");
+    if (kind !== "bank" && !/^(\+?237)?6\d{8}$/.test(number)) return toast.error("Numéro mobile camerounais invalide (ex. 6XXXXXXXX).");
+    if (kind === "bank" && (number.length < 10 || !f.bank_name.trim())) return toast.error("Indiquez la banque et le numéro de compte (RIB).");
+    setBusy(true);
+    const { data: { user } } = await supabase.auth.getUser();
+    const { error } = await db().from("seller_payout_methods").insert({
+      user_id: user?.id, kind, label: f.label.trim() || null, account_name: f.account_name.trim(), account_number: number,
+      bank_name: kind === "bank" ? f.bank_name.trim() : null, is_default: isFirst,
+    });
+    setBusy(false);
+    if (error) return toast.error(error.message);
+    toast.success("Moyen de retrait ajouté");
+    onSaved();
+  }
+  return (
+    <Modal title="Ajouter un moyen de retrait" onClose={onClose}>
+      <div className="mb-4 grid grid-cols-3 gap-2">
+        {(Object.keys(KIND) as Kind[]).map((k) => (
+          <button key={k} onClick={() => setKind(k)} className={`rounded-xl border p-3 text-xs font-semibold transition ${kind === k ? "border-primary bg-primary/10 text-primary" : "border-border"}`}>{KIND[k].label}</button>
+        ))}
+      </div>
+      <div className="space-y-3">
+        {kind === "bank" && <input className={inp} placeholder="Nom de la banque" value={f.bank_name} onChange={(e) => setF({ ...f, bank_name: e.target.value })} />}
+        <input className={inp} placeholder="Nom du titulaire" value={f.account_name} onChange={(e) => setF({ ...f, account_name: e.target.value })} />
+        <input className={inp} placeholder={kind === "bank" ? "Numéro de compte / RIB" : "Numéro (6XXXXXXXX)"} inputMode={kind === "bank" ? "text" : "tel"} value={f.account_number} onChange={(e) => setF({ ...f, account_number: e.target.value })} />
+        <input className={inp} placeholder="Nom (facultatif, ex. Mon Orange Money)" value={f.label} onChange={(e) => setF({ ...f, label: e.target.value })} />
+      </div>
+      <button onClick={save} disabled={busy} className="mt-5 w-full rounded-full bg-gradient-primary py-3 text-sm font-semibold text-white disabled:opacity-60">{busy ? "Enregistrement…" : "Enregistrer"}</button>
+    </Modal>
+  );
+}
+
+function WithdrawModal({ balance, methods, onClose, onDone }: { balance: number; methods: Method[]; onClose: () => void; onDone: () => void }) {
+  const [amount, setAmount] = useState(String(balance));
+  const [method, setMethod] = useState(methods.find((m) => m.is_default)?.id ?? methods[0]?.id ?? "");
+  const [busy, setBusy] = useState(false);
+  async function submit() {
+    const a = Math.floor(Number(amount.replace(/\s/g, "")));
+    if (!a || a < 1000) return toast.error("Montant minimum : 1 000 FCFA");
+    if (a > balance) return toast.error("Solde insuffisant");
+    setBusy(true);
+    const { error } = await db().rpc("request_withdrawal", { _amount: a, _method: method });
+    setBusy(false);
+    if (error) return toast.error(error.message);
+    toast.success("Demande de retrait envoyée");
+    onDone();
+  }
+  return (
+    <Modal title="Retirer mon argent" onClose={onClose}>
+      <p className="mb-3 text-sm text-muted-foreground">Solde disponible : <b className="text-foreground">{money(balance)}</b></p>
+      <label className="mb-1 block text-xs font-semibold">Montant (FCFA)</label>
+      <input className={inp} inputMode="numeric" value={amount} onChange={(e) => setAmount(e.target.value.replace(/[^\d]/g, ""))} />
+      <div className="mt-2 flex gap-2">
+        {[0.25, 0.5, 1].map((p) => <button key={p} onClick={() => setAmount(String(Math.floor(balance * p)))} className="rounded-full bg-secondary px-3 py-1 text-xs">{p === 1 ? "Tout" : `${p * 100} %`}</button>)}
+      </div>
+      <label className="mb-1 mt-4 block text-xs font-semibold">Vers</label>
+      <select className={inp} value={method} onChange={(e) => setMethod(e.target.value)}>
+        {methods.map((m) => <option key={m.id} value={m.id}>{(m.label || KIND[m.kind].label)} · {mask(m.account_number)}</option>)}
+      </select>
+      <button onClick={submit} disabled={busy} className="mt-5 w-full rounded-full bg-gradient-primary py-3 text-sm font-semibold text-white disabled:opacity-60">{busy ? "Envoi…" : "Confirmer le retrait"}</button>
+      <p className="mt-3 text-[11px] text-muted-foreground">Le montant est réservé immédiatement et versé par l'équipe Amashia sous 48 h ouvrées.</p>
+    </Modal>
   );
 }

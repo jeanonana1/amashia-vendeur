@@ -76,3 +76,34 @@ export function useLiveVisitors(sellerId?: string) {
   }, [sellerId]);
   return count;
 }
+
+const MOIS = ["janv.", "févr.", "mars", "avr.", "mai", "juin", "juil.", "août", "sept.", "oct.", "nov.", "déc."];
+/** Date et heure (heure du Cameroun) : « 13 nov. 2026 à 14h05 ». */
+export function dateTime(iso: string) {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  const l = new Date(d.getTime() + 60 * 60 * 1000); // UTC+1
+  return `${l.getUTCDate()} ${MOIS[l.getUTCMonth()]} ${l.getUTCFullYear()} à ${String(l.getUTCHours()).padStart(2, "0")}h${String(l.getUTCMinutes()).padStart(2, "0")}`;
+}
+
+/** Compteurs du menu : produits signalés non traités et commandes en attente. */
+export function useNavBadges(refreshMs = 60_000) {
+  const [badges, setBadges] = useState<{ reports: number; orders: number }>({ reports: 0, orders: 0 });
+  useEffect(() => {
+    let alive = true;
+    const load = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const db = supabase as any;
+      const [r, o] = await Promise.all([
+        db.from("product_reports").select("id", { count: "exact", head: true }).eq("seller_id", user.id).eq("status", "pending"),
+        db.from("seller_orders").select("id", { count: "exact", head: true }).eq("status", "pending"),
+      ]);
+      if (alive) setBadges({ reports: r.count ?? 0, orders: o.count ?? 0 });
+    };
+    void load();
+    const t = window.setInterval(load, refreshMs);
+    return () => { alive = false; window.clearInterval(t); };
+  }, [refreshMs]);
+  return badges;
+}

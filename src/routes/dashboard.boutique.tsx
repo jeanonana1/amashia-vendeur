@@ -5,6 +5,7 @@ import { Store, MapPin, Phone, Mail, Star, Eye, Heart, Edit, Camera, Loader2, Ch
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { ensureSellerProfile } from "@/lib/sellerProfile";
+import { compressImage } from "@/lib/imageCompress";
 import { MARKETPLACE_URL, num, useSellerStats } from "@/lib/sellerStats";
 
 export const Route = createFileRoute("/dashboard/boutique")({
@@ -82,13 +83,16 @@ function BoutiquePage() {
 
   async function uploadAsset(file: File, kind: "logo" | "banner") {
     if (!profile) return;
-    if (file.size > 5 * 1024 * 1024) { toast.error("Image trop lourde (5 Mo max)"); return; }
+    if (!file.type.startsWith("image/")) { toast.error("Choisissez une image (JPG, PNG, WebP…)."); return; }
+    if (file.size > 30 * 1024 * 1024) { toast.error("Image trop lourde (30 Mo max)."); return; }
     setUploading(kind);
     try {
+      // redimensionnée et compressée avant l'envoi (couverture large, logo carré plus petit)
+      file = await compressImage(file, kind === "banner" ? 2000 : 600);
       const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
       // RLS exige que le 1er dossier == auth.uid()
       const path = `${profile.id}/shop-${kind}-${Date.now()}.${ext}`;
-      const { error } = await supabase.storage.from("product-images").upload(path, file, { upsert: true, cacheControl: "3600", contentType: file.type });
+      const { error } = await supabase.storage.from("product-images").upload(path, file, { cacheControl: "3600", contentType: file.type || "image/jpeg" });
       if (error) throw error;
       const { data: pub } = supabase.storage.from("product-images").getPublicUrl(path);
       const url = `${pub.publicUrl}?v=${Date.now()}`;
@@ -100,7 +104,7 @@ function BoutiquePage() {
       toast.success(kind === "logo" ? "Logo mis à jour sur Amashia" : "Bannière mise à jour sur Amashia");
     } catch (e: any) {
       console.error("[upload]", e);
-      toast.error(e?.message || "Échec de l'upload");
+      toast.error(`Envoi de l'image impossible : ${e?.message || "erreur inconnue"}`);
     } finally {
       setUploading(null);
     }

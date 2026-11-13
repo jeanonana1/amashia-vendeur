@@ -214,6 +214,11 @@ function AddProductPage() {
   const [myProducts, setMyProducts] = useState<{ id: string; name: string; price: number }[]>([]);
   const [autoSavedAt, setAutoSavedAt] = useState<Date | null>(null);
   const [dbDraftId, setDbDraftId] = useState<string | null>(editId ?? null);
+  // Verrous anti-doublon : identifiant du brouillon connu immédiatement, création
+  // en cours, et blocage de l'enregistrement auto pendant la publication.
+  const draftIdRef = useRef<string | null>(editId ?? null);
+  const draftInsertRef = useRef<Promise<void> | null>(null);
+  const finalSavingRef = useRef(false);
   const [aiOpen, setAiOpen] = useState(false);
   const [aiImgOpen, setAiImgOpen] = useState(false);
 
@@ -285,11 +290,17 @@ function AddProductPage() {
           variant_images: variantImages as any,
           status: editId ? form.status : "draft",
         };
-        if (dbDraftId) {
-          await supabase.from("seller_products").update(payload).eq("id", dbDraftId);
+        if (finalSavingRef.current) return;
+        if (draftInsertRef.current) await draftInsertRef.current; // une création est déjà en cours
+        if (finalSavingRef.current) return;
+        if (draftIdRef.current) {
+          await supabase.from("seller_products").update(payload).eq("id", draftIdRef.current);
         } else {
-          const { data: created } = await supabase.from("seller_products").insert(payload).select("id").maybeSingle();
-          if (created?.id) setDbDraftId(created.id);
+          draftInsertRef.current = (async () => {
+            const { data: created } = await supabase.from("seller_products").insert(payload).select("id").maybeSingle();
+            if (created?.id) { draftIdRef.current = created.id; setDbDraftId(created.id); }
+          })();
+          try { await draftInsertRef.current; } finally { draftInsertRef.current = null; }
         }
         setAutoSavedAt(new Date());
       } catch { /* ignore */ }
@@ -414,6 +425,8 @@ function AddProductPage() {
 
   async function submit(asDraft = false) {
     if (!form.name || !form.price) return toast.error("Nom et prix requis");
+    if (finalSavingRef.current) return; // double-clic sur « Publier »
+    finalSavingRef.current = true;
     setSaving(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -444,7 +457,9 @@ function AddProductPage() {
 
       // Le brouillon enregistré automatiquement pendant la saisie devient le
       // produit final (au lieu de créer un second produit en double).
-      const targetId = editId || dbDraftId;
+      // attend la fin d'une éventuelle création de brouillon en cours, puis met à jour ce brouillon
+      if (draftInsertRef.current) await draftInsertRef.current;
+      const targetId = editId || draftIdRef.current || dbDraftId;
       if (targetId) {
         const { error } = await supabase.from("seller_products").update(payload).eq("id", targetId);
         if (error) throw error;
@@ -459,6 +474,7 @@ function AddProductPage() {
     } catch (e: any) {
       toast.error(e.message);
     } finally {
+      finalSavingRef.current = false;
       setSaving(false);
     }
   }

@@ -1,9 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { DashboardLayout } from "@/components/seller/dashboard/DashboardLayout";
-import { Store, MapPin, Phone, Mail, Star, Eye, Heart, Edit, Camera, Loader2, Check, X } from "lucide-react";
+import { Store, MapPin, Phone, Mail, Star, Eye, Heart, Edit, Camera, Loader2, Check, X, ExternalLink } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { ensureSellerProfile } from "@/lib/sellerProfile";
+import { MARKETPLACE_URL, num, useSellerStats } from "@/lib/sellerStats";
 
 export const Route = createFileRoute("/dashboard/boutique")({
   head: () => ({ meta: [{ title: "Ma Boutique — Amashia Seller" }, { name: "description", content: "Ma Boutique : votre espace vendeur Amashia pour gérer votre activité." }, { property: "og:title", content: "Ma Boutique — Amashia Seller" }, { property: "og:description", content: "Ma Boutique : votre espace vendeur Amashia pour gérer votre activité." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
@@ -47,14 +49,19 @@ function BoutiquePage() {
   const [form, setForm] = useState({
     shop_name: "",
     shop_description: "",
+    city: "",
     categories: [] as string[],
   });
+  const [saving, setSaving] = useState(false);
+  // vraies statistiques de la boutique (avis, abonnés, visites des 30 derniers jours)
+  const { stats, reload: reloadStats } = useSellerStats(30, 120_000);
 
   useEffect(() => {
     (async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
       setEmail(user.email ?? "");
+      await ensureSellerProfile(user); // crée la fiche si elle n'existe pas encore
       const { data } = await supabase.from("seller_profiles").select("*").eq("id", user.id).maybeSingle();
       if (data) {
         const p = data as Profile;
@@ -63,6 +70,7 @@ function BoutiquePage() {
         setForm({
           shop_name: p.shop_name || `${p.first_name ?? "Ma"} Boutique`,
           shop_description: p.shop_description || "",
+          city: p.city || "",
           categories: cats,
         });
       }
@@ -85,10 +93,11 @@ function BoutiquePage() {
       const { data: pub } = supabase.storage.from("product-images").getPublicUrl(path);
       const url = `${pub.publicUrl}?v=${Date.now()}`;
       const column = kind === "logo" ? "shop_logo_url" : "shop_banner_url";
-      const { error: upErr } = await supabase.from("seller_profiles").update({ [column]: url } as any).eq("id", profile.id);
+      const { error: upErr } = await supabase.from("seller_profiles").upsert({ id: profile.id, [column]: url } as never);
       if (upErr) throw upErr;
       setProfile({ ...profile, [column]: url } as Profile);
-      toast.success(kind === "logo" ? "Logo mis à jour" : "Bannière mise à jour");
+      void reloadStats();
+      toast.success(kind === "logo" ? "Logo mis à jour sur Amashia" : "Bannière mise à jour sur Amashia");
     } catch (e: any) {
       console.error("[upload]", e);
       toast.error(e?.message || "Échec de l'upload");
@@ -98,21 +107,29 @@ function BoutiquePage() {
   }
 
   async function saveInfos() {
-    if (!profile) return;
+    if (!profile) { toast.error("Profil vendeur introuvable : rechargez la page."); return; }
+    const name = form.shop_name.trim();
+    if (name.length < 2) { toast.error("Indiquez le nom de votre boutique (2 caractères minimum)."); return; }
+    setSaving(true);
     try {
       const payload: any = {
-        shop_name: form.shop_name,
-        shop_description: form.shop_description,
+        shop_name: name.slice(0, 80),
+        shop_description: form.shop_description.trim().slice(0, 2000),
+        city: form.city.trim() || null,
         categories: form.categories,
       };
-      if (!isEntreprise && form.categories[0]) payload.category = form.categories[0];
-      const { error } = await supabase.from("seller_profiles").update(payload).eq("id", profile.id);
+      if (form.categories[0]) payload.category = form.categories[0];
+      const { error } = await supabase.from("seller_profiles").upsert({ id: profile.id, ...payload } as never);
       if (error) throw error;
       setProfile({ ...profile, ...payload });
       setEditing(false);
-      toast.success("Boutique mise à jour");
+      void reloadStats();
+      toast.success("Boutique mise à jour : les changements sont visibles sur Amashia.");
     } catch (e: any) {
-      toast.error(e.message || "Erreur");
+      console.error("[boutique]", e);
+      toast.error(`Enregistrement impossible : ${e?.message || "erreur inconnue"}`);
+    } finally {
+      setSaving(false);
     }
   }
 
@@ -192,15 +209,22 @@ function BoutiquePage() {
           <div className="flex-1 min-w-0">
             <div className="flex flex-wrap items-center gap-3">
               <h2 className="text-2xl font-extrabold truncate">{profile?.shop_name || form.shop_name}</h2>
-              <span className="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-400 text-xs font-semibold">Vérifiée</span>
+              {stats?.shop && (
+                <a href={`${MARKETPLACE_URL}/seller/${stats.shop.slug}`} target="_blank" rel="noreferrer" className="flex items-center gap-1 rounded-full bg-primary/15 px-3 py-1 text-xs font-semibold text-primary hover:bg-primary/25">
+                  Voir sur Amashia <ExternalLink size={12} />
+                </a>
+              )}
             </div>
             <p className="text-muted-foreground text-sm mt-1">
               {(cats[0] || "Catégorie non définie")} • {location}
             </p>
             <div className="flex flex-wrap items-center gap-4 mt-2 text-sm">
-              <span className="flex items-center gap-1"><Star size={14} className="text-amber-400 fill-amber-400" /> 4.8 (235 avis)</span>
-              <span className="flex items-center gap-1 text-muted-foreground"><Eye size={14} /> 12.5k vues</span>
-              <span className="flex items-center gap-1 text-muted-foreground"><Heart size={14} /> 1.2k abonnés</span>
+              <span className="flex items-center gap-1">
+                <Star size={14} className={stats?.rating ? "text-amber-400 fill-amber-400" : "text-muted-foreground"} />
+                {stats?.rating ? `${String(stats.rating).replace(".", ",")} (${num(stats.reviews)} avis)` : "Pas encore d'avis"}
+              </span>
+              <span className="flex items-center gap-1 text-muted-foreground"><Eye size={14} /> {num(stats?.visits ?? 0)} visites (30 j)</span>
+              <span className="flex items-center gap-1 text-muted-foreground"><Heart size={14} /> {num(stats?.followers ?? 0)} abonné{(stats?.followers ?? 0) > 1 ? "s" : ""}</span>
             </div>
           </div>
 
@@ -262,6 +286,14 @@ function BoutiquePage() {
                 />
               </div>
               <div>
+                <label className="block text-sm font-semibold mb-2">Ville</label>
+                <input
+                  value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })}
+                  placeholder="Ex. Yaoundé, Douala…"
+                  className="w-full bg-background border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary"
+                />
+              </div>
+              <div>
                 <label className="block text-sm font-semibold mb-2">Description</label>
                 <textarea
                   value={form.shop_description} onChange={(e) => setForm({ ...form, shop_description: e.target.value })}
@@ -291,7 +323,9 @@ function BoutiquePage() {
             </div>
             <div className="flex items-center justify-end gap-3 p-6 border-t border-border sticky bottom-0 bg-card">
               <button onClick={() => setEditing(false)} className="px-5 py-2.5 rounded-full bg-secondary text-sm font-semibold">Annuler</button>
-              <button onClick={saveInfos} className="px-5 py-2.5 rounded-full bg-gradient-primary text-white text-sm font-semibold">Enregistrer</button>
+              <button onClick={saveInfos} disabled={saving} className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-primary text-white text-sm font-semibold disabled:opacity-60">
+                {saving && <Loader2 size={14} className="animate-spin" />} {saving ? "Enregistrement…" : "Enregistrer"}
+              </button>
             </div>
           </div>
         </div>

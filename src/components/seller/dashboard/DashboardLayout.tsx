@@ -2,6 +2,7 @@ import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState, ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { ensureSellerProfile } from "@/lib/sellerProfile";
+import { money, useSellerStats } from "@/lib/sellerStats";
 import {
   LayoutDashboard, Store, Package, ShoppingCart, Users, CreditCard, Truck,
   BarChart3, Megaphone, Star, Bell, MessageSquare, Settings, HelpCircle, LogOut,
@@ -30,6 +31,8 @@ const NAV = [
 ] as const;
 
 export function DashboardLayout({ title, subtitle, children }: { title: string; subtitle?: string; children: ReactNode }) {
+  // Solde disponible réel : ventes livrées (le montant en attente apparaît au survol)
+  const { stats: balanceStats } = useSellerStats(30, 120_000);
   const navigate = useNavigate();
   const { theme, toggle } = useTheme();
   const path = useRouterState({ select: (s) => s.location.pathname });
@@ -154,7 +157,9 @@ export function DashboardLayout({ title, subtitle, children }: { title: string; 
                 <Wallet className="text-primary" size={18} />
                 <div>
                   <p className="text-[11px] text-muted-foreground">Solde disponible</p>
-                  <p className="font-bold text-sm">125,500 FCFA</p>
+                  <p className="font-bold text-sm" title={balanceStats ? `En attente de livraison : ${money(balanceStats.pending_balance)}` : undefined}>
+                    {balanceStats ? money(balanceStats.balance) : "…"}
+                  </p>
                 </div>
               </div>
               <button onClick={toggle} className="hidden lg:grid w-10 h-10 place-items-center rounded-full bg-secondary text-muted-foreground hover:text-primary transition">

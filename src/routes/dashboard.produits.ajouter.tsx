@@ -158,7 +158,8 @@ const SPEC_EXAMPLES: Record<string, string> = {
   "Zone couverte": "Douala, Yaoundé",
 };
 
-type Attr = { name: string; values: string[] };
+/** prices : prix facultatif par valeur (ex. { "Noir": "15000" }) ; vide = prix de base du produit */
+type Attr = { name: string; values: string[]; prices?: Record<string, string> };
 type Spec = { name: string; value: string };
 type Variant = { id: string; combo: Record<string, string>; price: string; stock: string; sku: string };
 type BundleItem = { product_id?: string; name: string; qty: string };
@@ -392,7 +393,7 @@ function AddProductPage() {
       const i = prev.findIndex((a) => a.name.toLowerCase() === name.toLowerCase());
       if (i >= 0) {
         const merged = Array.from(new Set([...prev[i]!.values, ...values]));
-        return prev.map((a, j) => (j === i ? { name, values: merged } : a));
+        return prev.map((a, j) => (j === i ? { ...a, name, values: merged } : a));
       }
       return [...prev, { name, values }];
     });
@@ -677,30 +678,46 @@ function AddProductPage() {
                   <h3 className="font-bold mb-4">Attributs {type === "variable" && <span className="text-xs text-primary font-normal">(génèrent les variantes)</span>}</h3>
                   {attrs.length > 0 && (
                     <div className="space-y-2 mb-4">
-                      {attrs.map((a, i) => (
-                        <div key={i} className="border border-border rounded-xl p-3 flex items-center gap-3">
-                          <div className="flex-1">
-                            <p className="font-semibold text-sm">{a.name}</p>
-                            <div className="flex flex-wrap gap-1 mt-1">
-                              {a.values.map((v) => {
-                                if (isColorAttr(a.name)) {
-                                  return (
-                                    <span key={v} className="flex items-center gap-1.5 rounded-full bg-secondary py-0.5 pl-0.5 pr-2 text-xs">
-                                      <ColorSwatch value={v} size={18} /> {colorParts(v).name}
-                                    </span>
-                                  );
-                                }
-                                return (
-                                  <span key={v} className="px-2 py-0.5 rounded-full bg-secondary text-xs flex items-center gap-1">
-                                    {v}
-                                  </span>
-                                );
-                              })}
+                      {attrs.map((a, i) => {
+                        const setPrice = (v: string, price: string) =>
+                          setAttrs(attrs.map((x, j) => (j === i ? { ...x, prices: { ...(x.prices ?? {}), [v]: price.replace(/[^0-9]/g, "") } } : x)));
+                        const removeValue = (v: string) =>
+                          setAttrs(attrs.flatMap((x, j) => {
+                            if (j !== i) return [x];
+                            const values = x.values.filter((y) => y !== v);
+                            const prices = { ...(x.prices ?? {}) }; delete prices[v];
+                            return values.length ? [{ ...x, values, prices }] : [];
+                          }));
+                        return (
+                          <div key={i} className="border border-border rounded-xl p-3">
+                            <div className="flex items-center gap-3">
+                              <p className="flex-1 font-semibold text-sm">{a.name}</p>
+                              <button onClick={() => setAttrs(attrs.filter((_, j) => j !== i))} className="w-7 h-7 grid place-items-center rounded-lg bg-destructive/10 text-destructive" aria-label={`Supprimer ${a.name}`}><Trash2 size={12} /></button>
+                            </div>
+                            <p className="mt-0.5 text-[11px] text-muted-foreground">Prix différent pour une valeur ? Indiquez-le ; laissez vide pour garder le prix du produit{priceNum > 0 ? ` (${priceNum.toLocaleString("fr-FR")} FCFA)` : ""}.</p>
+                            <div className="mt-2 grid gap-1.5 sm:grid-cols-2">
+                              {a.values.map((v) => (
+                                <div key={v} className="flex items-center gap-2 rounded-lg bg-secondary/60 py-1 pl-1.5 pr-1">
+                                  {isColorAttr(a.name) ? <ColorSwatch value={v} size={18} /> : null}
+                                  <span className="min-w-0 flex-1 truncate text-xs font-medium">{isColorAttr(a.name) ? colorParts(v).name : v}</span>
+                                  <div className="relative w-28 shrink-0">
+                                    <input
+                                      inputMode="numeric"
+                                      value={a.prices?.[v] ?? ""}
+                                      onChange={(e) => setPrice(v, e.target.value)}
+                                      placeholder={priceNum > 0 ? String(priceNum) : "Prix"}
+                                      aria-label={`Prix pour ${v}`}
+                                      className="h-8 w-full rounded-lg border border-border bg-background pl-2 pr-11 text-xs"
+                                    />
+                                    <span className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground">FCFA</span>
+                                  </div>
+                                  <button onClick={() => removeValue(v)} className="grid h-6 w-6 shrink-0 place-items-center rounded text-muted-foreground hover:text-destructive" aria-label={`Retirer ${v}`}><X size={12} /></button>
+                                </div>
+                              ))}
                             </div>
                           </div>
-                          <button onClick={() => setAttrs(attrs.filter((_, j) => j !== i))} className="w-7 h-7 grid place-items-center rounded-lg bg-destructive/10 text-destructive"><Trash2 size={12} /></button>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   )}
                   {(() => {

@@ -53,6 +53,15 @@ function DashboardOverview() {
     return () => { alive = false; window.clearInterval(t); };
   }, []);
 
+  // Salutation selon l'heure du téléphone/ordinateur du vendeur (calculée côté navigateur)
+  const [greeting, setGreeting] = useState("Bonjour");
+  useEffect(() => {
+    const update = () => setGreeting(greetingFor(new Date().getHours()));
+    update();
+    const t = window.setInterval(update, 60_000);
+    return () => window.clearInterval(t);
+  }, []);
+
   const cards = stats ? [
     { icon: Wallet, color: "text-emerald-400 bg-emerald-500/10", label: "Chiffre d'affaires", value: money(stats.revenue), t: trend(stats.revenue, stats.revenue_prev) },
     { icon: ShoppingCart, color: "text-blue-400 bg-blue-500/10", label: "Commandes", value: num(stats.orders), t: trend(stats.orders, stats.orders_prev) },
@@ -61,7 +70,7 @@ function DashboardOverview() {
   ] : [];
 
   return (
-    <DashboardLayout title={`Bonjour, ${name}! 👋`} subtitle="Voici l'activité réelle de votre boutique">
+    <DashboardLayout title={`${greeting}, ${name}! 👋`} subtitle="Voici l'activité réelle de votre boutique">
       {/* Période */}
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
         <div className="flex rounded-full bg-secondary p-1 text-xs">
@@ -319,4 +328,11 @@ function Conversions({ stats, period }: { stats: SellerStats; period: string }) 
       </div>
     </div>
   );
+}
+
+/** Bonjour de 3 h à 12 h 59 · Bon après-midi de 13 h à 15 h 59 · Bonsoir de 16 h à 2 h 59 */
+function greetingFor(hour: number) {
+  if (hour >= 3 && hour < 13) return "Bonjour";
+  if (hour >= 13 && hour < 16) return "Bon après-midi";
+  return "Bonsoir";
 }

@@ -90,27 +90,40 @@ export function dateTime(iso: string) {
 
 /** Signalé quand le vendeur ouvre la page Commandes (le compteur du menu disparaît). */
 export const ORDERS_SEEN_EVENT = "amashia:orders-seen";
+export const REVIEWS_SEEN_EVENT = "amashia:reviews-seen";
 
 /** Compteurs du menu : produits signalés non traités et nouvelles commandes depuis la dernière visite. */
-export function useNavBadges(refreshMs = 60_000) {
-  const [badges, setBadges] = useState<{ reports: number; orders: number }>({ reports: 0, orders: 0 });
+export function useNavBadges(refreshMs = 20_000) {
+  const [badges, setBadges] = useState<{ reports: number; orders: number; reviews: number }>({ reports: 0, orders: 0, reviews: 0 });
   useEffect(() => {
     let alive = true;
     const load = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
       const db = supabase as any;
-      const [r, o] = await Promise.all([
-        db.from("product_reports").select("id", { count: "exact", head: true }).eq("seller_id", user.id).eq("status", "pending"),
-        db.rpc("seller_new_orders_count"),
-      ]);
-      // commandes reçues depuis la dernière visite de la page Commandes
-      if (alive) setBadges({ reports: r.count ?? 0, orders: Number(o.data ?? 0) });
+      try {
+        const [r, o, v] = await Promise.all([
+          db.from("product_reports").select("id", { count: "exact", head: true }).eq("seller_id", user.id).eq("status", "pending"),
+          db.rpc("seller_new_orders_count"),
+          db.rpc("seller_new_reviews_count"),
+        ]);
+        // commandes et avis reçus depuis la dernière visite des pages Commandes / Avis
+        if (alive) setBadges({ reports: r.count ?? 0, orders: Number(o.data ?? 0), reviews: Number(v.data ?? 0) });
+      } catch { /* coupure réseau : nouvel essai au prochain passage */ }
     };
     void load();
     const t = window.setInterval(load, refreshMs);
+    // les nouveaux avis/commandes apparaissent quasi en direct (toutes les 20 s, et au retour sur l'onglet)
+    const onFocus = () => void load();
     window.addEventListener(ORDERS_SEEN_EVENT, load);
-    return () => { alive = false; window.clearInterval(t); window.removeEventListener(ORDERS_SEEN_EVENT, load); };
+    window.addEventListener(REVIEWS_SEEN_EVENT, load);
+    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onFocus);
+    return () => {
+      alive = false; window.clearInterval(t);
+      window.removeEventListener(ORDERS_SEEN_EVENT, load); window.removeEventListener(REVIEWS_SEEN_EVENT, load);
+      window.removeEventListener("focus", onFocus); document.removeEventListener("visibilitychange", onFocus);
+    };
   }, [refreshMs]);
   return badges;
 }

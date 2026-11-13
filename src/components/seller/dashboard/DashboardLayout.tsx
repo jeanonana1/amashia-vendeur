@@ -87,7 +87,7 @@ export function DashboardLayout({ title, subtitle, children }: { title: string; 
         {NAV.map((item) => {
           const Icon = item.icon;
           const active = path === item.to || (item.to !== "/dashboard" && path.startsWith(item.to));
-          const badge = item.to === "/dashboard/signalements" ? badges.reports : item.to === "/dashboard/commandes" ? badges.orders : 0;
+          const badge = item.to === "/dashboard/signalements" ? badges.reports : item.to === "/dashboard/commandes" ? badges.orders : item.to === "/dashboard/avis" ? badges.reviews : 0;
           return (
             <Link key={item.to} to={item.to} className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition ${active ? "bg-primary/15 text-primary font-semibold" : "text-muted-foreground hover:bg-secondary hover:text-foreground"}`}>
               <Icon size={18} />

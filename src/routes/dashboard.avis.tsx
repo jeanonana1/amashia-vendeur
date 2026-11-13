@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { DashboardLayout } from "@/components/seller/dashboard/DashboardLayout";
 import { Star, MessageSquare, BadgeCheck, Search } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { dateTime, num } from "@/lib/sellerStats";
+import { dateTime, num, REVIEWS_SEEN_EVENT } from "@/lib/sellerStats";
 
 export const Route = createFileRoute("/dashboard/avis")({
   head: () => ({ meta: [{ title: "Avis — Amashia Seller" }, { name: "description", content: "Avis : votre espace vendeur Amashia pour gérer votre activité." }, { property: "og:title", content: "Avis — Amashia Seller" }, { property: "og:description", content: "Avis : votre espace vendeur Amashia pour gérer votre activité." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
@@ -31,6 +31,18 @@ function AvisPage() {
   const [filter, setFilter] = useState<number | null>(null);
   const [product, setProduct] = useState<string>("");
   const [q, setQ] = useState("");
+
+  // date de la visite précédente : les avis reçus depuis sont marqués « Nouveau » ; la pastille du menu disparaît
+  const [seenBefore, setSeenBefore] = useState<string | null | undefined>(undefined);
+  useEffect(() => {
+    void (async () => {
+      try {
+        const { data } = await (supabase as any).rpc("mark_reviews_seen");
+        setSeenBefore((data as string | null) ?? null);
+      } catch { setSeenBefore(null); }
+      window.dispatchEvent(new Event(REVIEWS_SEEN_EVENT));
+    })();
+  }, []);
 
   useEffect(() => {
     let alive = true;
@@ -124,7 +136,12 @@ function AvisPage() {
                     <span className="text-sm font-semibold">{r.author}</span>
                     {r.verified && <span className="flex items-center gap-1 rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-semibold text-emerald-400"><BadgeCheck size={11} /> Achat vérifié</span>}
                   </div>
-                  <p className="text-[11px] text-muted-foreground">Publié le {dateTime(r.created_at)}</p>
+                  <p className="text-[11px] text-muted-foreground">
+                    Publié le {dateTime(r.created_at)}
+                    {seenBefore !== undefined && (seenBefore === null || r.created_at > seenBefore) && (
+                      <span className="ml-2 rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold text-white">Nouveau</span>
+                    )}
+                  </p>
                   {r.comment && <p className="mt-2 whitespace-pre-line text-sm">{r.comment}</p>}
                   {Array.isArray(r.photos) && r.photos.length > 0 && (
                     <div className="mt-2 flex gap-2">

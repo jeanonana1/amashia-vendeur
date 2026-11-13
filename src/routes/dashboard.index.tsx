@@ -77,7 +77,7 @@ function DashboardOverview() {
         )}
       </div>
 
-      {error && <p className="mb-4 rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-400">Impossible de charger vos statistiques : {error}</p>}
+      {error && !stats && <p className="mb-4 rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-400">Connexion impossible pour le moment. Nouvel essai automatique dans une minute…</p>}
 
       {/* Indicateurs */}
       <div className="mb-6 grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-4">

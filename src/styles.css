@@ -142,3 +142,23 @@
 .animate-float { animation: float 6s ease-in-out infinite; }
 .animate-glow-pulse { animation: glow-pulse 3s ease-in-out infinite; }
 .animate-bounce-arrow { animation: bounce-arrow 2s ease-in-out infinite; }
+
+/* Récapitulatif des commandes : apparition douce, halo léger s'il y a de nouvelles commandes */
+.summary-backdrop { animation: summary-fade 0.35s ease-out both; }
+.summary-card { animation: summary-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.summary-card--new { animation: summary-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) both, summary-glow 2.8s ease-in-out 0.6s infinite; }
+.summary-bag { animation: summary-bob 2.4s ease-in-out 0.6s infinite; }
+.summary-new { animation: summary-rise 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.35s both; }
+.new-order-badge { animation: badge-breathe 2.2s ease-in-out infinite; }
+@keyframes summary-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes summary-in { from { opacity: 0; transform: translateY(14px) scale(0.96); } to { opacity: 1; transform: none; } }
+@keyframes summary-rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes summary-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 106, 0, 0); }
+  50% { box-shadow: 0 0 28px 2px rgba(255, 106, 0, 0.28); }
+}
+@keyframes summary-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+@keyframes badge-breathe { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+@media (prefers-reduced-motion: reduce) {
+  .summary-backdrop, .summary-card, .summary-card--new, .summary-bag, .summary-new, .new-order-badge { animation: none; }
+}

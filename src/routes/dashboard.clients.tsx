@@ -36,10 +36,13 @@ function ClientsPage() {
   useEffect(() => {
     let alive = true;
     const load = async () => {
-      const { data, error } = await (supabase as any).rpc("seller_customers");
+      let data: unknown = null; let error: { message: string } | null = null;
+      try { ({ data, error } = await (supabase as any).rpc("seller_customers")); } catch (e) { error = { message: (e as Error).message }; }
       if (!alive) return;
+      // une coupure réseau passagère (veille du téléphone, changement de page…) n'efface pas les données
+      // déjà affichées et le message disparaît dès que la connexion revient
       if (error) setError(error.message);
-      else setClients((data as Client[]) || []);
+      else { setClients((data as Client[]) || []); setError(null); }
     };
     void load();
     const t = window.setInterval(load, 60_000);
@@ -83,7 +86,7 @@ function ClientsPage() {
           </select>
         </div>
 
-        {error && <p className="py-6 text-center text-sm text-red-400">Chargement impossible : {error}</p>}
+        {error && clients === null && <p className="py-6 text-center text-sm text-red-400">Connexion impossible pour le moment. Nouvel essai automatique dans quelques secondes…</p>}
         {clients === null && !error && <div className="h-40 animate-pulse rounded-xl bg-secondary/40" />}
         {clients && list.length === 0 && (
           <p className="py-10 text-center text-sm text-muted-foreground">

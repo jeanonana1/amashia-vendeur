@@ -113,7 +113,7 @@ function AnalytiquePage() {
         {loading && <span className="text-xs text-muted-foreground">Mise à jour…</span>}
       </div>
 
-      {error && <p className="mb-4 rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-400">Chargement impossible : {error}</p>}
+      {error && !data && <p className="mb-4 rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-400">Connexion impossible pour le moment. Nouvel essai automatique dans une minute…</p>}
 
       <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
         {(data ? kpis : Array.from({ length: 8 })).map((k, i) =>

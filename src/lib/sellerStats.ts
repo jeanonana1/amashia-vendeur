@@ -48,7 +48,9 @@ export function useSellerStats(days: number, refreshMs = 60_000) {
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
-    const { data, error } = await (supabase as any).rpc("seller_dashboard_stats", { _days: days });
+    let data: unknown = null; let error: { message: string } | null = null;
+    try { ({ data, error } = await (supabase as any).rpc("seller_dashboard_stats", { _days: days })); }
+    catch (e) { error = { message: (e as Error).message }; }
     if (error) setError(error.message);
     else { setStats(data as SellerStats | null); setError(null); }
     setLoading(false);
@@ -86,7 +88,10 @@ export function dateTime(iso: string) {
   return `${l.getUTCDate()} ${MOIS[l.getUTCMonth()]} ${l.getUTCFullYear()} à ${String(l.getUTCHours()).padStart(2, "0")}h${String(l.getUTCMinutes()).padStart(2, "0")}`;
 }
 
-/** Compteurs du menu : produits signalés non traités et commandes en attente. */
+/** Signalé quand le vendeur ouvre la page Commandes (le compteur du menu disparaît). */
+export const ORDERS_SEEN_EVENT = "amashia:orders-seen";
+
+/** Compteurs du menu : produits signalés non traités et nouvelles commandes depuis la dernière visite. */
 export function useNavBadges(refreshMs = 60_000) {
   const [badges, setBadges] = useState<{ reports: number; orders: number }>({ reports: 0, orders: 0 });
   useEffect(() => {
@@ -97,13 +102,15 @@ export function useNavBadges(refreshMs = 60_000) {
       const db = supabase as any;
       const [r, o] = await Promise.all([
         db.from("product_reports").select("id", { count: "exact", head: true }).eq("seller_id", user.id).eq("status", "pending"),
-        db.from("seller_orders").select("id", { count: "exact", head: true }).eq("status", "pending"),
+        db.rpc("seller_new_orders_count"),
       ]);
-      if (alive) setBadges({ reports: r.count ?? 0, orders: o.count ?? 0 });
+      // commandes reçues depuis la dernière visite de la page Commandes
+      if (alive) setBadges({ reports: r.count ?? 0, orders: Number(o.data ?? 0) });
     };
     void load();
     const t = window.setInterval(load, refreshMs);
-    return () => { alive = false; window.clearInterval(t); };
+    window.addEventListener(ORDERS_SEEN_EVENT, load);
+    return () => { alive = false; window.clearInterval(t); window.removeEventListener(ORDERS_SEEN_EVENT, load); };
   }, [refreshMs]);
   return badges;
 }

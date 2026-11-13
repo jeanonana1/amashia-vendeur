@@ -7,7 +7,7 @@ import { marketplaceProductUrl } from "@/lib/sellerProfile";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { ORDER_FIELDS, ORDER_STATUS, OrderDetailModal, colorName, type SellerOrderLine } from "@/components/seller/dashboard/OrderDetailModal";
-import { dateTime } from "@/lib/sellerStats";
+import { ORDERS_SEEN_EVENT, dateTime } from "@/lib/sellerStats";
 import { X } from "lucide-react";
 
 export const Route = createFileRoute("/dashboard/commandes")({
@@ -38,6 +38,16 @@ function CommandesPage() {
   // récapitulatif affiché à l'arrivée sur la page
   const [summaryOpen, setSummaryOpen] = useState(false);
   const summaryShown = useRef(false);
+  // date de la visite précédente : les commandes reçues depuis sont marquées « Nouveau »
+  const [seenBefore, setSeenBefore] = useState<string | null | undefined>(undefined);
+  useEffect(() => {
+    void (async () => {
+      const { data } = await (supabase as any).rpc("mark_orders_seen");
+      setSeenBefore((data as string | null) ?? null);
+      window.dispatchEvent(new Event(ORDERS_SEEN_EVENT)); // le compteur du menu disparaît
+    })();
+  }, []);
+  const isNew = (o: SellerOrderLine) => seenBefore !== undefined && (seenBefore === null || o.created_at > seenBefore);
 
   async function load() {
     const { data: { user } } = await supabase.auth.getUser();
@@ -105,7 +115,10 @@ function CommandesPage() {
                     {order.product_image ? <img src={order.product_image} alt="" className="h-full w-full object-cover" /> : <div className="grid h-full w-full place-items-center bg-secondary"><ShoppingBag size={18} className="text-muted-foreground" /></div>}
                   </div>
                   <div className="min-w-0">
-                    <p className="font-bold">{order.order_number}</p>
+                    <p className="flex flex-wrap items-center gap-2 font-bold">
+                      {order.order_number}
+                      {isNew(order) && <span className="new-order-badge rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white">Nouveau</span>}
+                    </p>
                     <p className="line-clamp-1 text-sm font-medium">{order.product_title}</p>
                     {(order.color || order.options) && <p className="text-xs text-primary">{[order.color ? `Couleur : ${colorName(order.color)}` : "", order.options ?? ""].filter(Boolean).join(" · ")}</p>}
                     <p className="text-xs text-muted-foreground">{order.customer_name}{order.delivery_area ? ` (${order.delivery_area})` : ""} · {order.quantity} article{order.quantity > 1 ? "s" : ""}</p>
@@ -127,13 +140,32 @@ function CommandesPage() {
 
       {openOrder && <OrderDetailModal line={openOrder} onClose={() => setOpenOrder(null)} onChanged={() => void load()} />}
 
-      {summaryOpen && <OrdersSummary orders={orders} onClose={() => setSummaryOpen(false)} />}
+      {summaryOpen && seenBefore !== undefined && (
+        <OrdersSummary orders={orders} newOrders={new Set(orders.filter(isNew).map((o) => o.order_id)).size} onClose={() => setSummaryOpen(false)} />
+      )}
     </DashboardLayout>
   );
 }
 
 /** Récapitulatif affiché à l'arrivée : nombre de commandes reçues et leur état. */
-function OrdersSummary({ orders, onClose }: { orders: SellerOrderLine[]; onClose: () => void }) {
+/** Nombre qui monte doucement de 0 à la valeur (≈ 0,9 s, ralenti à la fin). */
+function useCountUp(target: number, ms = 900) {
+  const [v, setV] = useState(0);
+  useEffect(() => {
+    if (target <= 0) { setV(0); return; }
+    let raf = 0; const start = performance.now();
+    const tick = (t: number) => {
+      const k = Math.min(1, (t - start) / ms);
+      setV(Math.round(target * (1 - Math.pow(1 - k, 3))));
+      if (k < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [target, ms]);
+  return v;
+}
+
+function OrdersSummary({ orders, newOrders, onClose }: { orders: SellerOrderLine[]; newOrders: number; onClose: () => void }) {
   const byOrder = new Map<string, string[]>();
   for (const o of orders) byOrder.set(o.order_id, [...(byOrder.get(o.order_id) ?? []), o.status]);
   const total = byOrder.size;
@@ -143,14 +175,21 @@ function OrdersSummary({ orders, onClose }: { orders: SellerOrderLine[]; onClose
   const rows = [
     ["pending", "À traiter"], ["preparing", "En préparation"], ["shipped", "Expédiés"], ["delivered", "Livrés"], ["cancelled", "Annulés"],
   ] as const;
+  const shownTotal = useCountUp(total);
+  const shownNew = useCountUp(newOrders, 1100);
   return (
-    <div className="fixed inset-0 z-[110] grid place-items-center bg-black/60 p-4 backdrop-blur-sm" onClick={onClose}>
-      <div className="w-full max-w-sm rounded-2xl border border-border bg-card p-6 text-center" onClick={(e) => e.stopPropagation()}>
+    <div className="summary-backdrop fixed inset-0 z-[110] grid place-items-center bg-black/60 p-4 backdrop-blur-sm" onClick={onClose}>
+      <div className={`summary-card w-full max-w-sm rounded-2xl border bg-card p-6 text-center ${newOrders > 0 ? "summary-card--new border-primary/40" : "border-border"}`} onClick={(e) => e.stopPropagation()}>
         <button onClick={onClose} className="float-right -mr-2 -mt-2 grid h-8 w-8 place-items-center rounded-full hover:bg-secondary" aria-label="Fermer"><X size={16} /></button>
-        <div className="mx-auto mb-3 grid h-14 w-14 place-items-center rounded-2xl bg-primary/15 text-primary"><ShoppingBag size={26} /></div>
+        <div className={`mx-auto mb-3 grid h-14 w-14 place-items-center rounded-2xl bg-primary/15 text-primary ${newOrders > 0 ? "summary-bag" : ""}`}><ShoppingBag size={26} /></div>
         <p className="text-sm text-muted-foreground">Vous avez reçu</p>
-        <p className="text-5xl font-extrabold">{total}</p>
+        <p className="text-5xl font-extrabold tabular-nums">{shownTotal}</p>
         <p className="mb-4 text-sm font-semibold">commande{total > 1 ? "s" : ""} au total</p>
+        {newOrders > 0 && (
+          <p className="summary-new mb-3 rounded-full bg-primary/15 px-3 py-1.5 text-sm font-bold text-primary">
+            ✨ {shownNew} nouvelle{newOrders > 1 ? "s" : ""} commande{newOrders > 1 ? "s" : ""} depuis votre dernière visite
+          </p>
+        )}
         {todayOrders > 0 && <p className="mb-4 rounded-full bg-emerald-500/15 px-3 py-1 text-xs font-semibold text-emerald-400">dont {todayOrders} aujourd'hui 🎉</p>}
         <div className="grid grid-cols-2 gap-2 text-left text-sm">
           {rows.map(([k, label]) => (

@@ -34,15 +34,21 @@ function AvisPage() {
   useEffect(() => {
     let alive = true;
     const load = async () => {
-      const { data, error } = await (supabase as any).rpc("seller_reviews");
+      let data: unknown = null; let error: { message: string } | null = null;
+      try { ({ data, error } = await (supabase as any).rpc("seller_reviews")); } catch (e) { error = { message: (e as Error).message }; }
       if (!alive) return;
+      // une coupure réseau passagère (veille du téléphone, changement de page…) n'efface pas les données
+      // déjà affichées et le message disparaît dès que la connexion revient
       if (error) setError(error.message);
-      else setReviews((data as Review[]) || []);
+      else { setReviews((data as Review[]) || []); setError(null); }
     };
     void load();
     // nouveaux avis affichés automatiquement (toutes les 30 secondes)
     const t = window.setInterval(load, 30_000);
-    return () => { alive = false; window.clearInterval(t); };
+    const onOnline = () => void load();
+    window.addEventListener("online", onOnline);
+    window.addEventListener("focus", onOnline);
+    return () => { alive = false; window.clearInterval(t); window.removeEventListener("online", onOnline); window.removeEventListener("focus", onOnline); };
   }, []);
 
   const all = reviews ?? [];
@@ -94,7 +100,7 @@ function AvisPage() {
           )}
         </div>
 
-        {error && <p className="py-6 text-center text-sm text-red-400">Chargement impossible : {error}</p>}
+        {error && reviews === null && <p className="py-6 text-center text-sm text-red-400">Connexion impossible pour le moment. Nouvel essai automatique dans quelques secondes…</p>}
         {reviews === null && !error && <div className="h-40 animate-pulse rounded-xl bg-secondary/40" />}
         {reviews && list.length === 0 && (
           <p className="flex flex-col items-center gap-2 py-12 text-center text-sm text-muted-foreground">

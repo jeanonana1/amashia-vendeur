@@ -164,11 +164,11 @@ function BoutiquePage() {
       {/* Header card */}
       <div className="bg-card border border-border rounded-2xl overflow-hidden mb-6">
         <div
-          className="relative h-48 md:h-56 bg-gradient-primary bg-center bg-cover"
+          className="relative h-56 sm:h-64 md:h-80 bg-gradient-primary bg-center bg-cover"
           style={profile?.shop_banner_url ? { backgroundImage: `url(${profile.shop_banner_url})` } : undefined}
         >
           <div className="absolute bottom-4 right-4 flex items-center gap-2">
-            <span className="hidden md:inline px-3 py-1.5 rounded-full bg-black/60 backdrop-blur text-white text-[11px]">Recommandé : 1600 × 480 px • &lt; 5 Mo</span>
+            <span className="hidden md:inline px-3 py-1.5 rounded-full bg-black/60 backdrop-blur text-white text-[11px]">Recommandé : 1600 × 600 px (réduite automatiquement)</span>
             <button
               onClick={() => bannerInput.current?.click()}
               disabled={uploading === "banner"}
@@ -210,7 +210,7 @@ function BoutiquePage() {
             <p className="text-[10px] text-muted-foreground text-center mt-2">Logo carré 512×512 px</p>
           </div>
 
-          <div className="flex-1 min-w-0">
+          <div className="flex-1 min-w-0 md:pt-3">
             <div className="flex flex-wrap items-center gap-3">
               <h2 className="text-2xl font-extrabold truncate">{profile?.shop_name || form.shop_name}</h2>
               {stats?.shop && (

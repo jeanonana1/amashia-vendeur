@@ -215,28 +215,55 @@ function label(at: string, grain: Grain) {
   return d.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit" });
 }
 
+/** Arrondit vers le haut à une valeur « ronde » (1, 2, 2,5, 5 × 10ⁿ) pour l'axe. */
+function niceMax(v: number) {
+  if (v <= 0) return 1000;
+  const p = Math.pow(10, Math.floor(Math.log10(v)));
+  for (const m of [1, 2, 2.5, 5, 10]) if (m * p >= v) return m * p;
+  return 10 * p;
+}
+/** 100 000 -> « 100K », 1 500 000 -> « 1,5M ». */
+function compact(n: number) {
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(n % 1_000_000 ? 1 : 0).replace(".", ",")}M`;
+  if (n >= 1_000) return `${(n / 1_000).toFixed(n % 1_000 ? 1 : 0).replace(".", ",")}K`;
+  return String(Math.round(n));
+}
+
 function SalesChart({ data }: { data: Analytics }) {
   const [hover, setHover] = useState<number | null>(null);
   const s = data.series;
-  const maxR = Math.max(1, ...s.map((p) => p.revenue));
+  // 4 intervalles « ronds » : 0, 2K, 4K, 6K, 8K… (au moins 1 000 FCFA par graduation)
+  const stepR = Math.max(1000, niceMax(Math.max(0, ...s.map((p) => p.revenue)) / 4));
+  const maxR = stepR * 4;
   const maxV = Math.max(1, ...s.map((p) => p.visits));
+  const ticks = [0, 0.25, 0.5, 0.75, 1];
   const w = 100, h = 60, bw = (w / Math.max(1, s.length)) * 0.6;
   const x = (i: number) => (i + 0.5) * (w / Math.max(1, s.length));
+  const y = (v: number) => h - (v / maxR) * h;
   const empty = s.every((p) => !p.revenue && !p.visits);
   const step = Math.max(1, Math.ceil(s.length / 10));
   const hp = hover !== null ? s[hover] : null;
   return (
-    <div className="relative h-64">
-      <svg viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" className="h-[85%] w-full"
-        onMouseLeave={() => setHover(null)}
-        onMouseMove={(e) => { const r = (e.currentTarget as SVGSVGElement).getBoundingClientRect(); setHover(Math.max(0, Math.min(s.length - 1, Math.floor(((e.clientX - r.left) / r.width) * s.length)))); }}>
-        {[0.25, 0.5, 0.75].map((g) => <line key={g} x1="0" x2={w} y1={h * g} y2={h * g} stroke="currentColor" strokeWidth="0.15" className="text-border" />)}
-        {s.map((p, i) => (
-          <rect key={p.at} x={x(i) - bw / 2} y={h - (p.revenue / maxR) * (h - 4)} width={bw} height={(p.revenue / maxR) * (h - 4)} rx="0.6" className={hover === i ? "fill-primary" : "fill-primary/70"} />
-        ))}
-        <path d={s.map((p, i) => `${i ? "L" : "M"}${x(i)},${h - (p.visits / maxV) * (h - 4)}`).join(" ")} stroke="oklch(0.75 0.13 230)" strokeWidth="0.7" fill="none" vectorEffect="non-scaling-stroke" />
-      </svg>
-      <div className="mt-2 flex justify-between text-[10px] text-muted-foreground">
+    <div className="relative h-72">
+      <div className="flex h-[85%] gap-2">
+        {/* Axe vertical : montants des ventes (FCFA) */}
+        <div className="relative w-11 shrink-0 text-right text-[10px] text-muted-foreground">
+          {ticks.map((t) => (
+            <span key={t} className="absolute right-0 -translate-y-1/2 tabular-nums" style={{ top: `${(1 - t) * 100}%` }}>{compact(maxR * t)}</span>
+          ))}
+          <span className="absolute -left-1 top-1/2 -translate-y-1/2 -rotate-90 whitespace-nowrap text-[9px] uppercase tracking-wide opacity-70">FCFA</span>
+        </div>
+        <svg viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" className="h-full min-w-0 flex-1 overflow-visible border-b border-l border-border"
+          onMouseLeave={() => setHover(null)}
+          onMouseMove={(e) => { const r = (e.currentTarget as SVGSVGElement).getBoundingClientRect(); setHover(Math.max(0, Math.min(s.length - 1, Math.floor(((e.clientX - r.left) / r.width) * s.length)))); }}>
+          {ticks.slice(1).map((t) => <line key={t} x1="0" x2={w} y1={h * (1 - t)} y2={h * (1 - t)} stroke="currentColor" strokeWidth="0.15" strokeDasharray="0.8 0.8" className="text-border" />)}
+          {s.map((p, i) => (
+            <rect key={p.at} x={x(i) - bw / 2} y={y(p.revenue)} width={bw} height={h - y(p.revenue)} rx="0.6" className={hover === i ? "fill-primary" : "fill-primary/70"} />
+          ))}
+          <path d={s.map((p, i) => `${i ? "L" : "M"}${x(i)},${h - (p.visits / maxV) * (h - 4)}`).join(" ")} stroke="oklch(0.75 0.13 230)" strokeWidth="0.7" fill="none" vectorEffect="non-scaling-stroke" />
+        </svg>
+      </div>
+      <div className="ml-[3.25rem] mt-2 flex justify-between text-[10px] text-muted-foreground">
         {s.map((p, i) => (i % step === 0 || i === s.length - 1 ? <span key={p.at}>{label(p.at, data.grain)}</span> : null))}
       </div>
       {empty && <p className="absolute inset-x-0 top-1/3 text-center text-sm text-muted-foreground">Pas encore d'activité sur cette période.</p>}

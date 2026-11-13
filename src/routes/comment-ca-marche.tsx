@@ -20,21 +20,21 @@ const steps = [
     title: "Créez votre boutique",
     desc: "Inscrivez-vous gratuitement en quelques secondes. Renseignez les informations de base de votre entreprise et personnalisez l'apparence de votre boutique selon vos préférences.",
     items: ["Inscription rapide et gratuite", "Configuration guidée étape par étape", "Personnalisation du design", "Ajout de votre logo et couleurs"],
-    img: "/images/visual-338f4c83c902.jpg",
+    img: "/images/visual-338f4c83c902.webp",
   },
   {
     n: "02",
     title: "Ajoutez vos produits ou services",
     desc: "Importez facilement vos produits avec photos, descriptions détaillées et prix. Organisez-les par catégories et gérez vos stocks en temps réel pour une meilleure visibilité.",
     items: ["Upload de photos multiples", "Descriptions détaillées", "Gestion des variations", "Suivi des stocks automatique"],
-    img: "/images/visual-c8118462b524.jpg",
+    img: "/images/visual-c8118462b524.webp",
   },
   {
     n: "03",
     title: "Recevez les commandes et soyez payé",
     desc: "Vos clients découvrent vos produits et passent commande directement. Vous recevez des notifications instantanées, gérez les livraisons et recevez vos paiements de manière sécurisée.",
     items: ["Notifications en temps réel", "Gestion des commandes simplifiée", "Paiements sécurisés", "Suivi de livraison intégré"],
-    img: "/images/visual-a2961a58018a.jpg",
+    img: "/images/visual-a2961a58018a.webp",
   },
 ];
 
@@ -75,7 +75,7 @@ function Page() {
                 </div>
                 <div className="relative">
                   <div className="absolute -inset-6 bg-primary/20 blur-3xl rounded-full" />
-                  <img src={s.img} alt={s.title} className="relative rounded-3xl shadow-elegant w-full" />
+                  <img src={s.img} alt={s.title} loading="lazy" decoding="async" className="relative rounded-3xl shadow-elegant w-full" />
                 </div>
               </div>
             ))}

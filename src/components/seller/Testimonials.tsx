@@ -6,21 +6,21 @@ const testimonials = [
     role: "Propriétaire de boutique de mode",
     location: "Dakar, Sénégal",
     text: "Amashia Seller a transformé mon activité. En trois mois, mes ventes ont triplé et je peux maintenant gérer ma boutique depuis mon téléphone. C'est incroyablement simple et efficace.",
-    img: "/images/visual-36929e5ea498.jpg",
+    img: "/images/visual-36929e5ea498.webp",
   },
   {
     name: "Kwame Mensah",
     role: "Restaurateur",
     location: "Accra, Ghana",
     text: "Grâce à cette plateforme, j'ai pu digitaliser mon restaurant et recevoir des commandes en ligne. Le système de paiement est sécurisé et les clients adorent la facilité de commande.",
-    img: "/images/visual-e7ad3f34f225.jpg",
+    img: "/images/visual-e7ad3f34f225.webp",
   },
   {
     name: "Fatou Ndiaye",
     role: "Salon de coiffure",
     location: "Abidjan, Côte d'Ivoire",
     text: "Mes clientes peuvent maintenant réserver leurs rendez-vous en ligne et voir mes créations. J'ai gagné tellement de temps et mes revenus ont augmenté de 150% en six mois.",
-    img: "/images/visual-e0633f9978b6.jpg",
+    img: "/images/visual-e0633f9978b6.webp",
   },
 ];
 
@@ -40,7 +40,7 @@ export function Testimonials() {
           {testimonials.map((t) => (
             <div key={t.name} className="bg-card border border-border rounded-3xl overflow-hidden hover:border-primary/50 transition">
               <div className="aspect-[4/5] relative overflow-hidden">
-                <img src={t.img} alt={t.name} className="w-full h-full object-cover" />
+                <img src={t.img} alt={t.name} loading="lazy" decoding="async" className="w-full h-full object-cover" />
                 <div className="absolute inset-0 bg-gradient-to-t from-card to-transparent" />
                 <div className="absolute top-4 right-4 inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-primary/90 text-white text-xs font-medium">
                   <BadgeCheck size={14} /> Vérifié

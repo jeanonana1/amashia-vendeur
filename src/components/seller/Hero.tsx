@@ -1,14 +1,14 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, Users, ShieldCheck, ArrowDown } from "lucide-react";
 
-const HERO_BG = "/images/visual-a27356eba9dd.jpg";
-const DASHBOARD = "/images/visual-b7d6e0307252.jpg";
+const HERO_BG = "/images/visual-a27356eba9dd.webp";
+const DASHBOARD = "/images/visual-b7d6e0307252.webp";
 
 export function Hero() {
   return (
     <section className="relative overflow-hidden">
       <div className="absolute inset-0 -z-10">
-        <img src={HERO_BG} alt="" className="w-full h-full object-cover opacity-30" />
+        <img src={HERO_BG} alt="" fetchPriority="high" className="w-full h-full object-cover opacity-30" />
         <div className="absolute inset-0 bg-gradient-to-b from-background/70 via-background/80 to-background" />
       </div>
       <div className="container mx-auto px-6 pt-16 pb-24 md:pt-24 md:pb-32 grid md:grid-cols-2 gap-12 items-center">

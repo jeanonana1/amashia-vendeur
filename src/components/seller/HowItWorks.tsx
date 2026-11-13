@@ -3,19 +3,19 @@ const steps = [
     n: "01",
     title: "Créez votre boutique",
     desc: "Inscrivez-vous gratuitement et configurez votre boutique en quelques minutes. Personnalisez votre design et ajoutez vos informations.",
-    img: "/images/visual-5505bf88ea46.jpg",
+    img: "/images/visual-5505bf88ea46.webp",
   },
   {
     n: "02",
     title: "Ajoutez vos produits",
     desc: "Importez vos produits ou services avec photos, descriptions et prix. Organisez-les par catégories pour faciliter la navigation.",
-    img: "/images/visual-ea276a1196db.jpg",
+    img: "/images/visual-ea276a1196db.webp",
   },
   {
     n: "03",
     title: "Recevez et gérez vos commandes",
     desc: "Vos clients passent commande directement sur votre boutique. Recevez des notifications instantanées et gérez les livraisons facilement.",
-    img: "/images/visual-605676ddde20.jpg",
+    img: "/images/visual-605676ddde20.webp",
   },
 ];
 
@@ -35,7 +35,7 @@ export function HowItWorks() {
           {steps.map((s) => (
             <div key={s.n} className="bg-card border border-border rounded-3xl overflow-hidden hover:border-primary/50 transition group">
               <div className="aspect-[3/2] relative overflow-hidden">
-                <img src={s.img} alt={s.title} className="w-full h-full object-cover group-hover:scale-105 transition duration-700" />
+                <img src={s.img} alt={s.title} loading="lazy" decoding="async" className="w-full h-full object-cover group-hover:scale-105 transition duration-700" />
                 <div className="absolute top-4 left-4 w-14 h-14 rounded-full bg-gradient-primary text-white grid place-items-center font-extrabold shadow-elegant">
                   {s.n}
                 </div>

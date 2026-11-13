@@ -19,12 +19,14 @@ export interface SellerOrderLine {
   quantity: number;
   unit_price: number;
   amount: number;
+  discount?: number;
+  coupon_code?: string | null;
   payment_method: string;
   status: string;
   created_at: string;
 }
 
-export const ORDER_FIELDS = "id,order_id,order_number,customer_name,delivery_area,product_title,product_image,color,options,quantity,unit_price,amount,payment_method,status,created_at";
+export const ORDER_FIELDS = "id,order_id,order_number,customer_name,delivery_area,product_title,product_image,color,options,quantity,unit_price,amount,discount,coupon_code,payment_method,status,created_at";
 
 export const ORDER_STATUS: Record<string, { label: string; cls: string }> = {
   pending: { label: "En attente", cls: "bg-amber-500/15 text-amber-400" },
@@ -95,7 +97,7 @@ export function OrderDetailModal({ line, onClose, onChanged }: { line: SellerOrd
                 <div className="min-w-0 flex-1">
                   <p className="line-clamp-2 text-sm font-semibold">{l.product_title}</p>
                   {(l.color || l.options) && <p className="text-xs text-primary">{[l.color ? `Couleur : ${colorName(l.color)}` : "", l.options ?? ""].filter(Boolean).join(" · ")}</p>}
-                  <p className="mt-0.5 text-xs text-muted-foreground">{l.quantity} × {money(Number(l.unit_price))} = <b className="text-foreground">{money(Number(l.amount))}</b></p>
+                  <p className="mt-0.5 text-xs text-muted-foreground">{l.quantity} × {money(Number(l.unit_price))}{Number(l.discount) > 0 && <> − coupon {l.coupon_code} {money(Number(l.discount))}</>} = <b className="text-foreground">{money(Number(l.amount))}</b></p>
                   <div className="mt-2 flex flex-wrap items-center gap-2">
                     <span className={`rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${st.cls}`}>{st.label}</span>
                     <select

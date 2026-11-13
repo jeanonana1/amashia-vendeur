@@ -5,6 +5,7 @@ import { ArrowLeft, ArrowRight, Upload, X, Check, Package, Layers, Cloud, Boxes,
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { RichTextEditor } from "@/components/seller/dashboard/RichTextEditor";
+import { ColorPicker, ColorSwatch, colorParts } from "@/components/seller/dashboard/ColorPicker";
 import { AiSeoModal } from "@/components/seller/dashboard/AiSeoModal";
 import { AiImageModal } from "@/components/seller/dashboard/AiImageModal";
 
@@ -32,6 +33,11 @@ export const Route = createFileRoute("/dashboard/produits/ajouter")({
   }),
   component: AddProductPage,
 });
+
+/** L'attribut est-il une couleur (« Couleur », « Couleurs », « Color ») ? */
+function isColorAttr(name: string) {
+  return /^(couleurs?|colou?rs?)$/i.test(name.trim());
+}
 
 const inp = "w-full bg-background border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary";
 const STEPS = ["Type", "Infos", "Médias", "Attributs", "Prix & Stock", "Aperçu"];
@@ -180,9 +186,22 @@ function AddProductPage() {
   const [newAttr, setNewAttr] = useState({ name: "", values: "" });
   const [customAttrName, setCustomAttrName] = useState("");
   const [valueDraft, setValueDraft] = useState("");
-  const [colorDraft, setColorDraft] = useState("#ff6800");
   const [variantImages, setVariantImages] = useState<VariantImageGroup[]>([]);
-  const [newGroup, setNewGroup] = useState({ label: "", color: "#ff6800" });
+  // Couleurs choisies dans l'attribut « Couleur » : une zone de photos par couleur
+  const colorValues = attrs.filter((a) => isColorAttr(a.name)).flatMap((a) => a.values);
+  const colorKey = colorValues.join("|");
+  useEffect(() => {
+    setVariantImages((prev) => {
+      const next = colorValues.map((v) => {
+        const existing = prev.find((g) => g.label.toLowerCase() === v.toLowerCase());
+        const css = colorParts(v).css;
+        return existing ?? { id: crypto.randomUUID(), label: v, color: css.startsWith("#") ? css : "", images: [] };
+      });
+      const same = next.length === prev.length && next.every((g, i) => g === prev[i]);
+      return same ? prev : next;
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [colorKey]);
   const [uploadingVI, setUploadingVI] = useState<string | null>(null);
 
 
@@ -319,23 +338,17 @@ function AddProductPage() {
     }
   }
 
-  function addVariantGroup() {
-    const label = newGroup.label.trim();
-    if (!label) return toast.error("Indiquez le nom de la variante (ex : Rouge, Noir…)");
-    if (variantImages.some((g) => g.label.toLowerCase() === label.toLowerCase())) return toast.error("Cette variante existe déjà");
-    setVariantImages((prev) => [...prev, { id: crypto.randomUUID(), label, color: newGroup.color, images: [] }]);
-    setNewGroup({ label: "", color: "#ff6800" });
-    toast.success(`Variante « ${label} » ajoutée`);
-  }
 
-  async function addVariantImages(groupId: string, files: FileList | null) {
-    if (!files || !files.length) return;
+  // Reçoit une COPIE des fichiers : le champ est vidé juste après la sélection,
+  // ce qui viderait aussi la liste d'origine avant l'envoi.
+  async function addVariantImages(groupId: string, files: File[]) {
+    if (!files.length) return;
     setUploadingVI(groupId);
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Connectez-vous");
       const urls: string[] = [];
-      for (const f of Array.from(files).slice(0, 6)) {
+      for (const f of files.slice(0, 6)) {
         if (!f.type.startsWith("image/")) continue;
         if (f.size > 5 * 1024 * 1024) { toast.error(`${f.name} dépasse 5 Mo`); continue; }
         const ext = f.name.split(".").pop() || "jpg";
@@ -650,11 +663,15 @@ function AddProductPage() {
                             <p className="font-semibold text-sm">{a.name}</p>
                             <div className="flex flex-wrap gap-1 mt-1">
                               {a.values.map((v) => {
-                                const isHex = /^#[0-9a-f]{3,8}$/i.test(v);
-                                if (isHex) return <span key={v} title={v} className="w-6 h-6 rounded-full border-2 border-border shadow-sm" style={{ background: v }} />;
+                                if (isColorAttr(a.name)) {
+                                  return (
+                                    <span key={v} className="flex items-center gap-1.5 rounded-full bg-secondary py-0.5 pl-0.5 pr-2 text-xs">
+                                      <ColorSwatch value={v} size={18} /> {colorParts(v).name}
+                                    </span>
+                                  );
+                                }
                                 return (
                                   <span key={v} className="px-2 py-0.5 rounded-full bg-secondary text-xs flex items-center gap-1">
-                                    {a.name === "Couleur" && <span className="w-3 h-3 rounded-full border border-border" style={{ background: v }} />}
                                     {v}
                                   </span>
                                 );
@@ -699,43 +716,7 @@ function AddProductPage() {
                           <div className="border border-border rounded-xl p-3 bg-background/50">
                             <p className="text-xs font-semibold mb-2 text-muted-foreground">Valeurs pour « {effName || "attribut personnalisé"} »</p>
 
-                            {isColor && (() => {
-                              const valid = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(colorDraft.trim());
-                              return (
-                              <div className="space-y-3">
-                                {selected.length > 0 && (
-                                  <div className="flex flex-wrap gap-2">
-                                    {selected.map((c) => (
-                                      <span key={c} className="relative group">
-                                        <span title={c} className="block w-8 h-8 rounded-full border-2 border-border shadow-sm" style={{ background: c }} />
-                                        <button type="button" onClick={() => toggle(c)} className="absolute -top-1 -right-1 w-4 h-4 grid place-items-center rounded-full bg-destructive text-white"><X size={9} /></button>
-                                      </span>
-                                    ))}
-                                  </div>
-                                )}
-                                <div className="flex flex-wrap items-center gap-2">
-                                  <input type="color" value={valid ? colorDraft : "#ff6800"} onChange={(e) => setColorDraft(e.target.value)} className="w-10 h-10 rounded-lg border border-border cursor-pointer bg-transparent" />
-                                  <input
-                                    value={colorDraft}
-                                    onChange={(e) => setColorDraft(e.target.value.startsWith("#") || !e.target.value ? e.target.value : `#${e.target.value}`)}
-                                    placeholder="#FF6800"
-                                    className={`${inp} w-32 uppercase`}
-                                  />
-                                  <span className="w-8 h-8 rounded-full border border-border" style={{ background: valid ? colorDraft : "transparent" }} />
-                                  <button
-                                    type="button"
-                                    disabled={!valid || selected.includes(colorDraft.toLowerCase())}
-                                    onClick={() => { toggle(colorDraft.toLowerCase()); setColorDraft("#ff6800"); }}
-                                    className="px-3 py-2 rounded-xl bg-gradient-primary text-white text-xs font-semibold disabled:opacity-40"
-                                  >
-                                    Confirmer
-                                  </button>
-                                  <button type="button" onClick={() => setColorDraft("#ff6800")} className="px-3 py-2 rounded-xl bg-secondary text-xs font-semibold">Annuler</button>
-                                </div>
-                                <p className="text-[11px] text-muted-foreground">Choisissez une couleur ou saisissez son code hexadécimal, puis cliquez sur « Confirmer ».</p>
-                              </div>
-                              );
-                            })()}
+                            {isColor && <ColorPicker selected={selected} onToggle={toggle} />}
 
 
                             {!isColor && preset && preset.values.length > 0 && (
@@ -806,52 +787,21 @@ function AddProductPage() {
                 </div>
               )}
 
-              {/* Images par couleur / variante */}
-              <div className="bg-card border border-border rounded-2xl p-6">
-                <h3 className="font-bold mb-1">Images par couleur / variante</h3>
-                <p className="text-xs text-muted-foreground mb-4">
-                  Si votre produit existe en plusieurs couleurs ou modèles, ajoutez ici les photos de chaque version.
-                </p>
-
-                <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto_auto] gap-2 mb-4">
-                  <input
-                    value={newGroup.label}
-                    onChange={(e) => setNewGroup({ ...newGroup, label: e.target.value })}
-                    onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addVariantGroup(); } }}
-                    placeholder="Nom de la variante (ex : Rouge, Noir, Modèle B…)"
-                    className={inp}
-                  />
-                  <input
-                    type="color"
-                    value={newGroup.color}
-                    onChange={(e) => setNewGroup({ ...newGroup, color: e.target.value })}
-                    className="w-full sm:w-12 h-11 rounded-xl border border-border bg-transparent cursor-pointer"
-                    title="Couleur associée (optionnel)"
-                  />
-                  <button onClick={addVariantGroup} className="px-4 py-2.5 rounded-xl bg-gradient-primary text-white text-sm font-semibold flex items-center justify-center gap-1">
-                    <Plus size={14} /> Variante
-                  </button>
-                </div>
-
-                {variantImages.length === 0 ? (
-                  <p className="text-xs text-muted-foreground text-center py-4 border border-dashed border-border rounded-xl">
-                    Aucune variante pour l'instant.
+              {/* Images par couleur : uniquement si l'attribut « Couleur » est renseigné */}
+              {colorValues.length > 0 && (
+                <div className="bg-card border border-border rounded-2xl p-6">
+                  <h3 className="font-bold mb-1">Images par couleur</h3>
+                  <p className="text-xs text-muted-foreground mb-4">
+                    Ajoutez les photos du produit dans chaque couleur. Sur Amashia, le client verra une vignette par couleur
+                    et les photos changeront quand il choisit une couleur. Sans photo, la couleur s'affiche en pastille ronde.
                   </p>
-                ) : (
                   <div className="space-y-3">
                     {variantImages.map((g) => (
                       <div key={g.id} className="border border-border rounded-xl p-3">
                         <div className="flex items-center gap-2 mb-3">
-                          <span className="w-5 h-5 rounded-full border-2 border-border shrink-0" style={{ background: g.color }} />
-                          <input
-                            value={g.label}
-                            onChange={(e) => setVariantImages((prev) => prev.map((x) => x.id === g.id ? { ...x, label: e.target.value } : x))}
-                            className="flex-1 min-w-0 bg-transparent font-semibold text-sm outline-none"
-                          />
-                          <span className="text-[11px] text-muted-foreground">{g.images.length} image(s)</span>
-                          <button onClick={() => setVariantImages((prev) => prev.filter((x) => x.id !== g.id))} className="w-7 h-7 grid place-items-center rounded-lg bg-destructive/10 text-destructive shrink-0">
-                            <Trash2 size={12} />
-                          </button>
+                          <ColorSwatch value={g.label} size={22} />
+                          <span className="flex-1 min-w-0 truncate font-semibold text-sm">{colorParts(g.label).name}</span>
+                          <span className="text-[11px] text-muted-foreground">{g.images.length} photo{g.images.length > 1 ? "s" : ""}</span>
                         </div>
                         <div className="flex flex-wrap gap-2">
                           {g.images.map((u) => (
@@ -860,6 +810,7 @@ function AddProductPage() {
                               <button
                                 onClick={() => setVariantImages((prev) => prev.map((x) => x.id === g.id ? { ...x, images: x.images.filter((i) => i !== u) } : x))}
                                 className="absolute top-1 right-1 w-5 h-5 grid place-items-center rounded-full bg-destructive text-white"
+                                aria-label="Retirer la photo"
                               >
                                 <X size={10} />
                               </button>
@@ -871,14 +822,14 @@ function AddProductPage() {
                             ) : (
                               <span className="flex flex-col items-center gap-1"><Upload size={16} /><span className="text-[10px]">Ajouter</span></span>
                             )}
-                            <input type="file" accept="image/*" multiple className="hidden" disabled={uploadingVI === g.id} onChange={(e) => { addVariantImages(g.id, e.target.files); e.currentTarget.value = ""; }} />
+                            <input type="file" accept="image/*" multiple className="hidden" disabled={uploadingVI === g.id} onChange={(e) => { const picked = Array.from(e.currentTarget.files ?? []); e.currentTarget.value = ""; void addVariantImages(g.id, picked); }} />
                           </label>
                         </div>
                       </div>
                     ))}
                   </div>
-                )}
-              </div>
+                </div>
+              )}
 
 
 

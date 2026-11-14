@@ -173,6 +173,8 @@ const fmtFCFA = (n: number | string) => {
   return new Intl.NumberFormat("fr-FR").format(Math.round(v));
 };
 const DRAFT_KEY = (id?: string) => `amashia-product-draft-${id || "new"}`;
+/** étape du formulaire mémorisée par brouillon (reprise au même endroit après rechargement) */
+const STEP_KEY = (id: string) => `amashia-product-step-${id}`;
 
 function AddProductPage() {
   const navigate = useNavigate();
@@ -222,6 +224,11 @@ function AddProductPage() {
   const draftIdRef = useRef<string | null>(editId ?? null);
   const draftInsertRef = useRef<Promise<void> | null>(null);
   const finalSavingRef = useRef(false);
+  // le produit est-il encore un brouillon ? (un brouillon n'est jamais publié par l'enregistrement auto)
+  const isDraftRef = useRef(!editId);
+  const imgUploadRef = useRef(false);
+  // l'étape mémorisée n'est écrasée qu'une fois relue (sinon l'étape 1 effacerait la vraie)
+  const stepReadyRef = useRef(!editId);
   const [aiOpen, setAiOpen] = useState(false);
   const [aiImgOpen, setAiImgOpen] = useState(false);
 
@@ -250,13 +257,26 @@ function AddProductPage() {
           setBundleItems(((p as any).bundle_items as BundleItem[]) || []);
           setVirtualFiles(((p as any).virtual_files as VFile[]) || []);
           setVariantImages(((p as any).variant_images as VariantImageGroup[]) || []);
-
+          isDraftRef.current = p.status === "draft";
+          // reprise à l'étape où le vendeur s'était arrêté
+          try { const st = Number(localStorage.getItem(STEP_KEY(editId))); if (st > 0) setStep(st); } catch { /* ignore */ }
         }
+        stepReadyRef.current = true;
       } else {
-        // New product: always start fresh. Existing drafts are accessible
-        // from the products list (status = "draft"). Clear any stale local cache
-        // to avoid re-hydrating an old draft and creating duplicate DB rows.
-        try { localStorage.removeItem(DRAFT_KEY()); } catch { /* ignore */ }
+        // Nouveau produit : on reprend la saisie locale commencée avant le premier
+        // enregistrement en ligne (titre encore trop court). Dès qu'un brouillon existe
+        // en ligne, son identifiant est dans l'adresse et cette copie locale est effacée.
+        try {
+          const saved = JSON.parse(localStorage.getItem(DRAFT_KEY()) || "null");
+          if (saved?.form) {
+            setForm((f) => ({ ...f, ...saved.form }));
+            if (saved.type) setType(saved.type);
+            if (Array.isArray(saved.attrs)) setAttrs(saved.attrs);
+            if (Array.isArray(saved.specs)) setSpecs(saved.specs);
+            if (Array.isArray(saved.bundleItems)) setBundleItems(saved.bundleItems);
+            if (typeof saved.step === "number") setStep(saved.step);
+          }
+        } catch { /* ignore */ }
       }
     })();
   }, [editId]);
@@ -268,12 +288,32 @@ function AddProductPage() {
       try {
         const name = form.name.trim();
         const hasMeaningfulContent = name.length >= 3;
-        if (!hasMeaningfulContent && !editId && !dbDraftId) return;
-        if (!editId) localStorage.setItem(DRAFT_KEY(), JSON.stringify({ form, type, attrs, specs, bundleItems }));
+        const hasAnything = hasMeaningfulContent || !!form.description || !!form.price || attrs.length > 0 || specs.length > 0;
+        if (!hasAnything && !editId && !draftIdRef.current) return;
+        // copie locale tant qu'aucun brouillon n'existe en ligne
+        if (!editId && !draftIdRef.current) localStorage.setItem(DRAFT_KEY(), JSON.stringify({ form, type, attrs, specs, bundleItems, step }));
 
-        if (!hasMeaningfulContent) { setAutoSavedAt(new Date()); return; }
+        if (!hasMeaningfulContent && !draftIdRef.current) { setAutoSavedAt(new Date()); return; }
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
+
+        // photos ajoutées depuis l'appareil : envoyées en ligne tout de suite pour ne pas être perdues
+        const pending = images.filter((i) => i.file && !i.existing);
+        if (pending.length && !imgUploadRef.current) {
+          imgUploadRef.current = true;
+          try {
+            for (const img of pending) {
+              const toSend = await compressImage(img.file!, 1600);
+              const ext = toSend.name.split(".").pop() || "jpg";
+              const path = `${user.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+              const { error: upErr } = await supabase.storage.from("product-images").upload(path, toSend, { cacheControl: "31536000", contentType: toSend.type || "image/jpeg" });
+              if (upErr) continue;
+              const url = supabase.storage.from("product-images").getPublicUrl(path).data.publicUrl;
+              setImages((prev) => prev.map((x) => (x.preview === img.preview ? { preview: url, existing: true } : x)));
+            }
+          } finally { imgUploadRef.current = false; }
+          return; // l'enregistrement repart automatiquement avec les nouvelles adresses
+        }
         const existingImages = images.filter((i) => i.existing).map((i) => i.preview);
         const payload: any = {
           user_id: user.id,
@@ -291,7 +331,8 @@ function AddProductPage() {
           specifications: specs as any,
           bundle_items: bundleItems as any,
           variant_images: variantImages as any,
-          status: editId ? form.status : "draft",
+          // un brouillon reste un brouillon : seule la publication le met en ligne
+          status: isDraftRef.current ? "draft" : form.status,
         };
         if (finalSavingRef.current) return;
         if (draftInsertRef.current) await draftInsertRef.current; // une création est déjà en cours
@@ -301,7 +342,18 @@ function AddProductPage() {
         } else {
           draftInsertRef.current = (async () => {
             const { data: created } = await supabase.from("seller_products").insert(payload).select("id").maybeSingle();
-            if (created?.id) { draftIdRef.current = created.id; setDbDraftId(created.id); }
+            if (created?.id) {
+              draftIdRef.current = created.id;
+              setDbDraftId(created.id);
+              // l'adresse de la page pointe désormais sur ce brouillon : un rechargement le rouvre
+              try {
+                const u = new URL(window.location.href);
+                u.searchParams.set("id", created.id);
+                window.history.replaceState(window.history.state, "", u.toString());
+                localStorage.removeItem(DRAFT_KEY());
+                localStorage.setItem(STEP_KEY(created.id), String(step));
+              } catch { /* ignore */ }
+            }
           })();
           try { await draftInsertRef.current; } finally { draftInsertRef.current = null; }
         }
@@ -309,7 +361,14 @@ function AddProductPage() {
       } catch { /* ignore */ }
     }, 2000);
     return () => clearTimeout(t);
-  }, [form, type, attrs, specs, bundleItems, images, variantImages, editId, dbDraftId]);
+  }, [form, type, attrs, specs, bundleItems, images, variantImages, editId, dbDraftId, step]);
+
+  // étape courante mémorisée pour ce brouillon / ce produit
+  useEffect(() => {
+    const id = editId || draftIdRef.current;
+    if (!id || !stepReadyRef.current) return;
+    try { localStorage.setItem(STEP_KEY(id), String(step)); } catch { /* ignore */ }
+  }, [step, editId, dbDraftId]);
 
 
   // Specs presets when category changes
@@ -494,20 +553,24 @@ function AddProductPage() {
     <DashboardLayout title={editId ? "Modifier le produit" : "Ajouter un produit"} subtitle="Création en plusieurs étapes">
       <div className="flex items-center justify-between mb-6 gap-3 flex-wrap">
         <Link to="/dashboard/produits" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary"><ArrowLeft size={16} /> Retour</Link>
-        {!editId && (
-          <div className="flex items-center gap-2 text-xs">
-            {autoSavedAt ? (
-              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/10 text-emerald-400 font-semibold"><Check size={12} /> Brouillon auto-enregistré · {autoSavedAt.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}</span>
-            ) : (
-              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-secondary text-muted-foreground">Auto-sauvegarde activée</span>
-            )}
+        <div className="flex items-center gap-2 text-xs">
+          {autoSavedAt ? (
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/10 text-emerald-400 font-semibold"><Check size={12} /> {editId && !isDraftRef.current ? "Modifications enregistrées" : "Brouillon enregistré"} · {autoSavedAt.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}</span>
+          ) : (
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-secondary text-muted-foreground">Sauvegarde automatique activée</span>
+          )}
+          {(!editId || isDraftRef.current) && (
             <button
               type="button"
-              onClick={() => { try { localStorage.removeItem(DRAFT_KEY()); } catch { /* ignore */ } setAutoSavedAt(null); toast.success("Brouillon local effacé"); }}
+              onClick={() => {
+                if (!confirm("Commencer un nouveau produit ? Ce brouillon reste disponible dans vos produits (statut Brouillon).")) return;
+                try { localStorage.removeItem(DRAFT_KEY()); } catch { /* ignore */ }
+                window.location.href = "/dashboard/produits/ajouter";
+              }}
               className="px-3 py-1.5 rounded-full bg-secondary hover:bg-secondary/70 text-muted-foreground"
-            >Effacer</button>
-          </div>
-        )}
+            >Nouveau</button>
+          )}
+        </div>
       </div>
 
       <div className="bg-card border border-border rounded-2xl p-4 mb-6 overflow-x-auto">

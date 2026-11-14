@@ -12,6 +12,7 @@ import { compressImage } from "@/lib/imageCompress";
 import { AiSeoModal } from "@/components/seller/dashboard/AiSeoModal";
 import { AiImageModal } from "@/components/seller/dashboard/AiImageModal";
 import { PriceTipModal, charmPrice } from "@/components/seller/dashboard/PriceTipModal";
+import { SITE_CATEGORY_GROUPS, SITE_CATEGORIES } from "@/lib/categories";
 
 type ProductSearch = { id?: string };
 
@@ -507,6 +508,7 @@ function AddProductPage() {
 
   async function submit(asDraft = false) {
     if (!form.name || !form.price) return toast.error("Nom et prix requis");
+    if (!form.category) { setStep(1); return toast.error("Choisissez la catégorie du produit (étape Infos)."); }
     if (compareError) { setStep(4); return toast.error("Le prix normal ne peut pas être inférieur ou égal au prix de vente."); }
     if (finalSavingRef.current) return; // double-clic sur « Publier »
     finalSavingRef.current = true;
@@ -569,7 +571,7 @@ function AddProductPage() {
   }
 
   const canNext = () => {
-    if (step === 1) return !!form.name;
+    if (step === 1) return !!form.name && !!form.category;
     if (step === 4) return !!form.price && !compareError;
     return true;
   };
@@ -653,11 +655,19 @@ function AddProductPage() {
                 <RichTextEditor value={form.description} onChange={(v) => set("description", v)} placeholder="Décrivez votre produit... utilisez la barre pour formater, ajouter des listes, titres, etc." />
               </div>
               <div className="grid md:grid-cols-2 gap-4">
-                <div><label className="block text-sm mb-2">Catégorie</label>
-                  <select value={form.category} onChange={(e) => set("category", e.target.value)} className={inp}>
-                    <option value="">Sélectionner</option>
-                    {Object.keys(SPEC_PRESETS).filter((k) => k !== "default").map((c) => <option key={c}>{c}</option>)}
+                <div><label className="block text-sm mb-2">Catégorie *</label>
+                  <select value={form.category} onChange={(e) => set("category", e.target.value)} className={`${inp} ${!form.category ? "text-muted-foreground" : ""}`}>
+                    <option value="">Choisir la catégorie du produit</option>
+                    {SITE_CATEGORY_GROUPS.map((g) => (
+                      <optgroup key={g.group} label={`Rubrique ${g.group}`}>
+                        {g.categories.map((c) => <option key={c} value={c}>{c}</option>)}
+                      </optgroup>
+                    ))}
+                    {form.category && !SITE_CATEGORIES.includes(form.category) && <option value={form.category}>{form.category}</option>}
                   </select>
+                  {form.category
+                    ? <p className="mt-1 text-[11px] text-muted-foreground">Publié sur Amashia dans : <b className="text-foreground">{SITE_CATEGORY_GROUPS.find((g) => g.categories.includes(form.category))?.group ?? "—"} › {form.category}</b></p>
+                    : <p className="mt-1 text-[11px] text-muted-foreground">Le produit apparaîtra sur Amashia dans la rubrique correspondant à cette catégorie.</p>}
                 </div>
                 <div><label className="block text-sm mb-2">SKU</label><input value={form.sku} onChange={(e) => set("sku", e.target.value)} className={inp} /></div>
               </div>
@@ -1129,7 +1139,7 @@ function AddProductPage() {
           attributes={attrs.map((x) => ({ name: x.name, values: x.values.map((v) => (isColorAttr(x.name) ? colorParts(v).name : v)) }))}
           currentDescription={form.description}
           onClose={() => setAiOpen(false)}
-          onApply={({ name, description }) => setForm((f) => ({ ...f, name, description }))}
+          onApply={({ name, description, category }) => setForm((f) => ({ ...f, name, description, category: category || f.category }))}
         />
       )}
       {aiImgOpen && (

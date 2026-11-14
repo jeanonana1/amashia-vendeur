@@ -14,7 +14,7 @@ type Props = {
   attributes?: { name: string; values: string[] }[];
   currentDescription?: string;
   onClose: () => void;
-  onApply: (r: { name: string; description: string }) => void;
+  onApply: (r: { name: string; description: string; category?: string }) => void;
 };
 
 type SeoResult = {
@@ -80,7 +80,7 @@ export function AiSeoModal({ initialName = "", initialCategory = "", initialPric
 
   function apply() {
     if (!result) return;
-    onApply({ name: selectedTitle || result.recommendedTitle, description: result.description });
+    onApply({ name: selectedTitle || result.recommendedTitle, description: result.description, category: form.category || undefined });
     toast.success("Fiche appliquée au produit");
     onClose();
   }

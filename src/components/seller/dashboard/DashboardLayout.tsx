@@ -7,8 +7,7 @@ import { money, useNavBadges, useSellerStats } from "@/lib/sellerStats";
 import {
   LayoutDashboard, Store, Package, ShoppingCart, Users, CreditCard, Truck,
   BarChart3, Megaphone, Star, Bell, MessageSquare, Settings, HelpCircle, LogOut,
-  RotateCcw, Sun, Moon, Volume2, VolumeX, Wallet, ChevronDown, AppWindow, Menu, X, AlertTriangle, PackagePlus,
-} from "lucide-react";
+  RotateCcw, Sun, Moon, Volume2, VolumeX, Wallet, ChevronDown, AppWindow, Menu, X, AlertTriangle, PackagePlus, Percent } from "lucide-react";
 import { useTheme } from "@/components/theme-provider";
 
 const NAV = [
@@ -20,6 +19,7 @@ const NAV = [
   { icon: RotateCcw, label: "Retours", to: "/dashboard/retours" },
   { icon: Users, label: "Clients", to: "/dashboard/clients" },
   { icon: CreditCard, label: "Paiements", to: "/dashboard/paiements" },
+  { icon: Percent, label: "Commissions", to: "/dashboard/commissions" },
   { icon: Truck, label: "Livraison", to: "/dashboard/livraison" },
   { icon: BarChart3, label: "Analytique", to: "/dashboard/analytique" },
   { icon: Megaphone, label: "Promotions", to: "/dashboard/promotions" },

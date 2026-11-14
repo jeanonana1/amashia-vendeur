@@ -1,8 +1,8 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { Link, createFileRoute } from "@tanstack/react-router";
 import { askConfirm } from "@/lib/dialog";
 import { useCallback, useEffect, useState } from "react";
 import { DashboardLayout } from "@/components/seller/dashboard/DashboardLayout";
-import { Wallet, ArrowDownToLine, Smartphone, Landmark, Plus, X, Trash2, Pencil, History, Clock, CheckCircle2, XCircle, Star, ArrowUpRight } from "lucide-react";
+import { Wallet, ArrowDownToLine, Smartphone, Landmark, Plus, X, Trash2, Pencil, History, Clock, CheckCircle2, XCircle, Star, ArrowUpRight, BadgeCheck } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { dateTime, money, useSellerStats } from "@/lib/sellerStats";
@@ -46,7 +46,7 @@ function PaiementsPage() {
     const [m, w, s] = await Promise.all([
       db().from("seller_payout_methods").select("*").order("is_default", { ascending: false }).order("created_at"),
       db().from("seller_withdrawals").select("*").order("created_at", { ascending: false }),
-      db().from("seller_orders").select("id,order_number,product_title,amount,created_at").eq("status", "delivered").order("created_at", { ascending: false }).limit(50),
+      db().from("seller_orders").select("id,order_number,product_title,amount:net_amount,created_at").eq("status", "delivered").order("created_at", { ascending: false }).limit(50),
     ]);
     setMethods(m.data || []);
     setWithdrawals(w.data || []);
@@ -87,6 +87,10 @@ function PaiementsPage() {
           <div className="mb-4 flex items-center gap-3 opacity-90"><Wallet size={20} /><span className="text-sm font-semibold">Solde disponible</span></div>
           <p className="text-4xl font-extrabold">{stats ? money(balance) : "…"}</p>
           <p className="mt-1 text-xs opacity-80">Ventes livrées, moins les retraits demandés ou déjà payés.</p>
+          <p className="mt-3 flex items-start gap-2 rounded-xl bg-black/10 px-3 py-2 text-xs font-medium">
+            <BadgeCheck size={16} className="mt-px shrink-0" />
+            Ce solde vous appartient entièrement : la commission Amashia a déjà été prélevée sur chaque vente. <Link to="/dashboard/commissions" className="underline">Voir le détail</Link>
+          </p>
           <div className="mt-5 flex flex-wrap gap-2">
             <button
               onClick={() => (methods.length ? setOpenWithdraw(true) : (toast.info("Ajoutez d'abord un moyen de retrait."), setOpenMethod(true)))}
@@ -99,7 +103,7 @@ function PaiementsPage() {
           </div>
         </div>
         <div className="grid grid-cols-1 gap-3">
-          <Kpi label="En attente de livraison" value={money(stats?.pending_balance ?? 0)} hint="Ventes pas encore livrées" />
+          <Kpi label="En attente de livraison" value={money(stats?.pending_balance ?? 0)} hint="Ventes pas encore livrées (après commission)" />
           <Kpi label="Retraits en cours" value={money(pendingOut)} hint="En cours de traitement" />
           <Kpi label="Déjà versé" value={money(paidOut)} hint="Retraits payés" />
         </div>

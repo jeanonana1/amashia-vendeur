@@ -3,6 +3,7 @@ import { X, Sparkles, Loader2, Check, TrendingUp, Copy, Wand2 } from "lucide-rea
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
 import { generateSeoContent } from "@/lib/ai-seo.functions";
+import { SITE_CATEGORIES, SITE_CATEGORY_GROUPS } from "@/lib/categories";
 
 type Props = {
   initialName?: string;
@@ -104,7 +105,18 @@ export function AiSeoModal({ initialName = "", initialCategory = "", onClose, on
               </div>
               <div className="grid md:grid-cols-2 gap-3">
                 <div><label className="block text-xs font-semibold mb-1.5">Nom du produit *</label><input value={form.productName} onChange={(e) => set("productName", e.target.value)} className={inp} placeholder="Ex : Égreneur de maïs manuel" /></div>
-                <div><label className="block text-xs font-semibold mb-1.5">Catégorie</label><input value={form.category} onChange={(e) => set("category", e.target.value)} className={inp} placeholder="Cuisine, Mode, Électronique…" /></div>
+                <div><label className="block text-xs font-semibold mb-1.5">Catégorie</label>
+                  {/* liste fermée : uniquement les catégories du site Amashia */}
+                  <select value={form.category} onChange={(e) => set("category", e.target.value)} className={inp}>
+                    <option value="">Choisir une catégorie</option>
+                    {form.category && !SITE_CATEGORIES.includes(form.category) && <option value={form.category}>{form.category}</option>}
+                    {SITE_CATEGORY_GROUPS.map((g) => (
+                      <optgroup key={g.group} label={g.group}>
+                        {g.categories.map((c) => <option key={c} value={c}>{c}</option>)}
+                      </optgroup>
+                    ))}
+                  </select>
+                </div>
                 <div><label className="block text-xs font-semibold mb-1.5">Marque</label><input value={form.brand} onChange={(e) => set("brand", e.target.value)} className={inp} /></div>
                 <div><label className="block text-xs font-semibold mb-1.5">Prix (FCFA)</label><input value={form.price} onChange={(e) => set("price", e.target.value)} className={inp} /></div>
                 <div className="md:col-span-2"><label className="block text-xs font-semibold mb-1.5">Caractéristiques / à quoi ça sert</label><textarea value={form.features} onChange={(e) => set("features", e.target.value)} rows={3} className={inp} placeholder="Ex : retire les grains de maïs en 3 secondes, acier inox, ergonomique…" /></div>

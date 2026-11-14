@@ -31,6 +31,7 @@ import { Route as DashboardPaiementsRouteImport } from './routes/dashboard.paiem
 import { Route as DashboardParametresRouteImport } from './routes/dashboard.parametres'
 import { Route as DashboardPromotionsRouteImport } from './routes/dashboard.promotions'
 import { Route as DashboardReapprovisionnementRouteImport } from './routes/dashboard.reapprovisionnement'
+import { Route as DashboardRetoursRouteImport } from './routes/dashboard.retours'
 import { Route as DashboardSignalementsRouteImport } from './routes/dashboard.signalements'
 import { Route as DashboardSponsoringRouteImport } from './routes/dashboard.sponsoring'
 import { Route as InscriptionEtapesRouteImport } from './routes/inscription_.etapes'
@@ -148,6 +149,11 @@ const DashboardReapprovisionnementRoute =
     path: '/reapprovisionnement',
     getParentRoute: () => DashboardRoute,
   } as any)
+const DashboardRetoursRoute = DashboardRetoursRouteImport.update({
+  id: '/retours',
+  path: '/retours',
+  getParentRoute: () => DashboardRoute,
+} as any)
 const DashboardSignalementsRoute = DashboardSignalementsRouteImport.update({
   id: '/signalements',
   path: '/signalements',
@@ -197,6 +203,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/parametres': typeof DashboardParametresRoute
   '/dashboard/promotions': typeof DashboardPromotionsRoute
   '/dashboard/reapprovisionnement': typeof DashboardReapprovisionnementRoute
+  '/dashboard/retours': typeof DashboardRetoursRoute
   '/dashboard/signalements': typeof DashboardSignalementsRoute
   '/dashboard/sponsoring': typeof DashboardSponsoringRoute
   '/inscription/etapes': typeof InscriptionEtapesRoute
@@ -225,6 +232,7 @@ export interface FileRoutesByTo {
   '/dashboard/parametres': typeof DashboardParametresRoute
   '/dashboard/promotions': typeof DashboardPromotionsRoute
   '/dashboard/reapprovisionnement': typeof DashboardReapprovisionnementRoute
+  '/dashboard/retours': typeof DashboardRetoursRoute
   '/dashboard/signalements': typeof DashboardSignalementsRoute
   '/dashboard/sponsoring': typeof DashboardSponsoringRoute
   '/inscription/etapes': typeof InscriptionEtapesRoute
@@ -255,6 +263,7 @@ export interface FileRoutesById {
   '/dashboard/parametres': typeof DashboardParametresRoute
   '/dashboard/promotions': typeof DashboardPromotionsRoute
   '/dashboard/reapprovisionnement': typeof DashboardReapprovisionnementRoute
+  '/dashboard/retours': typeof DashboardRetoursRoute
   '/dashboard/signalements': typeof DashboardSignalementsRoute
   '/dashboard/sponsoring': typeof DashboardSponsoringRoute
   '/inscription_/etapes': typeof InscriptionEtapesRoute
@@ -286,6 +295,7 @@ export interface FileRouteTypes {
     | '/dashboard/parametres'
     | '/dashboard/promotions'
     | '/dashboard/reapprovisionnement'
+    | '/dashboard/retours'
     | '/dashboard/signalements'
     | '/dashboard/sponsoring'
     | '/inscription/etapes'
@@ -314,6 +324,7 @@ export interface FileRouteTypes {
     | '/dashboard/parametres'
     | '/dashboard/promotions'
     | '/dashboard/reapprovisionnement'
+    | '/dashboard/retours'
     | '/dashboard/signalements'
     | '/dashboard/sponsoring'
     | '/inscription/etapes'
@@ -343,6 +354,7 @@ export interface FileRouteTypes {
     | '/dashboard/parametres'
     | '/dashboard/promotions'
     | '/dashboard/reapprovisionnement'
+    | '/dashboard/retours'
     | '/dashboard/signalements'
     | '/dashboard/sponsoring'
     | '/inscription_/etapes'
@@ -520,6 +532,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardReapprovisionnementRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/dashboard/retours': {
+      id: '/dashboard/retours'
+      path: '/retours'
+      fullPath: '/dashboard/retours'
+      preLoaderRoute: typeof DashboardRetoursRouteImport
+      parentRoute: typeof DashboardRoute
+    }
     '/dashboard/signalements': {
       id: '/dashboard/signalements'
       path: '/signalements'
@@ -571,6 +590,7 @@ interface DashboardRouteChildren {
   DashboardParametresRoute: typeof DashboardParametresRoute
   DashboardPromotionsRoute: typeof DashboardPromotionsRoute
   DashboardReapprovisionnementRoute: typeof DashboardReapprovisionnementRoute
+  DashboardRetoursRoute: typeof DashboardRetoursRoute
   DashboardSignalementsRoute: typeof DashboardSignalementsRoute
   DashboardSponsoringRoute: typeof DashboardSponsoringRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
@@ -591,6 +611,7 @@ const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardParametresRoute: DashboardParametresRoute,
   DashboardPromotionsRoute: DashboardPromotionsRoute,
   DashboardReapprovisionnementRoute: DashboardReapprovisionnementRoute,
+  DashboardRetoursRoute: DashboardRetoursRoute,
   DashboardSignalementsRoute: DashboardSignalementsRoute,
   DashboardSponsoringRoute: DashboardSponsoringRoute,
   DashboardIndexRoute: DashboardIndexRoute,

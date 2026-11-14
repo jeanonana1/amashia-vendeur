@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { money } from "@/lib/sellerStats";
 import { imgProps } from "@/lib/img";
+import { FlashSales } from "@/components/seller/dashboard/FlashSales";
 
 export const Route = createFileRoute("/dashboard/promotions")({
   head: () => ({ meta: [{ title: "Promotions — Amashia Seller" }, { name: "description", content: "Créez des coupons de réduction pour vos produits Amashia." }] }),
@@ -41,6 +42,7 @@ const fmtDiscount = (c: { kind: string; value: number }) => (c.kind === "percent
 const fmtDate = (iso: string) => new Date(iso).toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric" });
 
 function PromotionsPage() {
+  const [tab, setTab] = useState<"coupons" | "flash">("coupons");
   const [coupons, setCoupons] = useState<Coupon[] | null>(null);
   const [products, setProducts] = useState<MyProduct[]>([]);
   const [form, setForm] = useState<Form | null>(null);
@@ -140,7 +142,15 @@ function PromotionsPage() {
   const input = "w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm";
 
   return (
-    <DashboardLayout title="Promotions" subtitle="Coupons de réduction pour vos produits">
+    <DashboardLayout title="Promotions" subtitle="Coupons de réduction et ventes flash">
+      {/* deux types de promotion : coupons et ventes flash */}
+      <div className="mb-5 inline-flex rounded-full bg-secondary p-1 text-sm">
+        {([["coupons", "Coupons"], ["flash", "⚡ Ventes flash"]] as const).map(([k, l]) => (
+          <button key={k} onClick={() => setTab(k)} className={`rounded-full px-5 py-2 font-semibold ${tab === k ? "bg-primary text-black" : "text-muted-foreground"}`}>{l}</button>
+        ))}
+      </div>
+      {tab === "flash" ? <FlashSales /> : (
+      <>
       <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-4">
         {[
           { label: "Coupons actifs", value: String(stats.active), icon: Ticket },
@@ -209,6 +219,8 @@ function PromotionsPage() {
         )}
       </div>
 
+      </>
+      )}
       {form && (
         <div className="fixed inset-0 z-50 grid place-items-center bg-black/60 p-4 backdrop-blur-sm" onClick={() => setForm(null)}>
           <form onSubmit={save} onClick={(e) => e.stopPropagation()} className="max-h-[92vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-border bg-card p-6">

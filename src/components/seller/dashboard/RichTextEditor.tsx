@@ -105,7 +105,7 @@ export function RichTextEditor({ value, onChange, placeholder }: Props) {
       onMouseDown={(e) => e.preventDefault()}
       onClick={onClick}
       title={title}
-      className={`w-8 h-8 grid place-items-center rounded-lg transition ${activeKey && active[activeKey] ? "bg-primary text-white" : "hover:bg-secondary text-foreground"}`}
+      className={`w-8 h-8 grid place-items-center rounded-lg transition ${activeKey && active[activeKey] ? "bg-primary text-black" : "hover:bg-secondary text-foreground"}`}
     >
       {children}
     </button>
@@ -200,14 +200,14 @@ export function RichTextEditor({ value, onChange, placeholder }: Props) {
         <Btn onClick={() => exec("underline")} title="Souligné" activeKey="underline"><Underline size={15} /></Btn>
         <Btn onClick={() => exec("strikeThrough")} title="Barré" activeKey="strikeThrough"><Strikethrough size={15} /></Btn>
         <Sep />
-        <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => setBlock("h1")} title="Titre 1" className={`w-8 h-8 grid place-items-center rounded-lg transition ${isBlock("h1") ? "bg-primary text-white" : "hover:bg-secondary"}`}><Heading1 size={15} /></button>
-        <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => setBlock("h2")} title="Titre 2" className={`w-8 h-8 grid place-items-center rounded-lg transition ${isBlock("h2") ? "bg-primary text-white" : "hover:bg-secondary"}`}><Heading2 size={15} /></button>
-        <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => setBlock("h3")} title="Titre 3" className={`w-8 h-8 grid place-items-center rounded-lg transition ${isBlock("h3") ? "bg-primary text-white" : "hover:bg-secondary"}`}><Heading3 size={15} /></button>
+        <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => setBlock("h1")} title="Titre 1" className={`w-8 h-8 grid place-items-center rounded-lg transition ${isBlock("h1") ? "bg-primary text-black" : "hover:bg-secondary"}`}><Heading1 size={15} /></button>
+        <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => setBlock("h2")} title="Titre 2" className={`w-8 h-8 grid place-items-center rounded-lg transition ${isBlock("h2") ? "bg-primary text-black" : "hover:bg-secondary"}`}><Heading2 size={15} /></button>
+        <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => setBlock("h3")} title="Titre 3" className={`w-8 h-8 grid place-items-center rounded-lg transition ${isBlock("h3") ? "bg-primary text-black" : "hover:bg-secondary"}`}><Heading3 size={15} /></button>
         <Sep />
         <Btn onClick={() => exec("insertUnorderedList")} title="Liste à puces" activeKey="insertUnorderedList"><List size={15} /></Btn>
         <Btn onClick={() => exec("insertOrderedList")} title="Liste numérotée" activeKey="insertOrderedList"><ListOrdered size={15} /></Btn>
-        <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => setBlock("blockquote")} title="Citation" className={`w-8 h-8 grid place-items-center rounded-lg transition ${isBlock("blockquote") ? "bg-primary text-white" : "hover:bg-secondary"}`}><Quote size={15} /></button>
-        <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => setBlock("pre")} title="Code" className={`w-8 h-8 grid place-items-center rounded-lg transition ${isBlock("pre") ? "bg-primary text-white" : "hover:bg-secondary"}`}><Code size={15} /></button>
+        <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => setBlock("blockquote")} title="Citation" className={`w-8 h-8 grid place-items-center rounded-lg transition ${isBlock("blockquote") ? "bg-primary text-black" : "hover:bg-secondary"}`}><Quote size={15} /></button>
+        <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => setBlock("pre")} title="Code" className={`w-8 h-8 grid place-items-center rounded-lg transition ${isBlock("pre") ? "bg-primary text-black" : "hover:bg-secondary"}`}><Code size={15} /></button>
         <Sep />
         <Btn onClick={() => exec("justifyLeft")} title="Aligner à gauche" activeKey="justifyLeft"><AlignLeft size={15} /></Btn>
         <Btn onClick={() => exec("justifyCenter")} title="Centrer" activeKey="justifyCenter"><AlignCenter size={15} /></Btn>

@@ -22,7 +22,7 @@ function Page() {
       <main className="flex-1 grid place-items-center py-16 px-6">
         <div className="w-full max-w-4xl bg-card border border-border rounded-3xl p-10 md:p-14">
           <div className="text-center mb-10">
-            <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-primary grid place-items-center text-white text-2xl font-extrabold shadow-elegant">a</div>
+            <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-primary grid place-items-center text-black text-2xl font-extrabold shadow-elegant">a</div>
             <h1 className="text-3xl md:text-4xl font-extrabold">Choisissez votre type de compte</h1>
             <p className="mt-3 text-muted-foreground">Sélectionnez le type de compte qui correspond à vos besoins</p>
           </div>
@@ -38,8 +38,8 @@ function Page() {
               </span>
             </button>
             <button onClick={() => go("entreprise")} className="group text-left bg-background border-2 border-primary/50 rounded-2xl p-7 hover:border-primary transition relative">
-              <span className="absolute top-4 right-4 px-3 py-1 rounded-full bg-primary text-white text-xs font-bold">Vendeur</span>
-              <div className="w-14 h-14 rounded-2xl bg-gradient-primary text-white grid place-items-center mb-5">
+              <span className="absolute top-4 right-4 px-3 py-1 rounded-full bg-primary text-black text-xs font-bold">Vendeur</span>
+              <div className="w-14 h-14 rounded-2xl bg-gradient-primary text-black grid place-items-center mb-5">
                 <Store size={26} />
               </div>
               <h3 className="text-xl font-bold mb-2">Entreprise</h3>

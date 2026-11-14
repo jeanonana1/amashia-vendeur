@@ -75,7 +75,7 @@ function Page() {
         <div className="w-full max-w-md">
           <div className="relative bg-card border border-border rounded-3xl p-8 md:p-10 shadow-glow">
             <div className="text-center mb-8">
-              <div className="w-20 h-20 mx-auto mb-5 rounded-2xl bg-gradient-primary grid place-items-center text-white text-2xl font-extrabold shadow-elegant">a</div>
+              <div className="w-20 h-20 mx-auto mb-5 rounded-2xl bg-gradient-primary grid place-items-center text-black text-2xl font-extrabold shadow-elegant">a</div>
               <h1 className="text-3xl font-extrabold">Connexion</h1>
               <p className="mt-2 text-sm text-muted-foreground">Accédez à votre tableau de bord vendeur</p>
             </div>
@@ -85,7 +85,7 @@ function Page() {
                 <button
                   key={t}
                   onClick={() => setTab(t)}
-                  className={`py-2.5 rounded-full text-sm font-semibold transition ${tab === t ? "bg-gradient-primary text-white" : "text-muted-foreground"}`}
+                  className={`py-2.5 rounded-full text-sm font-semibold transition ${tab === t ? "bg-gradient-primary text-black" : "text-muted-foreground"}`}
                 >
                   {t === "email" ? "Email" : "Téléphone"}
                 </button>
@@ -122,7 +122,7 @@ function Page() {
                   if (error) toast.error(error.message); else toast.success("Email de récupération envoyé.");
                 }}>Mot de passe oublié ?</Button>
               </div>
-              <button type="submit" disabled={loading} className="w-full py-3.5 rounded-full bg-gradient-primary text-white font-semibold shadow-elegant hover:shadow-glow transition disabled:opacity-60">
+              <button type="submit" disabled={loading} className="w-full py-3.5 rounded-full bg-gradient-primary text-black font-semibold shadow-elegant hover:shadow-glow transition disabled:opacity-60">
                 {loading ? "Connexion..." : recovery ? "Enregistrer le nouveau mot de passe" : "Se connecter"}
               </button>
               <p className="text-center text-sm text-muted-foreground">

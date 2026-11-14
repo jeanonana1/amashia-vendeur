@@ -36,7 +36,7 @@ export function HowItWorks() {
             <div key={s.n} className="bg-card border border-border rounded-3xl overflow-hidden hover:border-primary/50 transition group">
               <div className="aspect-[3/2] relative overflow-hidden">
                 <img src={s.img} alt={s.title} loading="lazy" decoding="async" className="w-full h-full object-cover group-hover:scale-105 transition duration-700" />
-                <div className="absolute top-4 left-4 w-14 h-14 rounded-full bg-gradient-primary text-white grid place-items-center font-extrabold shadow-elegant">
+                <div className="absolute top-4 left-4 w-14 h-14 rounded-full bg-gradient-primary text-black grid place-items-center font-extrabold shadow-elegant">
                   {s.n}
                 </div>
               </div>

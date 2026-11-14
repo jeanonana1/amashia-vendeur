@@ -16,7 +16,7 @@ export function Header() {
     <header className="sticky top-0 z-50 backdrop-blur-xl bg-background/80 border-b border-border/50">
       <div className="container mx-auto px-6 h-20 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-3 font-display font-extrabold text-xl">
-          <span className="w-10 h-10 rounded-xl bg-gradient-primary grid place-items-center text-white shadow-soft text-sm">
+          <span className="w-10 h-10 rounded-xl bg-gradient-primary grid place-items-center text-black shadow-soft text-sm">
             a
           </span>
           <span>Amashia Seller</span>
@@ -44,7 +44,7 @@ export function Header() {
           </Link>
           <Link
             to="/inscription"
-            className="inline-flex items-center px-6 py-2.5 rounded-full bg-gradient-primary text-white font-semibold text-[15px] hover:opacity-95 shadow-soft transition"
+            className="inline-flex items-center px-6 py-2.5 rounded-full bg-gradient-primary text-black font-semibold text-[15px] hover:opacity-95 shadow-soft transition"
           >
             Commencer
           </Link>

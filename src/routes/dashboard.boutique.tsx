@@ -235,7 +235,7 @@ function BoutiquePage() {
 
           <button
             onClick={() => setEditing(true)}
-            className="px-5 py-2.5 rounded-full bg-gradient-primary text-white text-sm font-semibold flex items-center gap-2 self-start md:self-auto"
+            className="px-5 py-2.5 rounded-full bg-gradient-primary text-black text-sm font-semibold flex items-center gap-2 self-start md:self-auto"
           >
             <Edit size={14} /> Modifier
           </button>
@@ -317,7 +317,7 @@ function BoutiquePage() {
                     return (
                       <button
                         key={c} type="button" onClick={() => toggleCategory(c)}
-                        className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition flex items-center gap-1 ${active ? "bg-primary text-white border-primary" : "bg-secondary border-border hover:border-primary/50"}`}
+                        className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition flex items-center gap-1 ${active ? "bg-primary text-black border-primary" : "bg-secondary border-border hover:border-primary/50"}`}
                       >
                         {active && <Check size={12} />} {c}
                       </button>
@@ -328,7 +328,7 @@ function BoutiquePage() {
             </div>
             <div className="flex items-center justify-end gap-3 p-6 border-t border-border sticky bottom-0 bg-card">
               <button onClick={() => setEditing(false)} className="px-5 py-2.5 rounded-full bg-secondary text-sm font-semibold">Annuler</button>
-              <button onClick={saveInfos} disabled={saving} className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-primary text-white text-sm font-semibold disabled:opacity-60">
+              <button onClick={saveInfos} disabled={saving} className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-primary text-black text-sm font-semibold disabled:opacity-60">
                 {saving && <Loader2 size={14} className="animate-spin" />} {saving ? "Enregistrement…" : "Enregistrer"}
               </button>
             </div>

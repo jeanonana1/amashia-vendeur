@@ -59,7 +59,7 @@ function Page() {
             {steps.map((s, i) => (
               <div key={s.n} className={`grid md:grid-cols-2 gap-12 lg:gap-20 items-center ${i % 2 === 1 ? "md:[&>div:first-child]:order-2" : ""}`}>
                 <div>
-                  <div className="w-16 h-16 rounded-full bg-gradient-primary text-white grid place-items-center font-extrabold text-xl mb-8 shadow-elegant">
+                  <div className="w-16 h-16 rounded-full bg-gradient-primary text-black grid place-items-center font-extrabold text-xl mb-8 shadow-elegant">
                     {s.n}
                   </div>
                   <h2 className="text-4xl md:text-5xl font-extrabold mb-6">{s.title}</h2>

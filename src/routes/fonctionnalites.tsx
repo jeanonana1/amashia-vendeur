@@ -43,7 +43,7 @@ function Page() {
             <div className="grid md:grid-cols-2 gap-6">
               {features.map((f) => (
                 <div key={f.title} className="bg-card border border-border rounded-2xl p-8 hover:border-primary/50 transition group">
-                  <div className="w-14 h-14 rounded-2xl bg-gradient-primary grid place-items-center text-white mb-6 group-hover:scale-110 transition">
+                  <div className="w-14 h-14 rounded-2xl bg-gradient-primary grid place-items-center text-black mb-6 group-hover:scale-110 transition">
                     <f.icon size={24} />
                   </div>
                   <h3 className="text-2xl font-bold mb-3">{f.title}</h3>
@@ -65,7 +65,7 @@ function Page() {
           <div className="container mx-auto px-6 text-center">
             <h2 className="text-3xl md:text-5xl font-extrabold">Prêt à <span className="text-gradient">commencer</span> ?</h2>
             <p className="mt-4 text-muted-foreground">Créez votre compte gratuitement et découvrez toutes nos fonctionnalités</p>
-            <Link to="/inscription" className="inline-flex mt-8 px-8 py-4 rounded-full bg-gradient-primary text-white font-semibold shadow-elegant hover:shadow-glow transition">
+            <Link to="/inscription" className="inline-flex mt-8 px-8 py-4 rounded-full bg-gradient-primary text-black font-semibold shadow-elegant hover:shadow-glow transition">
               Créer mon compte vendeur
             </Link>
           </div>

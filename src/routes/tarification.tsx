@@ -105,7 +105,7 @@ function Page() {
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {included.map((i) => (
                 <div key={i.title} className="text-center">
-                  <div className="w-16 h-16 rounded-2xl bg-gradient-primary text-white grid place-items-center mx-auto mb-4">
+                  <div className="w-16 h-16 rounded-2xl bg-gradient-primary text-black grid place-items-center mx-auto mb-4">
                     <i.icon size={26} />
                   </div>
                   <h3 className="font-bold mb-2">{i.title}</h3>

@@ -101,7 +101,7 @@ export function AiSeoModal({ initialName = "", initialCategory = "", initialPric
       <div onClick={(e) => e.stopPropagation()} className="bg-card border border-border rounded-2xl w-full max-w-4xl my-8 max-h-[calc(100vh-4rem)] flex flex-col">
         <div className="flex items-center justify-between p-5 border-b border-border">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-primary grid place-items-center text-white"><Sparkles size={20} /></div>
+            <div className="w-10 h-10 rounded-xl bg-gradient-primary grid place-items-center text-black"><Sparkles size={20} /></div>
             <div>
               <h3 className="font-bold text-lg">Agent IA SEO Amashia</h3>
               <p className="text-xs text-muted-foreground">Rédaction par Claude · mots-clés du marché camerounais</p>
@@ -139,7 +139,7 @@ export function AiSeoModal({ initialName = "", initialCategory = "", initialPric
                 <div><label className="block text-xs font-semibold mb-1.5">Utilisation / contexte</label><input value={form.usage} onChange={(e) => set("usage", e.target.value)} className={inp} placeholder="Cuisine, sport, bureau…" /></div>
                 <div className="md:col-span-2"><label className="block text-xs font-semibold mb-1.5">Public cible</label><input value={form.audience} onChange={(e) => set("audience", e.target.value)} className={inp} placeholder="Ex : ménagères, restaurateurs, jeunes actifs…" /></div>
               </div>
-              <button onClick={run} disabled={loading} className="w-full py-3.5 rounded-full bg-gradient-primary text-white font-semibold flex items-center justify-center gap-2 disabled:opacity-60">
+              <button onClick={run} disabled={loading} className="w-full py-3.5 rounded-full bg-gradient-primary text-black font-semibold flex items-center justify-center gap-2 disabled:opacity-60">
                 {loading ? <><Loader2 className="animate-spin" size={16} /> Recherche des mots-clés et rédaction… (≈ 1 min)</> : <><Wand2 size={16} /> Générer la fiche SEO</>}
               </button>
             </>
@@ -204,7 +204,7 @@ export function AiSeoModal({ initialName = "", initialCategory = "", initialPric
               <div>
                 <p className="text-xs font-semibold text-muted-foreground mb-2">🔍 Mots-clés</p>
                 <div className="flex flex-wrap gap-1.5">
-                  <span className="px-3 py-1 rounded-full bg-primary text-white text-xs font-semibold">★ {result.keywords.primary}</span>
+                  <span className="px-3 py-1 rounded-full bg-primary text-black text-xs font-semibold">★ {result.keywords.primary}</span>
                   {result.keywords.secondary.map((k, i) => <span key={i} className="px-3 py-1 rounded-full bg-secondary text-xs">{k}</span>)}
                   {result.keywords.longTail.map((k, i) => <span key={i} className="px-3 py-1 rounded-full bg-primary/10 text-primary text-xs">🎯 {k}</span>)}
                 </div>
@@ -261,7 +261,7 @@ export function AiSeoModal({ initialName = "", initialCategory = "", initialPric
         {result && (
           <div className="p-5 border-t border-border flex flex-col sm:flex-row gap-2">
             <button onClick={onClose} className="flex-1 py-3 rounded-full bg-secondary font-semibold text-sm">Fermer sans appliquer</button>
-            <button onClick={apply} className="flex-1 py-3 rounded-full bg-gradient-primary text-white font-semibold text-sm flex items-center justify-center gap-2"><Check size={14} /> Appliquer au produit</button>
+            <button onClick={apply} className="flex-1 py-3 rounded-full bg-gradient-primary text-black font-semibold text-sm flex items-center justify-center gap-2"><Check size={14} /> Appliquer au produit</button>
           </div>
         )}
       </div>

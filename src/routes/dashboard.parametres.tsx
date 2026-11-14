@@ -43,7 +43,7 @@ function ParametresPage() {
             <div className="space-y-5">
               <h3 className="font-bold text-lg">Informations du profil</h3>
               <div className="flex items-center gap-5">
-                <div className="w-20 h-20 rounded-2xl bg-gradient-primary grid place-items-center text-white text-2xl font-extrabold">A</div>
+                <div className="w-20 h-20 rounded-2xl bg-gradient-primary grid place-items-center text-black text-2xl font-extrabold">A</div>
                 <button className="px-4 py-2 rounded-full bg-secondary text-sm">Changer la photo</button>
               </div>
               <div className="grid md:grid-cols-2 gap-4">
@@ -52,7 +52,7 @@ function ParametresPage() {
                 <div><label className="block text-sm mb-2">Email</label><input className={inputCls} defaultValue="vendeur@amashia.cm" /></div>
                 <div><label className="block text-sm mb-2">Téléphone</label><input className={inputCls} defaultValue="+237 6 12 34 56 78" /></div>
               </div>
-              <button onClick={() => toast.success("Profil mis à jour")} className="px-6 py-3 rounded-full bg-gradient-primary text-white font-semibold">Enregistrer</button>
+              <button onClick={() => toast.success("Profil mis à jour")} className="px-6 py-3 rounded-full bg-gradient-primary text-black font-semibold">Enregistrer</button>
             </div>
           )}
           {tab === "notifs" && (
@@ -75,7 +75,7 @@ function ParametresPage() {
               <div><label className="block text-sm mb-2">Mot de passe actuel</label><PasswordInput className={inputCls} /></div>
               <div><label className="block text-sm mb-2">Nouveau mot de passe</label><PasswordInput className={inputCls} /></div>
               <div><label className="block text-sm mb-2">Confirmer</label><PasswordInput className={inputCls} /></div>
-              <button onClick={() => toast.success("Mot de passe modifié")} className="px-6 py-3 rounded-full bg-gradient-primary text-white font-semibold">Modifier</button>
+              <button onClick={() => toast.success("Mot de passe modifié")} className="px-6 py-3 rounded-full bg-gradient-primary text-black font-semibold">Modifier</button>
               <div className="border-t border-border pt-5">
                 <div className="flex justify-between items-center">
                   <div><p className="font-semibold">Authentification à deux facteurs</p><p className="text-xs text-muted-foreground">Ajoutez une couche de sécurité supplémentaire</p></div>
@@ -102,7 +102,7 @@ function ParametresPage() {
             <div className="space-y-5">
               <h3 className="font-bold text-lg">Centre d'aide</h3>
               <p className="text-sm text-muted-foreground">Besoin d'aide ? Contactez notre équipe support.</p>
-              <button className="px-6 py-3 rounded-full bg-gradient-primary text-white font-semibold">Contacter le support</button>
+              <button className="px-6 py-3 rounded-full bg-gradient-primary text-black font-semibold">Contacter le support</button>
             </div>
           )}
         </div>

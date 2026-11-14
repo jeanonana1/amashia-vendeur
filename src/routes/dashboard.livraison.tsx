@@ -65,7 +65,7 @@ function LivraisonPage() {
         <div className="grid md:grid-cols-3 gap-4">
           {["Amashia Express", "DHL", "La Poste"].map((t) => (
             <div key={t} className="border border-border rounded-xl p-4 flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-gradient-primary grid place-items-center text-white"><Truck size={18} /></div>
+              <div className="w-10 h-10 rounded-lg bg-gradient-primary grid place-items-center text-black"><Truck size={18} /></div>
               <div>
                 <p className="font-semibold text-sm">{t}</p>
                 <p className="text-xs text-muted-foreground">Disponible</p>

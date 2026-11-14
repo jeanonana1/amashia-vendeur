@@ -75,7 +75,7 @@ function DashboardOverview() {
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
         <div className="flex rounded-full bg-secondary p-1 text-xs">
           {PERIODS.map((p) => (
-            <button key={p.days} onClick={() => setDays(p.days)} className={`rounded-full px-3.5 py-1.5 transition ${days === p.days ? "bg-primary font-semibold text-white" : "text-muted-foreground hover:text-foreground"}`}>
+            <button key={p.days} onClick={() => setDays(p.days)} className={`rounded-full px-3.5 py-1.5 transition ${days === p.days ? "bg-primary font-semibold text-black" : "text-muted-foreground hover:text-foreground"}`}>
               {p.label}
             </button>
           ))}
@@ -125,7 +125,7 @@ function DashboardOverview() {
             </div>
             <div className="flex rounded-full bg-secondary p-1 text-xs">
               {PERIODS.map((p) => (
-                <button key={p.days} onClick={() => setDays(p.days)} className={`rounded-full px-3 py-1.5 ${days === p.days ? "bg-primary font-semibold text-white" : ""}`}>{p.label}</button>
+                <button key={p.days} onClick={() => setDays(p.days)} className={`rounded-full px-3 py-1.5 ${days === p.days ? "bg-primary font-semibold text-black" : ""}`}>{p.label}</button>
               ))}
             </div>
           </div>

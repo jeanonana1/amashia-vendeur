@@ -96,12 +96,12 @@ function AppsPage() {
                     {c.pixelId && <p>Pixel: <span className="font-mono text-foreground">{c.pixelId}</span></p>}
                   </div>
                   <div className="flex gap-2">
-                    <button onClick={() => setCreating(a.id)} className="flex-1 py-2.5 rounded-full bg-gradient-primary text-white text-sm font-semibold flex items-center justify-center gap-2"><Plus size={14} /> Nouvelle campagne</button>
+                    <button onClick={() => setCreating(a.id)} className="flex-1 py-2.5 rounded-full bg-gradient-primary text-black text-sm font-semibold flex items-center justify-center gap-2"><Plus size={14} /> Nouvelle campagne</button>
                     <button onClick={() => disconnect(a.id)} className="px-4 py-2.5 rounded-full bg-secondary text-sm font-semibold">Déconnecter</button>
                   </div>
                 </div>
               ) : (
-                <button onClick={() => startConnect(a.id)} className="w-full py-3 rounded-full bg-gradient-primary text-white font-semibold text-sm">Connecter mon compte {a.name}</button>
+                <button onClick={() => startConnect(a.id)} className="w-full py-3 rounded-full bg-gradient-primary text-black font-semibold text-sm">Connecter mon compte {a.name}</button>
               )}
             </div>
           );
@@ -145,7 +145,7 @@ function AppsPage() {
           <Field label="ID du compte publicitaire *"><input value={accId} onChange={(e) => setAccId(e.target.value)} placeholder="act_123456789" className={inputCls} /></Field>
           <Field label="ID du Pixel (tracking, optionnel)"><input value={pixelId} onChange={(e) => setPixelId(e.target.value)} placeholder="123456789012345" className={inputCls} /></Field>
           <div className="text-xs text-muted-foreground bg-secondary rounded-xl p-3">En connectant votre compte, vous autorisez Amashia à créer des campagnes et à suivre les conversions via votre pixel.</div>
-          <button onClick={connect} className="w-full py-3 rounded-full bg-gradient-primary text-white font-semibold">Connecter le compte</button>
+          <button onClick={connect} className="w-full py-3 rounded-full bg-gradient-primary text-black font-semibold">Connecter le compte</button>
         </Modal>
       )}
 
@@ -162,7 +162,7 @@ function AppsPage() {
             <Field label="Durée (jours)"><input type="number" value={form.duration} onChange={(e) => setForm({ ...form, duration: e.target.value })} className={inputCls} /></Field>
           </div>
           <Field label="Audience cible"><input value={form.audience} onChange={(e) => setForm({ ...form, audience: e.target.value })} className={inputCls} /></Field>
-          <button onClick={createCampaign} className="w-full py-3 rounded-full bg-gradient-primary text-white font-semibold">Lancer la campagne</button>
+          <button onClick={createCampaign} className="w-full py-3 rounded-full bg-gradient-primary text-black font-semibold">Lancer la campagne</button>
         </Modal>
       )}
     </DashboardLayout>

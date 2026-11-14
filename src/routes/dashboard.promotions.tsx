@@ -164,7 +164,7 @@ function PromotionsPage() {
             <h3 className="font-bold">Mes coupons</h3>
             <p className="text-xs text-muted-foreground">Chaque coupon s'affiche sur la page du produit concerné. Le client l'applique d'un clic ou saisit le code au paiement.</p>
           </div>
-          <button onClick={() => setForm(emptyForm())} className="flex items-center gap-2 rounded-full bg-gradient-primary px-5 py-2.5 text-sm font-semibold text-white"><Plus size={14} /> Créer un coupon</button>
+          <button onClick={() => setForm(emptyForm())} className="flex items-center gap-2 rounded-full bg-gradient-primary px-5 py-2.5 text-sm font-semibold text-black"><Plus size={14} /> Créer un coupon</button>
         </div>
 
         {coupons === null ? (
@@ -273,7 +273,7 @@ function PromotionsPage() {
 
             <div className="mt-6 flex gap-2">
               <button type="button" onClick={() => setForm(null)} className="flex-1 rounded-full border border-border py-2.5 text-sm font-semibold">Annuler</button>
-              <button type="submit" disabled={saving} className="flex-1 rounded-full bg-gradient-primary py-2.5 text-sm font-semibold text-white disabled:opacity-60">{saving ? "Enregistrement…" : form.id ? "Enregistrer" : "Créer le coupon"}</button>
+              <button type="submit" disabled={saving} className="flex-1 rounded-full bg-gradient-primary py-2.5 text-sm font-semibold text-black disabled:opacity-60">{saving ? "Enregistrement…" : form.id ? "Enregistrer" : "Créer le coupon"}</button>
             </div>
           </form>
         </div>

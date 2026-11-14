@@ -90,7 +90,7 @@ function ReapproPage() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
             <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Rechercher un produit…" className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-background border border-border text-sm focus:outline-none focus:border-primary" />
           </div>
-          <button onClick={() => setOnlyLow((v) => !v)} className={`px-4 py-2.5 rounded-xl text-sm font-semibold ${onlyLow ? "bg-gradient-primary text-white" : "bg-secondary"}`}>
+          <button onClick={() => setOnlyLow((v) => !v)} className={`px-4 py-2.5 rounded-xl text-sm font-semibold ${onlyLow ? "bg-gradient-primary text-black" : "bg-secondary"}`}>
             Stock faible uniquement
           </button>
         </div>
@@ -122,7 +122,7 @@ function ReapproPage() {
                       placeholder="Qté"
                       className="w-20 bg-background border border-border rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-primary"
                     />
-                    <button onClick={() => restock(r)} disabled={saving === r.id} className="px-3 py-2 rounded-xl bg-gradient-primary text-white text-xs font-semibold inline-flex items-center gap-1 disabled:opacity-60">
+                    <button onClick={() => restock(r)} disabled={saving === r.id} className="px-3 py-2 rounded-xl bg-gradient-primary text-black text-xs font-semibold inline-flex items-center gap-1 disabled:opacity-60">
                       <PackagePlus size={13} /> {saving === r.id ? "…" : "Ajouter au stock"}
                     </button>
                   </div>

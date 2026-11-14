@@ -7,7 +7,7 @@ export function Footer() {
         <div className="grid md:grid-cols-2 gap-10 mb-12">
           <div>
             <Link to="/" className="flex items-center gap-3 font-display font-extrabold text-xl mb-4">
-              <span className="w-10 h-10 rounded-xl bg-gradient-primary grid place-items-center text-white text-sm">a</span>
+              <span className="w-10 h-10 rounded-xl bg-gradient-primary grid place-items-center text-black text-sm">a</span>
               <span>Amashia Seller</span>
             </Link>
           </div>
@@ -50,7 +50,7 @@ export function Footer() {
                 placeholder="Votre email"
                 className="flex-1 bg-input border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary"
               />
-              <button className="w-10 h-10 grid place-items-center rounded-lg bg-gradient-primary text-white">→</button>
+              <button className="w-10 h-10 grid place-items-center rounded-lg bg-gradient-primary text-black">→</button>
             </form>
           </div>
         </div>

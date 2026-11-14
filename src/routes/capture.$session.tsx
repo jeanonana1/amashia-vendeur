@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Camera, Check, Loader2 } from "lucide-react";
+import { Camera, Check, Images, Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/capture/$session")({
   head: () => ({
@@ -29,54 +29,85 @@ async function downscale(file: File, max = 1024): Promise<string> {
 
 function CapturePage() {
   const { session } = Route.useParams();
-  const inputRef = useRef<HTMLInputElement>(null);
-  const [preview, setPreview] = useState<string | null>(null);
-  const [sending, setSending] = useState(false);
+  const camRef = useRef<HTMLInputElement>(null);
+  const galleryRef = useRef<HTMLInputElement>(null);
+  const [previews, setPreviews] = useState<string[]>([]);
+  const [sending, setSending] = useState(0);
   const [sent, setSent] = useState(0);
   const [error, setError] = useState<string | null>(null);
 
-  async function onFile(files: FileList | null) {
-    if (!files?.[0]) return;
-    const file = files[0];
+  /** Envoie une ou plusieurs photos à l'ordinateur (la page de l'ordinateur les reçoit en direct). */
+  async function sendFiles(list: File[]) {
+    const files = list.filter((f) => f.type.startsWith("image/")).slice(0, 8);
+    if (!files.length) return;
     setError(null);
-    setSending(true);
+    setSending(files.length);
+    const channel = supabase.channel(`capture-${session}`);
     try {
-      const dataUrl = await downscale(file);
-      setPreview(dataUrl);
-      const channel = supabase.channel(`capture-${session}`);
-      await new Promise<void>((resolve) => {
-        channel.subscribe((status) => { if (status === "SUBSCRIBED") resolve(); });
+      await new Promise<void>((resolve, reject) => {
+        const t = setTimeout(() => reject(new Error("Connexion impossible. Vérifiez votre réseau.")), 15000);
+        channel.subscribe((status) => { if (status === "SUBSCRIBED") { clearTimeout(t); resolve(); } });
       });
-      await channel.send({ type: "broadcast", event: "photo", payload: { dataUrl } });
-      setSent((n) => n + 1);
-      setTimeout(() => supabase.removeChannel(channel), 1500);
+      for (const file of files) {
+        const dataUrl = await downscale(file);
+        await channel.send({ type: "broadcast", event: "photo", payload: { dataUrl } });
+        setPreviews((p) => [dataUrl, ...p].slice(0, 12));
+        setSent((n) => n + 1);
+        setSending((n) => n - 1);
+      }
     } catch (e: any) {
       setError(e?.message || "Échec de l'envoi");
     } finally {
-      setSending(false);
+      setSending(0);
+      setTimeout(() => supabase.removeChannel(channel), 1500);
     }
   }
+
+  const pick = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files ?? []); // copie avant de vider le champ
+    e.target.value = "";
+    void sendFiles(files);
+  };
 
   return (
     <main className="min-h-screen bg-background text-foreground grid place-items-center p-6">
       <div className="w-full max-w-sm bg-card border border-border rounded-3xl p-6 text-center">
-        <h1 className="text-xl font-extrabold">Capture produit</h1>
-        <p className="text-sm text-muted-foreground mt-2">Photographiez votre produit sous plusieurs angles, sur un fond simple et bien éclairé. Chaque photo part directement sur votre ordinateur.</p>
+        <h1 className="text-xl font-extrabold">Photos du produit</h1>
+        <p className="text-sm text-muted-foreground mt-2">Chaque photo part directement sur votre ordinateur, dans la fiche produit. Conseil : fond simple, bonne lumière, plusieurs angles.</p>
 
-        {preview && <img src={preview} alt="Aperçu du produit capturé" className="mt-5 w-full rounded-2xl border border-border" />}
+        <div className="mt-5 space-y-3">
+          <button
+            onClick={() => camRef.current?.click()}
+            disabled={sending > 0}
+            className="flex w-full items-center gap-3 rounded-2xl border border-border p-4 text-left hover:border-primary disabled:opacity-60"
+          >
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-primary text-black"><Camera size={20} /></span>
+            <span><span className="block font-semibold">Filmer le produit</span><span className="text-xs text-muted-foreground">Ouvre la caméra pour photographier le produit</span></span>
+          </button>
+          <button
+            onClick={() => galleryRef.current?.click()}
+            disabled={sending > 0}
+            className="flex w-full items-center gap-3 rounded-2xl border border-border p-4 text-left hover:border-primary disabled:opacity-60"
+          >
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-secondary"><Images size={20} /></span>
+            <span><span className="block font-semibold">Importer depuis la galerie</span><span className="text-xs text-muted-foreground">Envoyez des photos déjà enregistrées sur ce téléphone</span></span>
+          </button>
+        </div>
 
-        {sent > 0 && (
-          <p className="mt-5 inline-flex items-center gap-2 text-emerald-400 font-semibold text-sm"><Check size={16} /> {sent > 1 ? `${sent} photos envoyées` : "Photo envoyée"} : elle apparaît sur votre ordinateur.</p>
+        {sending > 0 && <p className="mt-4 inline-flex items-center gap-2 text-sm text-muted-foreground"><Loader2 className="animate-spin" size={15} /> Envoi en cours…</p>}
+        {sent > 0 && sending === 0 && (
+          <p className="mt-4 inline-flex items-center gap-2 text-emerald-400 font-semibold text-sm"><Check size={16} /> {sent > 1 ? `${sent} photos envoyées` : "Photo envoyée"} : regardez votre ordinateur.</p>
         )}
-        <button
-          onClick={() => inputRef.current?.click()}
-          disabled={sending}
-          className="mt-5 w-full py-3.5 rounded-full bg-gradient-primary text-white font-semibold inline-flex items-center justify-center gap-2 disabled:opacity-60"
-        >
-          {sending ? <><Loader2 className="animate-spin" size={16} /> Envoi…</> : <><Camera size={16} /> {sent > 0 ? "Prendre une autre photo" : "Ouvrir la caméra"}</>}
-        </button>
         {error && <p className="mt-3 text-xs text-destructive">{error}</p>}
-        <input ref={inputRef} type="file" accept="image/*" capture="environment" hidden onChange={(e) => { void onFile(e.target.files); e.target.value = ""; }} />
+
+        {previews.length > 0 && (
+          <div className="mt-4 grid grid-cols-3 gap-2">
+            {previews.map((src, i) => <img key={i} src={src} alt={`Photo envoyée ${i + 1}`} className="aspect-square w-full rounded-xl border border-border object-cover" />)}
+          </div>
+        )}
+
+        <input ref={camRef} type="file" accept="image/*" capture="environment" hidden onChange={pick} />
+        <input ref={galleryRef} type="file" accept="image/*" multiple hidden onChange={pick} />
       </div>
     </main>
   );

@@ -452,12 +452,12 @@ function Page() {
           {/* STEP 7 — Done */}
           {step === 7 && (
             <div className="text-center py-8 animate-fade-up">
-              <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-primary grid place-items-center text-white shadow-elegant">
+              <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-primary grid place-items-center text-black shadow-elegant">
                 <Check size={40} />
               </div>
               <h2 className="text-3xl font-extrabold mb-3">Compte créé avec succès !</h2>
               <p className="text-muted-foreground mb-8">Bienvenue sur Amashia Seller, {data.firstName} ! Redirection vers votre tableau de bord…</p>
-              <button onClick={() => navigate({ to: "/dashboard" })} className="px-10 py-3.5 rounded-full bg-gradient-primary text-white font-semibold shadow-elegant hover:shadow-glow transition">
+              <button onClick={() => navigate({ to: "/dashboard" })} className="px-10 py-3.5 rounded-full bg-gradient-primary text-black font-semibold shadow-elegant hover:shadow-glow transition">
                 Accéder à mon compte
               </button>
             </div>
@@ -470,7 +470,7 @@ function Page() {
 }
 
 const inputCls = "w-full bg-background border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary disabled:opacity-50";
-const ctaCls = "w-full py-3.5 rounded-full bg-gradient-primary text-white font-semibold shadow-elegant hover:shadow-glow transition";
+const ctaCls = "w-full py-3.5 rounded-full bg-gradient-primary text-black font-semibold shadow-elegant hover:shadow-glow transition";
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return <div><label className="block text-sm font-medium mb-2">{label}</label>{children}</div>;
@@ -480,7 +480,7 @@ function NavBtns({ back, next, disabled, nextLabel = "Continuer" }: { back: () =
   return (
     <div className="grid grid-cols-2 gap-3 pt-2">
       <button onClick={back} className="py-3.5 rounded-full bg-secondary text-foreground font-semibold hover:opacity-90 transition">Précédent</button>
-      <button onClick={next} disabled={disabled} className="py-3.5 rounded-full bg-gradient-primary text-white font-semibold shadow-elegant hover:shadow-glow transition disabled:opacity-50 disabled:cursor-not-allowed">{nextLabel}</button>
+      <button onClick={next} disabled={disabled} className="py-3.5 rounded-full bg-gradient-primary text-black font-semibold shadow-elegant hover:shadow-glow transition disabled:opacity-50 disabled:cursor-not-allowed">{nextLabel}</button>
     </div>
   );
 }

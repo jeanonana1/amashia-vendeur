@@ -118,7 +118,7 @@ function CommandesPage() {
                   <div className="min-w-0">
                     <p className="flex flex-wrap items-center gap-2 font-bold">
                       {order.order_number}
-                      {isNew(order) && <span className="new-order-badge rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white">Nouveau</span>}
+                      {isNew(order) && <span className="new-order-badge rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-black">Nouveau</span>}
                     </p>
                     <p className="line-clamp-1 text-sm font-medium">{order.product_title}</p>
                     {(order.color || order.options) && <p className="text-xs text-primary">{[order.color ? `Couleur : ${colorName(order.color)}` : "", order.options ?? ""].filter(Boolean).join(" · ")}</p>}
@@ -201,7 +201,7 @@ function OrdersSummary({ orders, newOrders, onClose }: { orders: SellerOrderLine
           ))}
         </div>
         <p className="mt-2 text-[11px] text-muted-foreground">Nombre d'articles par état</p>
-        <button onClick={onClose} className="mt-5 w-full rounded-full bg-gradient-primary py-2.5 text-sm font-semibold text-white">Voir mes commandes</button>
+        <button onClick={onClose} className="mt-5 w-full rounded-full bg-gradient-primary py-2.5 text-sm font-semibold text-black">Voir mes commandes</button>
       </div>
     </div>
   );

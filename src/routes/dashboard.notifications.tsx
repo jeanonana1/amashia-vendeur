@@ -23,7 +23,7 @@ function NotificationsPage() {
         <div className="flex items-center justify-between mb-5">
           <div className="flex bg-secondary rounded-full p-1 text-xs">
             {["Toutes", "Non lues", "Commandes", "Paiements", "Avis"].map((t, i) => (
-              <button key={t} className={`px-4 py-1.5 rounded-full ${i === 0 ? "bg-primary text-white font-semibold" : ""}`}>{t}</button>
+              <button key={t} className={`px-4 py-1.5 rounded-full ${i === 0 ? "bg-primary text-black font-semibold" : ""}`}>{t}</button>
             ))}
           </div>
           <button className="text-sm text-primary flex items-center gap-2"><CheckCheck size={14} /> Tout marquer comme lu</button>

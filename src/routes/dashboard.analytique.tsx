@@ -97,7 +97,7 @@ function AnalytiquePage() {
       <div className="mb-6 flex flex-wrap items-end gap-3 rounded-2xl border border-border bg-card p-4">
         <div className="flex flex-wrap rounded-full bg-secondary p-1 text-xs">
           {PRESETS.map((p) => (
-            <button key={p.id} onClick={() => applyPreset(p.id)} className={`rounded-full px-3 py-1.5 ${preset === p.id ? "bg-primary font-semibold text-white" : "text-muted-foreground"}`}>{p.label}</button>
+            <button key={p.id} onClick={() => applyPreset(p.id)} className={`rounded-full px-3 py-1.5 ${preset === p.id ? "bg-primary font-semibold text-black" : "text-muted-foreground"}`}>{p.label}</button>
           ))}
         </div>
         <label className="text-xs text-muted-foreground">Du

@@ -27,7 +27,7 @@ export function Features() {
               key={i}
               className="group bg-card border border-border rounded-2xl p-8 hover:border-primary/50 hover:shadow-elegant transition-all duration-300"
             >
-              <div className="w-14 h-14 rounded-2xl bg-gradient-primary grid place-items-center text-white mb-6 group-hover:scale-110 transition-transform">
+              <div className="w-14 h-14 rounded-2xl bg-gradient-primary grid place-items-center text-black mb-6 group-hover:scale-110 transition-transform">
                 <f.icon size={24} />
               </div>
               <h3 className="text-xl font-bold mb-3">{f.title}</h3>

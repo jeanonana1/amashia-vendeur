@@ -172,6 +172,8 @@ const fmtFCFA = (n: number | string) => {
   if (!isFinite(v)) return "0";
   return new Intl.NumberFormat("fr-FR").format(Math.round(v));
 };
+/** Première lettre en majuscule (uniquement si c'est une lettre : « 8 Go » reste « 8 Go »). */
+const capFirst = (v: string) => v.replace(/^(\s*)(\p{Ll})/u, (_m, sp: string, c: string) => sp + c.toLocaleUpperCase("fr-FR"));
 const DRAFT_KEY = (id?: string) => `amashia-product-draft-${id || "new"}`;
 /** étape du formulaire mémorisée par brouillon (reprise au même endroit après rechargement) */
 const STEP_KEY = (id: string) => `amashia-product-step-${id}`;
@@ -534,7 +536,11 @@ function AddProductPage() {
         toast.success(asDraft ? "Brouillon enregistré" : "Produit publié !");
       }
       try { localStorage.removeItem(DRAFT_KEY()); } catch { /* ignore */ }
-      navigate({ to: "/dashboard/produits" });
+      // retour automatique à « Mes produits » (rechargement complet en secours)
+      const draftId = editId || draftIdRef.current;
+      if (draftId) { try { localStorage.removeItem(STEP_KEY(draftId)); } catch { /* ignore */ } }
+      try { await navigate({ to: "/dashboard/produits", replace: true }); } catch { /* repli ci-dessous */ }
+      if (!window.location.pathname.endsWith("/dashboard/produits")) window.location.assign("/dashboard/produits");
     } catch (e: any) {
       toast.error(e.message);
     } finally {
@@ -577,7 +583,7 @@ function AddProductPage() {
         <div className="flex items-center gap-2 min-w-max">
           {STEPS.map((s, i) => (
             <div key={s} className="flex items-center gap-2">
-              <button onClick={() => setStep(i)} className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold ${i === step ? "bg-gradient-primary text-white" : i < step ? "bg-emerald-500/20 text-emerald-400" : "bg-secondary text-muted-foreground"}`}>
+              <button onClick={() => setStep(i)} className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold ${i === step ? "bg-gradient-primary text-black" : i < step ? "bg-emerald-500/20 text-emerald-400" : "bg-secondary text-muted-foreground"}`}>
                 {i < step ? <Check size={12} /> : <span className="w-4 h-4 grid place-items-center rounded-full bg-white/20 text-[10px]">{i + 1}</span>}
                 {s}
               </button>
@@ -597,7 +603,7 @@ function AddProductPage() {
                   const Icon = t.icon; const active = type === t.id;
                   return (
                     <button key={t.id} onClick={() => setType(t.id as ProductType)} className={`p-4 rounded-2xl border text-left transition ${active ? "border-primary bg-primary/10" : "border-border hover:border-primary/50"}`}>
-                      <div className={`w-11 h-11 rounded-xl grid place-items-center mb-3 ${active ? "bg-gradient-primary text-white" : "bg-secondary"}`}><Icon size={20} /></div>
+                      <div className={`w-11 h-11 rounded-xl grid place-items-center mb-3 ${active ? "bg-gradient-primary text-black" : "bg-secondary"}`}><Icon size={20} /></div>
                       <p className="font-bold">{t.label}</p>
                       <p className="text-xs text-muted-foreground mt-1">{t.desc}</p>
                     </button>
@@ -614,7 +620,7 @@ function AddProductPage() {
                 <button
                   type="button"
                   onClick={() => setAiOpen(true)}
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-primary text-white text-xs font-bold shadow-elegant hover:opacity-90"
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-primary text-black text-xs font-bold shadow-elegant hover:opacity-90"
                   title="Générer une fiche SEO optimisée par l'agent IA Amashia"
                 >
                   <Sparkles size={14} /> Générer avec l'IA
@@ -649,7 +655,7 @@ function AddProductPage() {
                       <div key={i} className="relative group border border-border rounded-xl overflow-hidden">
                         <img {...imgProps(img.preview, { width: 256 })} className="w-full aspect-square object-cover" />
                         {i === 0 && (
-                          <span className="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-primary text-white text-[10px] font-bold flex items-center gap-1"><Star size={10} /> Principale</span>
+                          <span className="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-primary text-black text-[10px] font-bold flex items-center gap-1"><Star size={10} /> Principale</span>
                         )}
                         <button type="button" onClick={() => setImages(images.filter((_, j) => j !== i))} className="absolute top-2 right-2 w-6 h-6 grid place-items-center rounded-full bg-destructive text-white opacity-90 hover:opacity-100"><X size={12} /></button>
                         <div className="absolute inset-x-0 bottom-0 flex justify-between p-1.5 bg-gradient-to-t from-black/70 to-transparent">
@@ -679,7 +685,7 @@ function AddProductPage() {
                     <p className="font-semibold">Cliquez pour ajouter des images</p>
                     <p className="text-xs text-muted-foreground mt-1">PNG, JPG • 1000×1000 px recommandé (max 8)</p>
                   </button>
-                  <button type="button" onClick={() => setAiImgOpen(true)} className="sm:w-52 rounded-2xl bg-gradient-primary text-white p-6 text-center font-semibold text-sm flex flex-col items-center justify-center gap-2 hover:opacity-90">
+                  <button type="button" onClick={() => setAiImgOpen(true)} className="sm:w-52 rounded-2xl bg-gradient-primary text-black p-6 text-center font-semibold text-sm flex flex-col items-center justify-center gap-2 hover:opacity-90">
                     <Sparkles size={22} />
                     Générer avec l'IA
                     <span className="text-[11px] font-normal opacity-90">Vos photos sous les meilleurs angles</span>
@@ -726,8 +732,8 @@ function AddProductPage() {
                 <div className="space-y-2">
                   {specs.map((s, i) => (
                     <div key={i} className="grid grid-cols-[1fr_1.5fr_auto] gap-2">
-                      <input placeholder="Nom (ex: RAM)" value={s.name} onChange={(e) => setSpecs(specs.map((x, j) => j === i ? { ...x, name: e.target.value } : x))} className={inp} />
-                      <input placeholder={SPEC_EXAMPLES[s.name] ? `ex: ${SPEC_EXAMPLES[s.name]}` : "Valeur"} value={s.value} onChange={(e) => setSpecs(specs.map((x, j) => j === i ? { ...x, value: e.target.value } : x))} className={inp} />
+                      <input placeholder="Nom (ex: RAM)" value={s.name} onChange={(e) => setSpecs(specs.map((x, j) => j === i ? { ...x, name: capFirst(e.target.value) } : x))} className={inp} />
+                      <input placeholder={SPEC_EXAMPLES[s.name] ? `ex: ${SPEC_EXAMPLES[s.name]}` : "Valeur"} value={s.value} onChange={(e) => setSpecs(specs.map((x, j) => j === i ? { ...x, value: capFirst(e.target.value) } : x))} className={inp} />
                       <button onClick={() => setSpecs(specs.filter((_, j) => j !== i))} className="w-10 grid place-items-center rounded-xl bg-destructive/10 text-destructive"><Trash2 size={14} /></button>
                     </div>
                   ))}
@@ -799,7 +805,7 @@ function AddProductPage() {
                             <option value="">— Sélectionner un attribut —</option>
                             {Object.keys(ATTR_PRESETS).map((n) => <option key={n} value={n}>{n}</option>)}
                           </select>
-                          <button onClick={addAttr} disabled={!effName || !newAttr.values} className="px-4 rounded-xl bg-gradient-primary text-white text-sm font-semibold flex items-center gap-1 disabled:opacity-40"><Plus size={14} /> Ajouter</button>
+                          <button onClick={addAttr} disabled={!effName || !newAttr.values} className="px-4 rounded-xl bg-gradient-primary text-black text-sm font-semibold flex items-center gap-1 disabled:opacity-40"><Plus size={14} /> Ajouter</button>
                         </div>
 
                         {newAttr.name === "Personnalisé" && (
@@ -824,7 +830,7 @@ function AddProductPage() {
                                 {preset.values.map((v) => {
                                   const on = selected.includes(v);
                                   return (
-                                    <button key={v} type="button" onClick={() => toggle(v)} className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition ${on ? "border-primary bg-primary text-white" : "border-border hover:border-primary/50"}`}>
+                                    <button key={v} type="button" onClick={() => toggle(v)} className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition ${on ? "border-primary bg-primary text-black" : "border-border hover:border-primary/50"}`}>
                                       {v}
                                     </button>
                                   );
@@ -996,7 +1002,7 @@ function AddProductPage() {
                 <div className="rounded-xl p-3 bg-primary/10 border border-primary/30 text-sm">
                   <span className="text-muted-foreground line-through mr-2">{fmtFCFA(form.compare_at_price)} FCFA</span>
                   <span className="font-bold text-primary">{fmtFCFA(priceNum)} FCFA</span>
-                  <span className="ml-2 px-2 py-0.5 rounded-full bg-primary text-white text-xs font-bold">
+                  <span className="ml-2 px-2 py-0.5 rounded-full bg-primary text-black text-xs font-bold">
                     -{Math.round((1 - priceNum / Number(form.compare_at_price)) * 100)}%
                   </span>
                 </div>
@@ -1035,7 +1041,7 @@ function AddProductPage() {
                 <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-3"><p className="text-xs text-muted-foreground">Bénéfice ({margin}%)</p><p className="font-bold text-emerald-400">{fmtFCFA(profit)} FCFA</p></div>
               </div>
               <div className="flex flex-col sm:flex-row gap-3">
-                <button onClick={() => submit(false)} disabled={saving} className="flex-1 py-3.5 rounded-full bg-gradient-primary text-white font-semibold shadow-elegant disabled:opacity-50">
+                <button onClick={() => submit(false)} disabled={saving} className="flex-1 py-3.5 rounded-full bg-gradient-primary text-black font-semibold shadow-elegant disabled:opacity-50">
                   {saving ? "Enregistrement..." : editId ? "Mettre à jour" : "Publier le produit"}
                 </button>
                 <button onClick={() => submit(true)} disabled={saving} className="flex-1 py-3.5 rounded-full bg-secondary font-semibold disabled:opacity-50">Brouillon</button>
@@ -1046,7 +1052,7 @@ function AddProductPage() {
           <div className="flex justify-between">
             <button disabled={step === 0} onClick={() => setStep(step - 1)} className="px-5 py-2.5 rounded-full bg-secondary text-sm font-semibold disabled:opacity-40 flex items-center gap-2"><ArrowLeft size={14} /> Précédent</button>
             {step < STEPS.length - 1 && (
-              <button disabled={!canNext()} onClick={() => setStep(step + 1)} className="px-5 py-2.5 rounded-full bg-gradient-primary text-white text-sm font-semibold disabled:opacity-40 flex items-center gap-2">Suivant <ArrowRight size={14} /></button>
+              <button disabled={!canNext()} onClick={() => setStep(step + 1)} className="px-5 py-2.5 rounded-full bg-gradient-primary text-black text-sm font-semibold disabled:opacity-40 flex items-center gap-2">Suivant <ArrowRight size={14} /></button>
             )}
           </div>
         </div>
@@ -1056,7 +1062,7 @@ function AddProductPage() {
           <div className="bg-card border border-border rounded-2xl overflow-hidden">
             <div className="aspect-square bg-secondary relative">
               {images[0] ? <img {...imgProps(images[0].preview, { width: 384 })} className="w-full h-full object-cover" /> : <div className="w-full h-full grid place-items-center text-muted-foreground text-sm">Aperçu image</div>}
-              <span className="absolute top-3 left-3 px-3 py-1 rounded-full bg-primary text-white text-xs font-bold">{type}</span>
+              <span className="absolute top-3 left-3 px-3 py-1 rounded-full bg-primary text-black text-xs font-bold">{type}</span>
             </div>
             <div className="p-4 space-y-2">
               <p className="font-bold">{form.name || "Nom du produit"}</p>

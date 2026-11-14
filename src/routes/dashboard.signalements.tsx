@@ -86,7 +86,7 @@ function ReportsPage() {
           <button
             key={f}
             onClick={() => setFilter(f)}
-            className={`px-4 py-2 rounded-full text-sm font-semibold transition ${filter === f ? "bg-gradient-primary text-white" : "bg-secondary text-muted-foreground hover:text-foreground"}`}
+            className={`px-4 py-2 rounded-full text-sm font-semibold transition ${filter === f ? "bg-gradient-primary text-black" : "bg-secondary text-muted-foreground hover:text-foreground"}`}
           >
             {f === "all" ? `Tous (${reports.length})` : `${STATUS[f]!.label}${f === "pending" ? ` (${pending})` : ""}`}
           </button>
@@ -169,7 +169,7 @@ function ReportsPage() {
             </div>
 
             <div className="flex flex-wrap gap-2 mt-6">
-              <button onClick={() => setStatus(open.id, "reviewed")} className="flex-1 min-w-[120px] py-2.5 rounded-xl bg-gradient-primary text-white text-sm font-semibold">Marquer comme traité</button>
+              <button onClick={() => setStatus(open.id, "reviewed")} className="flex-1 min-w-[120px] py-2.5 rounded-xl bg-gradient-primary text-black text-sm font-semibold">Marquer comme traité</button>
               <button onClick={() => setStatus(open.id, "rejected")} className="flex-1 min-w-[120px] py-2.5 rounded-xl bg-secondary text-sm font-semibold">Rejeter</button>
               <button onClick={() => remove(open.id)} className="px-4 py-2.5 rounded-xl bg-destructive/10 text-destructive text-sm font-semibold flex items-center gap-1"><Trash2 size={14} /></button>
             </div>

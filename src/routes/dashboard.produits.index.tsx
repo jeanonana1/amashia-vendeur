@@ -184,7 +184,7 @@ function ProduitsPage() {
               )}
             </div>
           </div>
-          <Link to="/dashboard/produits/ajouter" className="px-4 sm:px-5 py-2.5 rounded-full bg-gradient-primary text-white text-sm font-semibold flex items-center gap-2 whitespace-nowrap"><Plus size={14} /><span className="hidden sm:inline">Ajouter un produit</span><span className="sm:hidden">Ajouter</span></Link>
+          <Link to="/dashboard/produits/ajouter" className="px-4 sm:px-5 py-2.5 rounded-full bg-gradient-primary text-black text-sm font-semibold flex items-center gap-2 whitespace-nowrap"><Plus size={14} /><span className="hidden sm:inline">Ajouter un produit</span><span className="sm:hidden">Ajouter</span></Link>
         </div>
 
         {filtered.length === 0 ? (
@@ -200,9 +200,10 @@ function ProduitsPage() {
               const isActive = p.status === "active";
               return (
                 <article key={p.id} className="group bg-background/40 border border-border rounded-2xl overflow-hidden flex flex-col hover:border-primary/50 transition">
-                  <div className="relative w-full aspect-square overflow-hidden bg-secondary">
+                  <div className="relative w-full aspect-square overflow-hidden bg-white">
                     {p.images && p.images[0] ? (
-                      <img {...imgProps(p.images[0], { width: 256, sizes: "(max-width: 768px) 50vw, 240px" })} alt={p.name} loading="lazy" className="absolute inset-0 w-full h-full object-cover object-center" />
+                      // image entière, sans zoom (comme sur le site client)
+                      <img {...imgProps(p.images[0], { width: 384, sizes: "(max-width: 768px) 50vw, 240px" })} alt={p.name} loading="lazy" className="absolute inset-0 w-full h-full object-contain p-2" />
                     ) : (
                       <div className="absolute inset-0 bg-gradient-primary opacity-40" />
                     )}
@@ -242,7 +243,7 @@ function ProduitsPage() {
 
                     <button
                       onClick={() => setPublishTarget(p)}
-                      className="w-full py-2 rounded-full bg-gradient-primary text-white text-[11px] font-semibold inline-flex items-center justify-center gap-1.5"
+                      className="w-full py-2 rounded-full bg-gradient-primary text-black text-[11px] font-semibold inline-flex items-center justify-center gap-1.5"
                     >
                       <Rocket size={12} /> Publier sur Amashia
                     </button>
@@ -278,7 +279,7 @@ function ProduitsPage() {
             <p className="text-[11px] text-muted-foreground mt-1.5">Stock actuel : {stockEdit.product.stock}</p>
             <div className="flex gap-2 mt-5">
               <button onClick={() => setStockEdit(null)} className="flex-1 py-2.5 rounded-full bg-secondary text-sm font-semibold">Annuler</button>
-              <button onClick={saveStock} disabled={savingStock} className="flex-1 py-2.5 rounded-full bg-gradient-primary text-white text-sm font-semibold disabled:opacity-60">{savingStock ? "…" : "Enregistrer"}</button>
+              <button onClick={saveStock} disabled={savingStock} className="flex-1 py-2.5 rounded-full bg-gradient-primary text-black text-sm font-semibold disabled:opacity-60">{savingStock ? "…" : "Enregistrer"}</button>
             </div>
           </div>
         </div>

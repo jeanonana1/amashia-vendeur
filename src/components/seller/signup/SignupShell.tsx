@@ -8,7 +8,7 @@ export function SignupShell({ step, children, onBack }: { step: number; children
   return (
     <div className="w-full max-w-3xl bg-card border border-border rounded-3xl p-8 md:p-10">
       <div className="flex justify-center mb-6">
-        <div className="w-16 h-16 rounded-2xl bg-gradient-primary grid place-items-center text-white font-extrabold shadow-elegant">
+        <div className="w-16 h-16 rounded-2xl bg-gradient-primary grid place-items-center text-black font-extrabold shadow-elegant">
           a
         </div>
       </div>
@@ -31,7 +31,7 @@ export function SignupShell({ step, children, onBack }: { step: number; children
           const active = num === step;
           return (
             <div key={label} className="flex flex-col items-center text-center">
-              <div className={`w-9 h-9 rounded-full grid place-items-center text-xs font-bold mb-1.5 transition ${done || active ? "bg-gradient-primary text-white" : "bg-secondary text-muted-foreground"}`}>
+              <div className={`w-9 h-9 rounded-full grid place-items-center text-xs font-bold mb-1.5 transition ${done || active ? "bg-gradient-primary text-black" : "bg-secondary text-muted-foreground"}`}>
                 {done ? <Check size={16} /> : num}
               </div>
               <span className={`text-[10px] ${active ? "text-foreground font-semibold" : "text-muted-foreground"}`}>{label}</span>

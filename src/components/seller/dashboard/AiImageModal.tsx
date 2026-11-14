@@ -208,7 +208,7 @@ export function AiImageModal({ productName, category, description, formImages, o
       <div onClick={(e) => e.stopPropagation()} className="relative my-4 flex max-h-[calc(100dvh-2rem)] w-full min-w-0 max-w-3xl flex-col rounded-2xl border border-border bg-card sm:my-8">
         <div className="flex items-center justify-between border-b border-border p-5">
           <div className="flex min-w-0 items-center gap-3">
-            <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-gradient-primary text-white"><Sparkles size={20} /></div>
+            <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-gradient-primary text-black"><Sparkles size={20} /></div>
             <div className="min-w-0">
               <h3 className="truncate text-lg font-bold">Images produit par IA</h3>
               <p className="truncate text-xs text-muted-foreground">Vos vraies photos, mises en valeur sous les meilleurs angles</p>
@@ -229,13 +229,13 @@ export function AiImageModal({ productName, category, description, formImages, o
               {refs.map((r) => (
                 <button key={r.key} type="button" onClick={() => setRefs((prev) => prev.map((x) => (x.key === r.key ? { ...x, on: !x.on && prev.filter((y) => y.on).length < MAX_REFS ? true : false } : x)))} className={`relative h-20 w-20 overflow-hidden rounded-xl border-2 ${r.on ? "border-primary" : "border-border opacity-50"}`}>
                   <img {...(r.url ? imgProps(r.url, { width: 128 }) : { src: r.preview })} alt="" className="h-full w-full object-cover" />
-                  {r.on && <span className="absolute right-1 top-1 grid h-5 w-5 place-items-center rounded-full bg-primary text-white"><Check size={11} /></span>}
+                  {r.on && <span className="absolute right-1 top-1 grid h-5 w-5 place-items-center rounded-full bg-primary text-black"><Check size={11} /></span>}
                 </button>
               ))}
               {Array.from({ length: uploading }).map((_, i) => <div key={i} className="grid h-20 w-20 place-items-center rounded-xl bg-secondary"><Loader2 className="animate-spin" size={18} /></div>)}
               {!refs.length && !uploading && <p className="text-xs text-muted-foreground">Aucune photo pour le moment.</p>}
             </div>
-            <button onClick={runPlan} disabled={planning || !activeRefs.length || uploading > 0} className={`${btn} mt-4 w-full bg-gradient-primary py-3 text-sm text-white`}>
+            <button onClick={runPlan} disabled={planning || !activeRefs.length || uploading > 0} className={`${btn} mt-4 w-full bg-gradient-primary py-3 text-sm text-black`}>
               {planning ? <><Loader2 className="animate-spin" size={15} /> Analyse des photos et de la description…</> : <><Sparkles size={15} /> {planned ? "Proposer d'autres angles" : "Proposer les meilleurs angles"}</>}
             </button>
           </section>
@@ -265,7 +265,7 @@ export function AiImageModal({ productName, category, description, formImages, o
                         ) : (
                           <span className="absolute inset-0 grid place-items-center p-3 text-center text-[11px] text-muted-foreground">{chosen[s.id] ? "Sera générée" : "Non retenue"}</span>
                         )}
-                        {(j ? j.selected : chosen[s.id]) && <span className="absolute right-1.5 top-1.5 grid h-5 w-5 place-items-center rounded-full bg-primary text-white"><Check size={11} /></span>}
+                        {(j ? j.selected : chosen[s.id]) && <span className="absolute right-1.5 top-1.5 grid h-5 w-5 place-items-center rounded-full bg-primary text-black"><Check size={11} /></span>}
                       </button>
                       <div className="p-2.5">
                         <p className="truncate text-xs font-bold" title={s.label}>{s.label}</p>
@@ -276,7 +276,7 @@ export function AiImageModal({ productName, category, description, formImages, o
                 })}
               </ul>
               {!Object.keys(jobs).length && (
-                <button onClick={generate} className={`${btn} mt-4 w-full bg-gradient-primary py-3 text-sm text-white`}>
+                <button onClick={generate} className={`${btn} mt-4 w-full bg-gradient-primary py-3 text-sm text-black`}>
                   <Sparkles size={15} /> Générer {Object.values(chosen).filter(Boolean).length} image(s)
                   {planned.costUsd ? <span className="text-xs font-normal opacity-90">(≈ {(planned.costUsd * Object.values(chosen).filter(Boolean).length).toFixed(2)} $)</span> : null}
                 </button>
@@ -292,7 +292,7 @@ export function AiImageModal({ productName, category, description, formImages, o
         {done.length > 0 && (
           <div className="flex flex-col gap-2 border-t border-border p-5 sm:flex-row">
             <button onClick={onClose} className={`${btn} flex-1 bg-secondary py-3 text-sm`}>Fermer</button>
-            <button onClick={addSelected} className={`${btn} flex-1 bg-gradient-primary py-3 text-sm text-white`}><Check size={14} /> Ajouter {done.length} image(s) à ma fiche</button>
+            <button onClick={addSelected} className={`${btn} flex-1 bg-gradient-primary py-3 text-sm text-black`}><Check size={14} /> Ajouter {done.length} image(s) à ma fiche</button>
           </div>
         )}
 

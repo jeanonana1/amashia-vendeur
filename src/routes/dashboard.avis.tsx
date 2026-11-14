@@ -139,7 +139,7 @@ function AvisPage() {
                   <p className="text-[11px] text-muted-foreground">
                     Publié le {dateTime(r.created_at)}
                     {seenBefore !== undefined && (seenBefore === null || r.created_at > seenBefore) && (
-                      <span className="ml-2 rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold text-white">Nouveau</span>
+                      <span className="ml-2 rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold text-black">Nouveau</span>
                     )}
                   </p>
                   {r.comment && <p className="mt-2 whitespace-pre-line text-sm">{r.comment}</p>}

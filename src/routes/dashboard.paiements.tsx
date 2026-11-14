@@ -82,7 +82,7 @@ function PaiementsPage() {
   return (
     <DashboardLayout title="Paiements" subtitle="Votre solde, vos moyens de retrait et l'historique de vos gains">
       <div className="mb-6 grid grid-cols-1 gap-5 lg:grid-cols-3">
-        <div className="rounded-2xl bg-gradient-primary p-6 text-white lg:col-span-2">
+        <div className="rounded-2xl bg-gradient-primary p-6 text-black lg:col-span-2">
           <div className="mb-4 flex items-center gap-3 opacity-90"><Wallet size={20} /><span className="text-sm font-semibold">Solde disponible</span></div>
           <p className="text-4xl font-extrabold">{stats ? money(balance) : "…"}</p>
           <p className="mt-1 text-xs opacity-80">Ventes livrées, moins les retraits demandés ou déjà payés.</p>
@@ -278,7 +278,7 @@ function MethodModal({ initial, onClose, onSaved, isFirst }: { initial: Method |
             <input {...noFill} name="amashia-payout-label" className={`${inp} mt-1`} placeholder="Ex. Mon Orange Money" value={f.label} onChange={(e) => setF({ ...f, label: e.target.value })} />
           </label>
         </div>
-        <button type="submit" disabled={busy} className="mt-5 w-full rounded-full bg-gradient-primary py-3 text-sm font-semibold text-white disabled:opacity-60">{busy ? "Enregistrement…" : initial ? "Enregistrer les modifications" : "Enregistrer"}</button>
+        <button type="submit" disabled={busy} className="mt-5 w-full rounded-full bg-gradient-primary py-3 text-sm font-semibold text-black disabled:opacity-60">{busy ? "Enregistrement…" : initial ? "Enregistrer les modifications" : "Enregistrer"}</button>
       </form>
     </Modal>
   );
@@ -311,7 +311,7 @@ function WithdrawModal({ balance, methods, onClose, onDone }: { balance: number;
       <select className={inp} value={method} onChange={(e) => setMethod(e.target.value)}>
         {methods.map((m) => <option key={m.id} value={m.id}>{(m.label || KIND[m.kind].label)} · {mask(m.account_number)}</option>)}
       </select>
-      <button onClick={submit} disabled={busy} className="mt-5 w-full rounded-full bg-gradient-primary py-3 text-sm font-semibold text-white disabled:opacity-60">{busy ? "Envoi…" : "Confirmer le retrait"}</button>
+      <button onClick={submit} disabled={busy} className="mt-5 w-full rounded-full bg-gradient-primary py-3 text-sm font-semibold text-black disabled:opacity-60">{busy ? "Envoi…" : "Confirmer le retrait"}</button>
       <p className="mt-3 text-[11px] text-muted-foreground">Le montant est réservé immédiatement et versé par l'équipe Amashia sous 48 h ouvrées.</p>
     </Modal>
   );

@@ -19,7 +19,7 @@ export function FinalCTA() {
             <div className="mt-10 flex flex-wrap justify-center gap-4">
               <Link
                 to="/inscription"
-                className="inline-flex items-center gap-2 px-8 py-4 rounded-full bg-gradient-primary text-white font-semibold shadow-elegant hover:shadow-glow transition"
+                className="inline-flex items-center gap-2 px-8 py-4 rounded-full bg-gradient-primary text-black font-semibold shadow-elegant hover:shadow-glow transition"
               >
                 Créer mon compte vendeur <ArrowRight size={18} />
               </Link>

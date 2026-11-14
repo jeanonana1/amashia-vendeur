@@ -41,7 +41,7 @@ function SponsoringPage() {
 
   return (
     <DashboardLayout title="Sponsoring" subtitle="Boostez votre visibilité">
-      <div className="bg-gradient-primary text-white rounded-2xl p-7 mb-6 flex flex-wrap items-center gap-6">
+      <div className="bg-gradient-primary text-black rounded-2xl p-7 mb-6 flex flex-wrap items-center gap-6">
         <div className="w-16 h-16 rounded-2xl bg-white/20 grid place-items-center"><Sparkles size={28} /></div>
         <div className="flex-1 min-w-[200px]">
           <h2 className="text-2xl font-extrabold">Augmentez vos ventes jusqu'à 3x</h2>
@@ -56,14 +56,14 @@ function SponsoringPage() {
       <div className="grid md:grid-cols-3 gap-5 mb-6">
         {PLANS.map((p) => (
           <div key={p.id} className={`bg-card border-2 rounded-2xl p-6 relative ${p.popular ? "border-primary" : "border-border"}`}>
-            {p.popular && <span className="absolute -top-3 left-6 px-3 py-1 rounded-full bg-gradient-primary text-white text-xs font-bold">Populaire</span>}
+            {p.popular && <span className="absolute -top-3 left-6 px-3 py-1 rounded-full bg-gradient-primary text-black text-xs font-bold">Populaire</span>}
             <h3 className="font-bold text-lg">{p.name}</h3>
             <p className="text-3xl font-extrabold mt-2">{p.price.toLocaleString()} <span className="text-base text-muted-foreground font-normal">FCFA</span></p>
             <p className="text-xs text-muted-foreground">{p.duration} jours</p>
             <ul className="space-y-2 my-5 text-sm">
               {p.features.map((f) => <li key={f} className="flex items-center gap-2"><Star size={14} className="text-primary" /> {f}</li>)}
             </ul>
-            <button onClick={() => setSelectedPlan(p)} className={`w-full py-3 rounded-full font-semibold text-sm ${p.popular ? "bg-gradient-primary text-white" : "bg-secondary"}`}>Choisir</button>
+            <button onClick={() => setSelectedPlan(p)} className={`w-full py-3 rounded-full font-semibold text-sm ${p.popular ? "bg-gradient-primary text-black" : "bg-secondary"}`}>Choisir</button>
           </div>
         ))}
       </div>
@@ -79,7 +79,7 @@ function SponsoringPage() {
               const remaining = Math.max(0, c.durationDays - elapsed);
               return (
                 <div key={c.id} className="border border-border rounded-xl p-4 flex flex-wrap items-center gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-primary grid place-items-center text-white"><Sparkles size={18} /></div>
+                  <div className="w-12 h-12 rounded-xl bg-gradient-primary grid place-items-center text-black"><Sparkles size={18} /></div>
                   <div className="flex-1 min-w-[200px]">
                     <p className="font-bold">{c.name}</p>
                     <p className="text-xs text-muted-foreground">Plan {c.plan} • {remaining} jours restants</p>
@@ -110,7 +110,7 @@ function SponsoringPage() {
             <div><label className="block text-sm mb-2 font-medium">Produit à sponsoriser *</label>
               <input value={productName} onChange={(e) => setProductName(e.target.value)} placeholder="Nom du produit" className="w-full bg-background border border-border rounded-xl px-4 py-3 text-sm" />
             </div>
-            <button onClick={launch} className="w-full py-3 rounded-full bg-gradient-primary text-white font-semibold">Confirmer et lancer</button>
+            <button onClick={launch} className="w-full py-3 rounded-full bg-gradient-primary text-black font-semibold">Confirmer et lancer</button>
           </div>
         </div>
       )}

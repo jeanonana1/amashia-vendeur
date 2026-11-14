@@ -78,7 +78,7 @@ export function ColorPicker({ selected, onToggle }: { selected: string[]; onTogg
               <span className={`relative grid h-11 w-11 place-items-center rounded-full p-[3px] ring-2 transition ${on ? "ring-primary" : "ring-transparent group-hover:ring-border"}`}>
                 <span className="h-full w-full rounded-full border border-black/15 shadow-sm" style={{ background: c.hex }} />
                 {on && (
-                  <span className="absolute -right-0.5 -top-0.5 grid h-5 w-5 place-items-center rounded-full bg-primary text-white shadow">
+                  <span className="absolute -right-0.5 -top-0.5 grid h-5 w-5 place-items-center rounded-full bg-primary text-black shadow">
                     <Check size={12} strokeWidth={3} />
                   </span>
                 )}
@@ -117,7 +117,7 @@ export function ColorPicker({ selected, onToggle }: { selected: string[]; onTogg
             type="button"
             onClick={addCustom}
             disabled={!customName.trim()}
-            className="flex items-center gap-1 rounded-xl bg-gradient-primary px-3 py-2.5 text-xs font-semibold text-white disabled:opacity-40"
+            className="flex items-center gap-1 rounded-xl bg-gradient-primary px-3 py-2.5 text-xs font-semibold text-black disabled:opacity-40"
           >
             <Plus size={14} /> Ajouter
           </button>

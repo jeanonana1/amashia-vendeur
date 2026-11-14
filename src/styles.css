@@ -38,7 +38,8 @@
   --shadow-elegant: 0 25px 60px -20px color-mix(in oklab, var(--primary) 45%, transparent);
   --shadow-glow: 0 0 80px color-mix(in oklab, var(--primary) 35%, transparent);
   --shadow-soft: 0 4px 20px -4px oklch(0 0 0 / 0.4);
-  --gradient-primary: linear-gradient(135deg, var(--primary) 0%, var(--gold) 100%);
+  /* orange principal Amashia, identique au site client (boutons : texte noir) */
+  --gradient-primary: linear-gradient(0deg, #ff6800, #ff6800);
   --gradient-orange: linear-gradient(135deg, oklch(0.7 0.2 45) 0%, oklch(0.78 0.18 70) 100%);
 }
 
@@ -52,8 +53,8 @@
   --popover: oklch(0.18 0.008 60);
   --popover-foreground: oklch(0.98 0.005 60);
   /* #FF6800 orange */
-  --primary: oklch(0.7 0.2 45);
-  --primary-foreground: oklch(1 0 0);
+  --primary: #ff6800;
+  --primary-foreground: #000000;
   --primary-glow: oklch(0.78 0.18 60);
   --secondary: oklch(0.22 0.01 60);
   --secondary-foreground: oklch(0.98 0.005 60);
@@ -68,7 +69,7 @@
   --destructive-foreground: oklch(0.99 0 0);
   --border: oklch(0.25 0.008 60);
   --input: oklch(0.22 0.008 60);
-  --ring: oklch(0.7 0.2 45);
+  --ring: #ff6800;
 }
 
 .light {
@@ -78,8 +79,8 @@
   --card-foreground: oklch(0.18 0.01 60);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.18 0.01 60);
-  --primary: oklch(0.7 0.2 45);
-  --primary-foreground: oklch(1 0 0);
+  --primary: #ff6800;
+  --primary-foreground: #000000;
   --primary-glow: oklch(0.78 0.18 60);
   --secondary: oklch(0.96 0.005 60);
   --secondary-foreground: oklch(0.18 0.01 60);
@@ -93,7 +94,7 @@
   --destructive-foreground: oklch(0.99 0 0);
   --border: oklch(0.92 0.005 60);
   --input: oklch(0.96 0.005 60);
-  --ring: oklch(0.7 0.2 45);
+  --ring: #ff6800;
 }
 
 @layer base {

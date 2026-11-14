@@ -80,7 +80,7 @@ export function DashboardLayout({ title, subtitle, children }: { title: string; 
   const SidebarInner = (
     <>
       <Link to="/" className="flex items-center gap-3 font-display font-extrabold text-lg p-6 border-b border-border">
-        <span className="w-9 h-9 rounded-xl bg-gradient-primary grid place-items-center text-white text-sm">a</span>
+        <span className="w-9 h-9 rounded-xl bg-gradient-primary grid place-items-center text-black text-sm">a</span>
         <span>Amashia Seller</span>
       </Link>
       <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
@@ -93,7 +93,7 @@ export function DashboardLayout({ title, subtitle, children }: { title: string; 
               <Icon size={18} />
               <span className="flex-1">{item.label}</span>
               {badge > 0 && (
-                <span className={`min-w-[20px] rounded-full px-1.5 py-0.5 text-center text-[10px] font-bold leading-none text-white ${item.to === "/dashboard/signalements" ? "bg-red-500" : "bg-primary"}`}>
+                <span className={`min-w-[20px] rounded-full px-1.5 py-0.5 text-center text-[10px] font-bold leading-none text-black ${item.to === "/dashboard/signalements" ? "bg-red-500" : "bg-primary"}`}>
                   {badge > 99 ? "99+" : badge}
                 </span>
               )}
@@ -139,7 +139,7 @@ export function DashboardLayout({ title, subtitle, children }: { title: string; 
             <Menu size={20} />
           </button>
           <Link to="/" className="flex items-center gap-2 font-display font-extrabold text-base">
-            <span className="w-8 h-8 rounded-lg bg-gradient-primary grid place-items-center text-white text-xs">a</span>
+            <span className="w-8 h-8 rounded-lg bg-gradient-primary grid place-items-center text-black text-xs">a</span>
             <span>Amashia</span>
           </Link>
           <div className="flex items-center gap-2">
@@ -148,7 +148,7 @@ export function DashboardLayout({ title, subtitle, children }: { title: string; 
             </button>
             <button className="relative w-10 h-10 grid place-items-center rounded-full bg-secondary text-muted-foreground" aria-label="Notifications">
               <Bell size={16} />
-              <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-primary text-white text-[9px] font-bold grid place-items-center">3</span>
+              <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-primary text-black text-[9px] font-bold grid place-items-center">3</span>
             </button>
           </div>
         </div>
@@ -174,10 +174,10 @@ export function DashboardLayout({ title, subtitle, children }: { title: string; 
               </button>
               <button className="hidden lg:grid relative w-10 h-10 place-items-center rounded-full bg-secondary text-muted-foreground hover:text-primary transition">
                 <Bell size={18} />
-                <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-primary text-white text-[10px] font-bold grid place-items-center">3</span>
+                <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-primary text-black text-[10px] font-bold grid place-items-center">3</span>
               </button>
               <button className="flex items-center gap-2 bg-secondary rounded-full pl-1 pr-3 py-1">
-                <div className="w-8 h-8 rounded-full bg-gradient-primary grid place-items-center text-white text-xs font-bold">{name[0]}</div>
+                <div className="w-8 h-8 rounded-full bg-gradient-primary grid place-items-center text-black text-xs font-bold">{name[0]}</div>
                 <ChevronDown size={14} />
               </button>
             </div>

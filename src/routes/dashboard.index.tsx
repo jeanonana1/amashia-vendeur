@@ -35,6 +35,16 @@ const STATUS: Record<string, { label: string; cls: string }> = {
 function DashboardOverview() {
   const name = useSellerName();
   const [days, setDays] = useState<number>(1);
+  // période par défaut choisie dans Paramètres > Préférences
+  useEffect(() => {
+    void (async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const { data } = await (supabase as any).from("seller_profiles").select("dashboard_period").eq("id", user.id).maybeSingle();
+      const d = Number(data?.dashboard_period);
+      if ([7, 30, 365].includes(d)) setDays(d);
+    })();
+  }, []);
   const period = PERIODS.find((p) => p.days === days)!;
   const { stats, loading, error } = useSellerStats(days);
   const live = useLiveVisitors(stats?.shop?.id);
@@ -122,6 +132,7 @@ function DashboardOverview() {
                 <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-primary" /> Visites</span>
                 <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-emerald-500" /> Ajouts au panier</span>
                 <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-sky-400" /> Commandes</span>
+                <span className="flex items-center gap-1.5"><span className="h-2 w-3 rounded-sm" style={{ background: "oklch(0.72 0.14 85 / .6)" }} /> Ventes (FCFA, axe gauche)</span>
               </div>
             </div>
             <div className="flex rounded-full bg-secondary p-1 text-xs">
@@ -243,20 +254,45 @@ function bucketLabel(iso: string, days: number) {
   return d.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit" });
 }
 
+/** Graduation « ronde » adaptée aux montants (1, 2, 2,5 ou 5 × 10ⁿ par pas). */
+function niceScale(max: number, steps = 4) {
+  if (max <= 0) return { top: 1000 * steps, step: 1000 };
+  const raw = max / steps;
+  const p = 10 ** Math.floor(Math.log10(raw));
+  const step = [1, 2, 2.5, 5, 10].map((m) => m * p).find((v) => v >= raw)!;
+  return { top: step * steps, step };
+}
+/** 1 500 → « 1,5 k » ; 2 300 000 → « 2,3 M ». */
+function fcfaShort(v: number) {
+  if (v >= 1_000_000) return `${(v / 1_000_000).toLocaleString("fr-FR", { maximumFractionDigits: 1 })} M`;
+  if (v >= 1_000) return `${(v / 1_000).toLocaleString("fr-FR", { maximumFractionDigits: 1 })} k`;
+  return v.toLocaleString("fr-FR");
+}
+
 function Chart({ stats }: { stats: SellerStats }) {
   const [hover, setHover] = useState<number | null>(null);
   const s = stats.series;
+  // axe des ventes en FCFA, gradué selon les montants de la période
+  const scale = niceScale(Math.max(0, ...s.map((p) => Number(p.revenue) || 0)));
+  const ticks = Array.from({ length: 5 }, (_, i) => scale.step * (4 - i));
   const max = Math.max(1, ...s.map((p) => Math.max(p.views, p.carts, p.orders)));
   const w = 100, h = 60;
   const x = (i: number) => (s.length <= 1 ? w / 2 : (i / (s.length - 1)) * w);
   const y = (v: number) => h - (v / max) * (h - 4);
   const path = (k: "views" | "carts" | "orders") => s.map((p, i) => `${i === 0 ? "M" : "L"}${x(i)},${y(p[k])}`).join(" ");
-  const empty = s.every((p) => !p.views && !p.carts && !p.orders);
+  const empty = s.every((p) => !p.views && !p.carts && !p.orders && !p.revenue);
+  const yRev = (v: number) => h - (v / scale.top) * h;
+  const barW = Math.max(0.6, (w / Math.max(1, s.length)) * 0.55);
   const labelStep = Math.max(1, Math.ceil(s.length / 8));
   const hp = hover !== null ? s[hover] : null;
 
   return (
-    <div className="relative h-64">
+    <div className="relative h-64 pl-14">
+      {/* graduation FCFA */}
+      <div className="pointer-events-none absolute left-0 top-0 flex h-[85%] w-12 flex-col justify-between text-right text-[10px] text-muted-foreground">
+        {ticks.map((t) => <span key={t} className="-translate-y-1/2 first:translate-y-0 last:translate-y-0 leading-none">{fcfaShort(t)}</span>)}
+      </div>
+      <span className="pointer-events-none absolute -top-5 left-0 text-[10px] font-semibold text-muted-foreground">FCFA</span>
       <svg
         viewBox={`0 0 ${w} ${h}`}
         preserveAspectRatio="none"
@@ -271,7 +307,9 @@ function Chart({ stats }: { stats: SellerStats }) {
         <defs>
           <linearGradient id="gv" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stopColor="oklch(0.7 0.2 45)" stopOpacity="0.35" /><stop offset="100%" stopColor="oklch(0.7 0.2 45)" stopOpacity="0" /></linearGradient>
         </defs>
-        {[0.25, 0.5, 0.75].map((g) => <line key={g} x1="0" x2={w} y1={h * g} y2={h * g} stroke="currentColor" strokeWidth="0.15" className="text-border" />)}
+        {[0, 0.25, 0.5, 0.75, 1].map((g) => <line key={g} x1="0" x2={w} y1={h * g} y2={h * g} stroke="currentColor" strokeWidth="0.15" className="text-border" />)}
+        {/* ventes de chaque période, en FCFA */}
+        {s.map((p, i) => Number(p.revenue) > 0 ? <rect key={`r${i}`} x={Math.min(w - barW, Math.max(0, x(i) - barW / 2))} y={yRev(Number(p.revenue))} width={barW} height={h - yRev(Number(p.revenue))} rx="0.4" fill="oklch(0.72 0.14 85)" fillOpacity={hover === i ? 0.75 : 0.45} /> : null)}
         <path d={`${path("views")} L${x(s.length - 1)},${h} L${x(0)},${h} Z`} fill="url(#gv)" />
         <path d={path("views")} stroke="oklch(0.7 0.2 45)" strokeWidth="0.7" fill="none" vectorEffect="non-scaling-stroke" />
         <path d={path("carts")} stroke="oklch(0.7 0.18 150)" strokeWidth="0.7" fill="none" vectorEffect="non-scaling-stroke" />

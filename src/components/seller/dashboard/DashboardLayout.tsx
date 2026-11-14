@@ -44,6 +44,13 @@ export function DashboardLayout({ title, subtitle, children }: { title: string; 
   const { theme, toggle } = useTheme();
   const path = useRouterState({ select: (s) => s.location.pathname });
   const [name, setName] = useState("Vendeur");
+  const [avatar, setAvatar] = useState<string | null>(null);
+  // mise à jour immédiate après un changement dans Paramètres
+  useEffect(() => {
+    const onProfile = (e: Event) => { const d = (e as CustomEvent<{ name?: string; avatar?: string | null }>).detail; if (d?.name) setName(d.name); if (d && "avatar" in d) setAvatar(d.avatar ?? null); };
+    window.addEventListener("amashia-profile", onProfile);
+    return () => window.removeEventListener("amashia-profile", onProfile);
+  }, []);
   const [authReady, setAuthReady] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
 
@@ -60,8 +67,9 @@ export function DashboardLayout({ title, subtitle, children }: { title: string; 
       if (!mounted) return;
       if (!user) { navigate({ to: "/connexion", replace: true }); return; }
       await ensureSellerProfile(user);
-      const { data } = await supabase.from("seller_profiles").select("first_name").eq("id", user.id).maybeSingle();
+      const { data } = await (supabase as any).from("seller_profiles").select("first_name, avatar_url").eq("id", user.id).maybeSingle();
       if (data?.first_name) setName(data.first_name);
+      setAvatar((data as { avatar_url?: string | null } | null)?.avatar_url ?? null);
       setAuthReady(true);
     })();
     return () => { mounted = false; };
@@ -189,7 +197,9 @@ export function DashboardLayout({ title, subtitle, children }: { title: string; 
                 {badges.notifications > 0 && <span className="absolute -top-1 -right-1 min-w-5 h-5 px-1 rounded-full bg-primary text-black text-[10px] font-bold grid place-items-center">{badges.notifications > 99 ? "99+" : badges.notifications}</span>}
               </Link>
               <button className="flex items-center gap-2 bg-secondary rounded-full pl-1 pr-3 py-1">
-                <div className="w-8 h-8 rounded-full bg-gradient-primary grid place-items-center text-black text-xs font-bold">{name[0]}</div>
+                {avatar
+                  ? <img src={avatar} alt="" className="h-8 w-8 rounded-full object-cover" />
+                  : <div className="w-8 h-8 rounded-full bg-gradient-primary grid place-items-center text-black text-xs font-bold">{name[0]}</div>}
                 <ChevronDown size={14} />
               </button>
             </div>

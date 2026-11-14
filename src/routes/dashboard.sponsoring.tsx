@@ -15,13 +15,13 @@ export const Route = createFileRoute("/dashboard/sponsoring")({
 
 type Campaign = {
   id: string; name: string; product_id: string; product_title: string | null; product_image: string | null;
-  placement: "all" | "home" | "search"; daily_budget: number | null; starts_at: string; ends_at: string | null; status: "active" | "paused"; created_at: string;
+  placement: "all" | "home" | "search" | "product"; daily_budget: number | null; starts_at: string; ends_at: string | null; status: "active" | "paused"; created_at: string;
   impressions: number; clicks: number; carts: number; purchases: number; revenue: number;
   daily: { day: string; clicks: number; carts: number; purchases: number }[];
 };
 type MyProduct = { id: string; name: string };
 
-const PLACEMENT = { all: "Accueil + recherche", home: "Page d'accueil", search: "Résultats de recherche" } as const;
+const PLACEMENT = { all: "Partout (accueil, recherche, pages produit)", home: "Page d'accueil", search: "Résultats de recherche", product: "Pages produit (« Produits liés à cet article »)" } as const;
 const pct = (a: number, b: number) => (b ? `${((a / b) * 100).toFixed(1).replace(".", ",")} %` : "—");
 const today = () => new Date().toISOString().slice(0, 10);
 

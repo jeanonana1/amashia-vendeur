@@ -619,7 +619,7 @@ function AddProductPage() {
                   <button type="button" onClick={() => setAiImgOpen(true)} className="sm:w-52 rounded-2xl bg-gradient-primary text-white p-6 text-center font-semibold text-sm flex flex-col items-center justify-center gap-2 hover:opacity-90">
                     <Sparkles size={22} />
                     Générer avec l'IA
-                    <span className="text-[11px] font-normal opacity-90">Angles marketing + caméra du téléphone</span>
+                    <span className="text-[11px] font-normal opacity-90">Vos photos sous les meilleurs angles</span>
                   </button>
                 </div>
                 <input ref={fileRef} type="file" multiple accept="image/*" hidden onChange={(e) => addImages(e.target.files)} />
@@ -1041,8 +1041,11 @@ function AddProductPage() {
         <AiImageModal
           productName={form.name}
           category={form.category}
+          description={form.description}
+          formImages={images}
+          onFormImageUploaded={(preview, url) => setImages((prev) => prev.map((img) => (img.preview === preview ? { preview: url, existing: true } : img)))}
+          onAddUrls={(urls) => setImages((prev) => [...prev, ...urls.filter((u) => !prev.some((p) => p.preview === u)).map((u) => ({ preview: u, existing: true }))].slice(0, 8))}
           onClose={() => setAiImgOpen(false)}
-          onAdd={(files) => setImages((prev) => [...prev, ...files.map((file) => ({ file, preview: URL.createObjectURL(file) }))].slice(0, 8))}
         />
       )}
     </DashboardLayout>

@@ -17,6 +17,24 @@ function cors(origin: string | null) {
 
 export const Route = createFileRoute("/api/translate")({
   server: { handlers: {
+    // POST (texte brut JSON : {"to":"en","q":["…","…"]}) : plusieurs textes en un seul aller-retour
+    POST: async ({ request }) => {
+      const origin = request.headers.get("origin");
+      if (!origin || !ALLOWED.has(origin)) return Response.json({ error: "Origine non autorisée" }, { status: 403, headers: cors(origin) });
+      let body: { to?: string; q?: unknown };
+      try { body = JSON.parse(await request.text()); } catch { return Response.json({ error: "Requête invalide" }, { status: 400, headers: cors(origin) }); }
+      const q = Array.isArray(body.q) ? body.q.filter((x): x is string => typeof x === "string").map((x) => x.trim()) : [];
+      if (body.to !== "en" || !q.length || q.length > 80 || q.some((x) => !x || x.length > MAX) || q.join("").length > 40_000) {
+        return Response.json({ error: "Requête invalide" }, { status: 400, headers: cors(origin) });
+      }
+      if (!process.env.ANTHROPIC_API_KEY) return Response.json({ t: q }, { status: 503, headers: cors(origin) });
+      try {
+        const { translateMany } = await import("@/lib/translate.server");
+        return Response.json({ t: await translateMany(q) }, { headers: { ...cors(origin), "Cache-Control": "no-store" } });
+      } catch {
+        return Response.json({ t: q }, { status: 502, headers: { ...cors(origin), "Cache-Control": "no-store" } });
+      }
+    },
     GET: async ({ request }) => {
       const origin = request.headers.get("origin");
       const referer = request.headers.get("referer") || "";

@@ -33,7 +33,7 @@ const STATUS: Record<string, { label: string; cls: string }> = {
 
 function DashboardOverview() {
   const name = useSellerName();
-  const [days, setDays] = useState<number>(30);
+  const [days, setDays] = useState<number>(1);
   const period = PERIODS.find((p) => p.days === days)!;
   const { stats, loading, error } = useSellerStats(days);
   const live = useLiveVisitors(stats?.shop?.id);

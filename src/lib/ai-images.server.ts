@@ -28,8 +28,6 @@ function higgsfieldAuth() {
   if (!key) throw new ConfigError("Génération d'images non configurée : la clé Higgsfield (HIGGSFIELD_API_KEY) doit être ajoutée au site vendeur.");
   return `Key ${secret ? `${key}:${secret}` : key}`;
 }
-  return `Key ${creds}`;
-}
 
 /** Seules les photos du vendeur lui-même, dans le stockage Amashia, servent de référence. */
 export function isOwnImage(url: string, userId: string) {

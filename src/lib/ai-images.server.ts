@@ -21,10 +21,17 @@ const CLAUDE_MODEL = "claude-opus-5-5";
 export class ConfigError extends Error {}
 
 function higgsfieldAuth() {
-  const id = process.env.HIGGSFIELD_API_KEY;
-  const secret = process.env.HIGGSFIELD_API_SECRET;
-  if (!id || !secret) throw new ConfigError("Génération d'images non configurée : les clés Higgsfield (HIGGSFIELD_API_KEY et HIGGSFIELD_API_SECRET) doivent être ajoutées au site vendeur.");
-  return `Key ${id}:${secret}`;
+  // Une seule variable suffit : la clé telle que donnée par Higgsfield, au format « identifiant:secret ».
+  // (Les deux parties peuvent aussi être fournies séparément : HIGGSFIELD_API_KEY + HIGGSFIELD_API_SECRET.)
+  const key = (process.env.HIGGSFIELD_API_KEY || process.env.HF_CREDENTIALS || "").trim();
+  const secret = (process.env.HIGGSFIELD_API_SECRET || "").trim();
+  const creds = secret ? `${key}:${secret}` : key;
+  if (!key || !creds.includes(":")) {
+    throw new ConfigError(key
+      ? "Clé Higgsfield incomplète : elle doit contenir l'identifiant et le secret, au format identifiant:secret."
+      : "Génération d'images non configurée : la clé Higgsfield (HIGGSFIELD_API_KEY) doit être ajoutée au site vendeur.");
+  }
+  return `Key ${creds}`;
 }
 
 /** Seules les photos du vendeur lui-même, dans le stockage Amashia, servent de référence. */
@@ -144,7 +151,7 @@ export async function startShots(input: z.infer<typeof StartInput>) {
 }
 
 function hfError(status: number, detail?: unknown) {
-  if (status === 401) return "Clés Higgsfield invalides : vérifiez HIGGSFIELD_API_KEY et HIGGSFIELD_API_SECRET.";
+  if (status === 401) return "Clé Higgsfield invalide : vérifiez HIGGSFIELD_API_KEY (format identifiant:secret).";
   if (status === 402) return "Crédit Higgsfield insuffisant : rechargez votre compte Higgsfield.";
   if (status === 429) return "Trop de générations en même temps. Réessayez dans une minute.";
   if (status === 404 || status === 423 || status === 503) return "Le modèle d'images n'est pas disponible pour ce compte Higgsfield en ce moment.";

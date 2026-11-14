@@ -8,6 +8,11 @@ import { SITE_CATEGORIES, SITE_CATEGORY_GROUPS } from "@/lib/categories";
 type Props = {
   initialName?: string;
   initialCategory?: string;
+  initialPrice?: string;
+  /** données déjà saisies dans le formulaire produit : transmises telles quelles à l'agent */
+  specs?: { name: string; value: string }[];
+  attributes?: { name: string; values: string[] }[];
+  currentDescription?: string;
   onClose: () => void;
   onApply: (r: { name: string; description: string }) => void;
 };
@@ -30,7 +35,7 @@ type SeoResult = {
 
 const inp = "w-full bg-background border border-border rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-primary";
 
-export function AiSeoModal({ initialName = "", initialCategory = "", onClose, onApply }: Props) {
+export function AiSeoModal({ initialName = "", initialCategory = "", initialPrice = "", specs = [], attributes = [], currentDescription = "", onClose, onApply }: Props) {
   const generate = useServerFn(generateSeoContent);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<SeoResult | null>(null);
@@ -45,7 +50,7 @@ export function AiSeoModal({ initialName = "", initialCategory = "", onClose, on
     size: "",
     usage: "",
     audience: "",
-    price: "",
+    price: initialPrice,
   });
 
   const set = (k: string, v: string) => setForm((f) => ({ ...f, [k]: v }));
@@ -54,7 +59,15 @@ export function AiSeoModal({ initialName = "", initialCategory = "", onClose, on
     if (!form.productName.trim()) return toast.error("Le nom du produit est requis");
     setLoading(true);
     try {
-      const r = (await generate({ data: form })) as SeoResult;
+      const plain = currentDescription.replace(/<[^>]+>/g, " ").replace(/&nbsp;/g, " ").replace(/\s+/g, " ").trim();
+      const r = (await generate({
+        data: {
+          ...form,
+          specs: specs.filter((x) => x.name.trim() && x.value.trim()).slice(0, 60),
+          attributes: attributes.filter((a) => a.values.length).map((a) => ({ name: a.name, values: a.values.slice(0, 60) })).slice(0, 20),
+          currentDescription: plain.slice(0, 8000) || undefined,
+        },
+      })) as SeoResult;
       setResult(r);
       setSelectedTitle(r.recommendedTitle || r.titles?.[0]?.text || "");
       toast.success("Fiche SEO générée");
@@ -91,7 +104,7 @@ export function AiSeoModal({ initialName = "", initialCategory = "", onClose, on
             <div className="w-10 h-10 rounded-xl bg-gradient-primary grid place-items-center text-white"><Sparkles size={20} /></div>
             <div>
               <h3 className="font-bold text-lg">Agent IA SEO Amashia</h3>
-              <p className="text-xs text-muted-foreground">Optimisation Google + Marketplace + Conversion</p>
+              <p className="text-xs text-muted-foreground">Rédaction par Claude · mots-clés du marché camerounais</p>
             </div>
           </div>
           <button onClick={onClose} className="w-8 h-8 grid place-items-center rounded-lg hover:bg-secondary"><X size={16} /></button>
@@ -101,7 +114,7 @@ export function AiSeoModal({ initialName = "", initialCategory = "", onClose, on
           {!result && (
             <>
               <div className="rounded-xl bg-primary/5 border border-primary/20 p-4 text-xs text-muted-foreground">
-                Renseignez ce que vous savez sur votre produit. Plus vous êtes précis, plus la fiche générée sera performante (titre, description à puces, mots-clés, CTA, score SEO).
+                L'agent rédige uniquement à partir de <strong className="text-foreground">vos informations</strong> (ce formulaire + les caractéristiques, options et prix déjà saisis). Il recherche sur le web les mots que les acheteurs camerounais utilisent, puis écrit un titre optimisé et une description professionnelle. Rien n'est inventé : s'il manque une information, il vous la demandera dans les conseils. Comptez environ une minute.
               </div>
               <div className="grid md:grid-cols-2 gap-3">
                 <div><label className="block text-xs font-semibold mb-1.5">Nom du produit *</label><input value={form.productName} onChange={(e) => set("productName", e.target.value)} className={inp} placeholder="Ex : Égreneur de maïs manuel" /></div>
@@ -127,7 +140,7 @@ export function AiSeoModal({ initialName = "", initialCategory = "", onClose, on
                 <div className="md:col-span-2"><label className="block text-xs font-semibold mb-1.5">Public cible</label><input value={form.audience} onChange={(e) => set("audience", e.target.value)} className={inp} placeholder="Ex : ménagères, restaurateurs, jeunes actifs…" /></div>
               </div>
               <button onClick={run} disabled={loading} className="w-full py-3.5 rounded-full bg-gradient-primary text-white font-semibold flex items-center justify-center gap-2 disabled:opacity-60">
-                {loading ? <><Loader2 className="animate-spin" size={16} /> Analyse en cours…</> : <><Wand2 size={16} /> Générer la fiche SEO</>}
+                {loading ? <><Loader2 className="animate-spin" size={16} /> Recherche des mots-clés et rédaction… (≈ 1 min)</> : <><Wand2 size={16} /> Générer la fiche SEO</>}
               </button>
             </>
           )}

@@ -11,6 +11,8 @@ import { nitro } from "nitro/vite";
  */
 const nitroConfig = {
   vercel: {
+    // l'agent IA (recherche web + rédaction par Claude) peut prendre plus d'une minute
+    functions: { maxDuration: 300 },
     config: {
       images: {
         sizes: [64, 128, 256, 384, 640, 828, 1080, 1600],

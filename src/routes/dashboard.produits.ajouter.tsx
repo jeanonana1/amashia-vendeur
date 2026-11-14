@@ -1029,6 +1029,10 @@ function AddProductPage() {
         <AiSeoModal
           initialName={form.name}
           initialCategory={form.category}
+          initialPrice={form.price}
+          specs={specs}
+          attributes={attrs.map((x) => ({ name: x.name, values: x.values.map((v) => (isColorAttr(x.name) ? colorParts(v).name : v)) }))}
+          currentDescription={form.description}
           onClose={() => setAiOpen(false)}
           onApply={({ name, description }) => setForm((f) => ({ ...f, name, description }))}
         />

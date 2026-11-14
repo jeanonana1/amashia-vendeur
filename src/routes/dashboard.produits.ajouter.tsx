@@ -11,6 +11,7 @@ import { ColorPicker, ColorSwatch, colorParts } from "@/components/seller/dashbo
 import { compressImage } from "@/lib/imageCompress";
 import { AiSeoModal } from "@/components/seller/dashboard/AiSeoModal";
 import { AiImageModal } from "@/components/seller/dashboard/AiImageModal";
+import { PriceTipModal, charmPrice } from "@/components/seller/dashboard/PriceTipModal";
 
 type ProductSearch = { id?: string };
 
@@ -323,7 +324,7 @@ function AddProductPage() {
           name,
           category: form.category || null,
           price: Math.max(0, Number(form.price) || 0),
-          compare_at_price: form.compare_at_price ? Math.max(0, Number(form.compare_at_price)) : null,
+          compare_at_price: Number(form.compare_at_price) > (Number(form.price) || 0) ? Number(form.compare_at_price) : null,
           purchase_price: form.purchase_price ? Math.max(0, Number(form.purchase_price)) : null,
           stock: Math.max(0, parseInt(form.stock || "0", 10) || 0),
           description: form.description || null,
@@ -488,9 +489,25 @@ function AddProductPage() {
   const compareNum = Math.max(0, Number(form.compare_at_price) || 0);
   const profit = Math.max(0, priceNum - costNum);
   const margin = priceNum > 0 ? ((profit / priceNum) * 100).toFixed(1) : "0";
+  // le prix normal (barré) doit être strictement supérieur au prix de vente
+  const compareError = form.compare_at_price !== "" && compareNum > 0 && priceNum > 0 && compareNum <= priceNum
+    ? `Le prix normal doit être supérieur au prix de vente (${fmtFCFA(priceNum)} FCFA). Laissez-le vide s'il n'y a pas de réduction.`
+    : null;
+  const charm = charmPrice(priceNum);
+
+  // conseil « prix psychologique » montré en arrivant à l'étape Prix
+  const [priceTip, setPriceTip] = useState(false);
+  const priceTipShown = useRef(false);
+  useEffect(() => {
+    if (step !== 4 || priceTipShown.current) return;
+    priceTipShown.current = true;
+    try { if (localStorage.getItem("amashia-price-tip-off") === "1") return; } catch { /* ignore */ }
+    setPriceTip(true);
+  }, [step]);
 
   async function submit(asDraft = false) {
     if (!form.name || !form.price) return toast.error("Nom et prix requis");
+    if (compareError) { setStep(4); return toast.error("Le prix normal ne peut pas être inférieur ou égal au prix de vente."); }
     if (finalSavingRef.current) return; // double-clic sur « Publier »
     finalSavingRef.current = true;
     setSaving(true);
@@ -517,7 +534,8 @@ function AddProductPage() {
         price: priceNum, compare_at_price: form.compare_at_price ? Number(form.compare_at_price) : null,
         purchase_price: costNum, stock: Number(form.stock || 0),
         category: form.category || null, sku: form.sku || null,
-        status: asDraft ? "draft" : form.status, images: urls,
+        // « Publier sur Amashia » met le produit en ligne directement
+        status: asDraft ? "draft" : "active", images: urls,
         product_type: type, attributes: attrs, specifications: specs.filter((s) => s.name && s.value),
         bundle_items: bundleItems, virtual_files: virtualFiles, variant_images: variantImages,
       };
@@ -530,11 +548,11 @@ function AddProductPage() {
       if (targetId) {
         const { error } = await supabase.from("seller_products").update(payload).eq("id", targetId);
         if (error) throw error;
-        toast.success(editId ? "Produit mis à jour" : asDraft ? "Brouillon enregistré" : "Produit publié !");
+        toast.success(asDraft ? "Brouillon enregistré" : "Produit publié sur Amashia !");
       } else {
         const { error } = await supabase.from("seller_products").insert(payload);
         if (error) throw error;
-        toast.success(asDraft ? "Brouillon enregistré" : "Produit publié !");
+        toast.success(asDraft ? "Brouillon enregistré" : "Produit publié sur Amashia !");
       }
       try { localStorage.removeItem(DRAFT_KEY()); } catch { /* ignore */ }
       // retour automatique à « Mes produits » (rechargement complet en secours)
@@ -552,12 +570,13 @@ function AddProductPage() {
 
   const canNext = () => {
     if (step === 1) return !!form.name;
-    if (step === 4) return !!form.price;
+    if (step === 4) return !!form.price && !compareError;
     return true;
   };
 
   return (
     <DashboardLayout title={editId ? "Modifier le produit" : "Ajouter un produit"} subtitle="Création en plusieurs étapes">
+      {priceTip && <PriceTipModal price={priceNum} onApply={(v) => set("price", String(v))} onClose={() => setPriceTip(false)} />}
       <div className="flex items-center justify-between mb-6 gap-3 flex-wrap">
         <Link to="/dashboard/produits" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary"><ArrowLeft size={16} /> Retour</Link>
         <div className="flex items-center gap-2 text-xs">
@@ -985,17 +1004,27 @@ function AddProductPage() {
 
           {step === 4 && (
             <div className="bg-card border border-border rounded-2xl p-6 space-y-4">
-              <h3 className="font-bold">Prix & Stock</h3>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <h3 className="font-bold">Prix & Stock</h3>
+                <button type="button" onClick={() => setPriceTip(true)} className="inline-flex items-center gap-1 text-xs text-primary hover:underline"><Sparkles size={12} /> Conseil prix</button>
+              </div>
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm mb-2">Prix de vente (FCFA) *</label>
                   <input type="number" value={form.price} onChange={(e) => set("price", e.target.value)} className={inp} />
                   <p className="text-[11px] text-muted-foreground mt-1">Prix affiché et payé par le client.</p>
+                  {charm && (
+                    <button type="button" onClick={() => set("price", String(charm))} className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-primary/15 px-3 py-1 text-xs font-semibold text-primary hover:bg-primary/25">
+                      <Sparkles size={12} /> Essayer {fmtFCFA(charm)} FCFA (prix psychologique)
+                    </button>
+                  )}
                 </div>
                 <div>
                   <label className="block text-sm mb-2">Prix normal (FCFA)</label>
-                  <input type="number" value={form.compare_at_price} onChange={(e) => set("compare_at_price", e.target.value)} className={inp} placeholder="Optionnel" />
-                  <p className="text-[11px] text-muted-foreground mt-1">Affiché <span className="line-through">barré</span> à côté du prix de vente pour montrer la réduction.</p>
+                  <input type="number" value={form.compare_at_price} onChange={(e) => set("compare_at_price", e.target.value)} className={`${inp} ${compareError ? "!border-destructive focus:!ring-destructive" : ""}`} placeholder="Optionnel" aria-invalid={!!compareError} />
+                  {compareError
+                    ? <p className="mt-1 text-xs font-medium text-destructive">{compareError}</p>
+                    : <p className="text-[11px] text-muted-foreground mt-1">Affiché <span className="line-through">barré</span> à côté du prix de vente pour montrer la réduction. Il doit être supérieur au prix de vente.</p>}
                 </div>
               </div>
 
@@ -1025,11 +1054,7 @@ function AddProductPage() {
                 </div>
               )}
               {type !== "virtual" && <div><label className="block text-sm mb-2">Quantité en stock</label><input type="number" value={form.stock} onChange={(e) => set("stock", e.target.value)} className={inp} /></div>}
-              <div><label className="block text-sm mb-2">Statut</label>
-                <select value={form.status} onChange={(e) => set("status", e.target.value)} className={inp}>
-                  <option value="active">Actif (publié)</option><option value="draft">Brouillon</option>
-                </select>
-              </div>
+              <p className="text-[11px] text-muted-foreground">À la dernière étape, « Publier sur Amashia » met le produit en ligne ; « Enregistrer en brouillon » le garde hors ligne.</p>
             </div>
           )}
 
@@ -1042,10 +1067,10 @@ function AddProductPage() {
                 <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-3"><p className="text-xs text-muted-foreground">Bénéfice ({margin}%)</p><p className="font-bold text-emerald-400">{fmtFCFA(profit)} FCFA</p></div>
               </div>
               <div className="flex flex-col sm:flex-row gap-3">
-                <button onClick={() => submit(false)} disabled={saving} className="flex-1 py-3.5 rounded-full bg-gradient-primary text-black font-semibold shadow-elegant disabled:opacity-50">
-                  {saving ? "Enregistrement..." : editId ? "Mettre à jour" : "Publier le produit"}
+                <button onClick={() => submit(false)} disabled={saving || !!compareError} className="flex-1 py-3.5 rounded-full bg-gradient-primary text-black font-semibold shadow-elegant disabled:opacity-50">
+                  {saving ? "Publication…" : "Publier sur Amashia"}
                 </button>
-                <button onClick={() => submit(true)} disabled={saving} className="flex-1 py-3.5 rounded-full bg-secondary font-semibold disabled:opacity-50">Brouillon</button>
+                <button onClick={() => submit(true)} disabled={saving} className="flex-1 py-3.5 rounded-full bg-secondary font-semibold disabled:opacity-50">Enregistrer en brouillon</button>
               </div>
             </div>
           )}

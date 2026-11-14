@@ -208,3 +208,8 @@ begin
 end $$;
 revoke execute on function public.admin_latest_order(timestamptz) from public, anon;
 grant execute on function public.admin_latest_order(timestamptz) to authenticated;
+
+-- 7. Temps réel des nouvelles commandes pour l'admin (lecture limitée par les règles existantes : l'admin voit tout).
+do $$ begin
+  alter publication supabase_realtime add table public.orders;
+exception when duplicate_object then null; end $$;

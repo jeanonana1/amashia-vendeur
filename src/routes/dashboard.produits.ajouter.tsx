@@ -12,12 +12,12 @@ import { compressImage } from "@/lib/imageCompress";
 import { AiSeoModal } from "@/components/seller/dashboard/AiSeoModal";
 import { AiImageModal } from "@/components/seller/dashboard/AiImageModal";
 import { PriceTipModal, charmPrice } from "@/components/seller/dashboard/PriceTipModal";
-import { SITE_CATEGORY_GROUPS, SITE_CATEGORIES } from "@/lib/categories";
+import { useTaxonomy } from "@/lib/categories";
 
 type ProductSearch = { id?: string };
 
 // Preset attributes with their default values
-const ATTR_PRESETS: Record<string, { values: string[]; type: "text" | "color" | "size" }> = {
+const DEFAULT_ATTR_PRESETS: Record<string, { values: string[]; type: "text" | "color" | "size" }> = {
   "Taille": { values: ["XS", "S", "M", "L", "XL", "XXL", "3XL"], type: "size" },
   "Pointure": { values: ["36", "37", "38", "39", "40", "41", "42", "43", "44", "45", "46"], type: "size" },
   "Couleur": { values: [], type: "color" },
@@ -182,6 +182,12 @@ const DRAFT_KEY = (id?: string) => `amashia-product-draft-${id || "new"}`;
 const STEP_KEY = (id: string) => `amashia-product-step-${id}`;
 
 function AddProductPage() {
+  // Catégories, marques et attributs définis dans l'espace admin Amashia
+  const { taxonomy, groups: SITE_CATEGORY_GROUPS, categories: SITE_CATEGORIES } = useTaxonomy();
+  const ATTR_PRESETS: Record<string, { values: string[]; type: "text" | "color" | "size" }> = taxonomy?.attributes.length
+    ? { ...Object.fromEntries(taxonomy.attributes.map((a) => [a.name, { values: a.values, type: a.kind }])), "Personnalisé": { values: [], type: "text" } }
+    : DEFAULT_ATTR_PRESETS;
+  const BRANDS = taxonomy?.brands.map((b) => b.name) ?? [];
   const navigate = useNavigate();
   const { id: editId } = useSearch({ from: "/dashboard/produits/ajouter" });
   const fileRef = useRef<HTMLInputElement>(null);
@@ -760,10 +766,11 @@ function AddProductPage() {
                 </div>
                 {specs.length === 0 && <p className="text-sm text-muted-foreground mb-3">Cliquez sur « Pré-remplir » pour charger les caractéristiques typiques de la catégorie « {form.category || "votre produit"} ».</p>}
                 <div className="space-y-2">
+                  <datalist id="amashia-brands">{BRANDS.map((b) => <option key={b} value={b} />)}</datalist>
                   {specs.map((s, i) => (
                     <div key={i} className="grid grid-cols-[1fr_1.5fr_auto] gap-2">
                       <input placeholder="Nom (ex: RAM)" value={s.name} onChange={(e) => setSpecs(specs.map((x, j) => j === i ? { ...x, name: capFirst(e.target.value) } : x))} className={inp} />
-                      <input placeholder={SPEC_EXAMPLES[s.name] ? `ex: ${SPEC_EXAMPLES[s.name]}` : "Valeur"} value={s.value} onChange={(e) => setSpecs(specs.map((x, j) => j === i ? { ...x, value: capFirst(e.target.value) } : x))} className={inp} />
+                      <input list={/^marque$/i.test(s.name.trim()) ? "amashia-brands" : undefined} placeholder={/^marque$/i.test(s.name.trim()) && BRANDS.length ? "Choisir ou saisir la marque" : SPEC_EXAMPLES[s.name] ? `ex: ${SPEC_EXAMPLES[s.name]}` : "Valeur"} value={s.value} onChange={(e) => setSpecs(specs.map((x, j) => j === i ? { ...x, value: capFirst(e.target.value) } : x))} className={inp} />
                       <button onClick={() => setSpecs(specs.filter((_, j) => j !== i))} className="w-10 grid place-items-center rounded-xl bg-destructive/10 text-destructive"><Trash2 size={14} /></button>
                     </div>
                   ))}

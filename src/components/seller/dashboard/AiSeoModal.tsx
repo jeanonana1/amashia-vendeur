@@ -3,7 +3,7 @@ import { X, Sparkles, Loader2, Check, TrendingUp, Copy, Wand2 } from "lucide-rea
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
 import { generateSeoContent } from "@/lib/ai-seo.functions";
-import { SITE_CATEGORIES, SITE_CATEGORY_GROUPS } from "@/lib/categories";
+import { useTaxonomy } from "@/lib/categories";
 
 type Props = {
   initialName?: string;
@@ -36,6 +36,7 @@ type SeoResult = {
 const inp = "w-full bg-background border border-border rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-primary";
 
 export function AiSeoModal({ initialName = "", initialCategory = "", initialPrice = "", specs = [], attributes = [], currentDescription = "", onClose, onApply }: Props) {
+  const { groups: SITE_CATEGORY_GROUPS, categories: SITE_CATEGORIES } = useTaxonomy();
   const generate = useServerFn(generateSeoContent);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<SeoResult | null>(null);

@@ -80,18 +80,46 @@ function sellerFacts(d: SeoInput) {
   return lines.join("\n");
 }
 
-const RESEARCH_SYSTEM = `Tu es le chargé de recherche SEO d'Amashia, marketplace camerounaise.
-Ta mission : trouver comment les acheteurs au Cameroun et en Afrique francophone recherchent et nomment un produit, pour optimiser son référencement.
+/** Requêtes de départ tirées du nom du produit (mots significatifs, sans marque ni chiffres isolés). */
+function seedQueries(d: SeoInput) {
+  const stop = new Set(["de", "du", "des", "la", "le", "les", "pour", "avec", "et", "en", "a", "à", "au", "aux", "un", "une", "sur", "the", "for", "with"]);
+  const words = d.productName.toLowerCase().replace(/[^\p{L}\p{N}\s'-]/gu, " ").split(/\s+/)
+    .filter((w) => w.length > 1 && !stop.has(w) && !/^\d+$/.test(w) && (!d.brand || w !== d.brand.toLowerCase()));
+  const out = [words.slice(0, 3).join(" "), words.slice(0, 2).join(" "), words[0] ?? ""].filter((q) => q.length > 2);
+  return [...new Set(out)];
+}
 
-Cherche sur le web (Google, Jumia Cameroun, marketplaces et boutiques africaines francophones, forums, réseaux) :
-- les mots et expressions que les acheteurs tapent réellement pour ce type de produit (y compris les appellations locales camerounaises courantes) ;
-- la façon dont les annonces bien classées formulent leurs titres ;
-- les questions que se posent les acheteurs avant d'acheter.
+/**
+ * Ce que les internautes du Cameroun tapent réellement sur Google : suggestions de recherche
+ * Google localisées (pays CM, français). Gratuit, sans clé ; en cas d'échec, liste vide.
+ */
+async function googleSuggestionsCameroon(queries: string[]) {
+  const found: string[] = [];
+  await Promise.all(queries.map(async (q) => {
+    try {
+      const res = await fetch(`https://suggestqueries.google.com/complete/search?client=firefox&hl=fr&gl=cm&q=${encodeURIComponent(q)}`, {
+        headers: { "Accept-Language": "fr-CM,fr;q=0.9" },
+        signal: AbortSignal.timeout(6000),
+      });
+      if (!res.ok) return;
+      const data = JSON.parse(await res.text()) as [string, string[]];
+      for (const s of data[1] ?? []) if (typeof s === "string") found.push(s.trim().toLowerCase());
+    } catch { /* source indisponible : on continue sans */ }
+  }));
+  return [...new Set(found)].slice(0, 30);
+}
+
+const RESEARCH_SYSTEM = `Tu es le chargé de recherche SEO d'Amashia, marketplace camerounaise.
+Ta mission : établir, à partir de SOURCES RÉELLES, les mots-clés que les acheteurs utilisent pour ce type de produit.
+
+Sources, par ordre d'importance :
+1. Les « Recherches Google au Cameroun » fournies dans le message : ce sont les suggestions que Google propose réellement aux internautes du Cameroun (ce qu'ils tapent). C'est la source principale pour le mot-clé principal.
+2. Jumia Côte d'Ivoire (jumia.ci) et Jumia Sénégal (jumia.sn) : utilise l'outil de recherche (limité à ces deux sites) pour voir comment des produits similaires y sont nommés et titrés, quels termes reviennent et quelles questions se posent les acheteurs.
 
 Règles strictes :
-- Tu ne cherches que du VOCABULAIRE et des MOTS-CLÉS. Ne rapporte aucune caractéristique technique, prix, garantie ou promesse trouvée en ligne comme si elle concernait ce produit précis : ces informations viendront uniquement du vendeur.
-- N'invente pas de volumes de recherche ni de chiffres. Si tu ne trouves rien de fiable, dis-le.
-- Réponds en français, en notes brèves : 1) mots-clés principaux, 2) mots-clés secondaires et appellations locales, 3) requêtes longues / questions, 4) formulations de titres observées, 5) ce que tu n'as pas pu vérifier.`;
+- Tu ne retiens que du VOCABULAIRE et des MOTS-CLÉS. Aucune caractéristique, prix, garantie ou promesse trouvés sur Jumia ne doit être attribué au produit du vendeur.
+- N'invente ni volumes de recherche ni tendances chiffrées : tu n'as pas accès à Google Trends. Si une source ne donne rien d'utile, dis-le.
+- Réponds en français, en notes brèves : 1) mot-clé principal recommandé (et pourquoi, d'après les recherches Google Cameroun), 2) mots-clés secondaires et appellations locales, 3) requêtes longues / questions, 4) formulations de titres observées sur Jumia CI / SN, 5) ce qui n'a pas pu être vérifié.`;
 
 const WRITING_SYSTEM = `Tu es le rédacteur e-commerce officiel d'Amashia, marketplace du Cameroun : copywriter professionnel et expert SEO (Google et marketplaces).
 
@@ -123,7 +151,8 @@ AUTRES CHAMPS
 - sellingPoints : 4 à 6 puces courtes ; benefits : 3 à 5 bénéfices client ; ctas : 3 appels à l'action courts.
 - scores : estimations éditoriales de 0 à 100.
 - improvements : informations manquantes à demander au vendeur et conseils concrets pour mieux vendre.
-- researchNotes : 2 ou 3 phrases sur l'origine des mots-clés et ce qui n'a pas pu être vérifié.`;
+- Mot-clé principal : choisis-le parmi les recherches Google réelles au Cameroun quand elles correspondent au produit.
+- researchNotes : 2 ou 3 phrases sur l'origine des mots-clés (Google Cameroun, Jumia CI / SN) et ce qui n'a pas pu être vérifié.`;
 
 /** Génère la fiche (appelée uniquement côté serveur). */
 export async function writeProductSheet(data: SeoInput) {
@@ -134,13 +163,22 @@ export async function writeProductSheet(data: SeoInput) {
     const facts = sellerFacts(data);
 
     try {
-      // ---- Étape 1 : recherche des mots-clés sur le web (marché camerounais) ----
+      // ---- Étape 1 : recherche des mots-clés (Google Cameroun + Jumia Côte d'Ivoire / Sénégal) ----
       let research = "";
       const sources: { title: string; url: string }[] = [];
+      const queries = seedQueries(data);
+      const suggestions = await googleSuggestionsCameroon(queries);
+      if (suggestions.length) sources.push({ title: `Suggestions Google Cameroun (${suggestions.length} recherches)`, url: `https://www.google.cm/search?q=${encodeURIComponent(queries[0] ?? data.productName)}` });
       try {
         const messages: Anthropic.Beta.BetaMessageParam[] = [{
           role: "user",
-          content: `Produit à référencer sur Amashia (Cameroun) :\n${facts}\n\nTrouve les mots-clés et le vocabulaire que les acheteurs camerounais utilisent pour ce type de produit.`,
+          content: `Produit à référencer sur Amashia (Cameroun) :
+${facts}
+
+Recherches Google au Cameroun (suggestions Google réelles, pays CM, pour : ${queries.map((q) => `« ${q} »`).join(", ") || "—"}) :
+${suggestions.length ? suggestions.map((x) => `- ${x}`).join("\n") : "(aucune suggestion récupérée)"}
+
+Analyse ces recherches, puis cherche sur Jumia Côte d'Ivoire et Jumia Sénégal comment des produits similaires sont nommés et titrés.`,
         }];
         for (let turn = 0; turn < 3; turn++) {
           const res = await client.beta.messages.create({
@@ -152,7 +190,8 @@ export async function writeProductSheet(data: SeoInput) {
             system: RESEARCH_SYSTEM,
             tools: [{
               type: "web_search_20260209", name: "web_search", max_uses: 4,
-              user_location: { type: "approximate", country: "CM", city: "Douala", timezone: "Africa/Douala" },
+              // recherche limitée aux deux sources demandées : Jumia Côte d'Ivoire et Jumia Sénégal
+              allowed_domains: ["jumia.ci", "jumia.sn"],
             }],
             messages,
           });
@@ -186,8 +225,11 @@ export async function writeProductSheet(data: SeoInput) {
           content: `Données du vendeur (seule source autorisée pour les faits sur le produit) :
 ${facts}
 
-Recherche de mots-clés (vocabulaire uniquement, aucun fait produit) :
-${research.trim() || "Aucune recherche disponible : choisis les mots-clés à partir du nom, de la catégorie et des données du vendeur, et indique-le dans researchNotes."}
+Recherches Google réelles au Cameroun (suggestions Google, pays CM) :
+${suggestions.length ? suggestions.join(" · ") : "aucune"}
+
+Recherche de mots-clés sur Jumia Côte d'Ivoire / Sénégal (vocabulaire uniquement, aucun fait produit) :
+${research.trim() || "Aucune recherche disponible : appuie-toi sur les recherches Google ci-dessus, le nom, la catégorie et les données du vendeur, et indique-le dans researchNotes."}
 
 Marché : Cameroun et Afrique francophone. Rédige la fiche produit complète.`,
         }],

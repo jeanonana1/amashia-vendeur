@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { askText } from "@/lib/dialog";
 import { cleanEditorHtml, hasForeignFormatting } from "@/lib/richText";
 import {
   Bold, Italic, Underline, Strikethrough, List, ListOrdered, Quote,
@@ -93,9 +94,14 @@ export function RichTextEditor({ value, onChange, placeholder }: Props) {
   };
 
   const setBlock = (tag: string) => exec("formatBlock", `<${tag}>`);
-  const link = () => {
-    const url = prompt("URL du lien ?");
-    if (url) exec("createLink", url);
+  const link = async () => {
+    // la sélection du texte est mémorisée : la fenêtre de saisie prend le focus
+    const sel = window.getSelection();
+    const range = sel && sel.rangeCount ? sel.getRangeAt(0).cloneRange() : null;
+    const url = await askText({ title: "Ajouter un lien", message: "Collez l'adresse de la page (https://…).", placeholder: "https://", confirmLabel: "Ajouter" });
+    if (!url) return;
+    if (range) { const s2 = window.getSelection(); s2?.removeAllRanges(); s2?.addRange(range); }
+    exec("createLink", /^https?:\/\//i.test(url) ? url : `https://${url}`);
   };
   const setSize = (size: string) => exec("fontSize", size);
 

@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
+import { askConfirm } from "@/lib/dialog";
 import { imgProps } from "@/lib/img";
 import { useEffect, useRef, useState } from "react";
 import { DashboardLayout } from "@/components/seller/dashboard/DashboardLayout";
@@ -568,8 +569,8 @@ function AddProductPage() {
           {(!editId || isDraftRef.current) && (
             <button
               type="button"
-              onClick={() => {
-                if (!confirm("Commencer un nouveau produit ? Ce brouillon reste disponible dans vos produits (statut Brouillon).")) return;
+              onClick={async () => {
+                if (!(await askConfirm({ title: "Commencer un nouveau produit ?", message: "Ce brouillon reste disponible dans vos produits (statut Brouillon).", confirmLabel: "Nouveau produit" }))) return;
                 try { localStorage.removeItem(DRAFT_KEY()); } catch { /* ignore */ }
                 window.location.href = "/dashboard/produits/ajouter";
               }}

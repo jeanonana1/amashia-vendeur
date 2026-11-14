@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { askConfirm } from "@/lib/dialog";
 import { useCallback, useEffect, useState } from "react";
 import { DashboardLayout } from "@/components/seller/dashboard/DashboardLayout";
 import { Wallet, ArrowDownToLine, Smartphone, Landmark, Plus, X, Trash2, Pencil, History, Clock, CheckCircle2, XCircle, Star, ArrowUpRight } from "lucide-react";
@@ -65,7 +66,7 @@ function PaiementsPage() {
   ].sort((a, b) => b.date.localeCompare(a.date));
 
   async function removeMethod(id: string) {
-    if (!confirm("Supprimer ce moyen de retrait ?")) return;
+    if (!(await askConfirm({ title: "Supprimer ce moyen de retrait ?", danger: true }))) return;
     const { error } = await db().from("seller_payout_methods").delete().eq("id", id);
     if (error) return toast.error(error.message);
     toast.success("Moyen de retrait supprimé");

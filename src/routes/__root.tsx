@@ -10,7 +10,10 @@ import {
 
 import appCss from "../styles.css?url";
 import { ThemeProvider } from "@/components/theme-provider";
-import { Toaster } from "sonner";
+import { Toaster, toast } from "sonner";
+import { useEffect } from "react";
+import { DialogHost } from "@/lib/dialog";
+import { installToastSounds } from "@/lib/sound";
 
 function NotFoundComponent() {
   return (
@@ -111,12 +114,15 @@ function RootShell({ children }: { children: React.ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  // un petit son accompagne chaque réussite (enregistrement, publication…) ou erreur
+  useEffect(() => { installToastSounds(toast as never); }, []);
 
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <Outlet />
         <Toaster richColors position="top-right" />
+        <DialogHost />
       </ThemeProvider>
     </QueryClientProvider>
   );

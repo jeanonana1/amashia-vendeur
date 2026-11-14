@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { askConfirm } from "@/lib/dialog";
 import { imgProps } from "@/lib/img";
 import { useEffect, useState } from "react";
 import { DashboardLayout } from "@/components/seller/dashboard/DashboardLayout";
@@ -83,7 +84,7 @@ function ProduitsPage() {
   }, []);
 
   async function deleteProduct(id: string) {
-    if (!confirm("Supprimer ce produit ?")) return;
+    if (!(await askConfirm({ title: "Supprimer ce produit ?", message: "Il disparaîtra aussi du site Amashia. Cette action est définitive.", danger: true }))) return;
     const prev = products;
     setProducts((p) => p.filter((x) => x.id !== id));
     const { error } = await supabase.from("seller_products").delete().eq("id", id);

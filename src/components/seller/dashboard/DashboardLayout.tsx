@@ -1,4 +1,5 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
+import { playSound, setSoundEnabled, soundEnabled } from "@/lib/sound";
 import { useEffect, useState, ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { ensureSellerProfile } from "@/lib/sellerProfile";
@@ -6,7 +7,7 @@ import { money, useNavBadges, useSellerStats } from "@/lib/sellerStats";
 import {
   LayoutDashboard, Store, Package, ShoppingCart, Users, CreditCard, Truck,
   BarChart3, Megaphone, Star, Bell, MessageSquare, Settings, HelpCircle, LogOut,
-  Sun, Moon, Wallet, ChevronDown, AppWindow, Menu, X, AlertTriangle, PackagePlus,
+  Sun, Moon, Volume2, VolumeX, Wallet, ChevronDown, AppWindow, Menu, X, AlertTriangle, PackagePlus,
 } from "lucide-react";
 import { useTheme } from "@/components/theme-provider";
 
@@ -32,6 +33,10 @@ const NAV = [
 
 export function DashboardLayout({ title, subtitle, children }: { title: string; subtitle?: string; children: ReactNode }) {
   const badges = useNavBadges();
+  // sons de l'espace vendeur : activés par défaut, coupables d'un clic
+  const [sound, setSound] = useState(true);
+  useEffect(() => { setSound(soundEnabled()); }, []);
+  const toggleSound = () => { const next = !sound; setSoundEnabled(next); setSound(next); if (next) playSound("success"); };
   // Solde disponible réel : ventes livrées (le montant en attente apparaît au survol)
   const { stats: balanceStats } = useSellerStats(30, 120_000);
   const navigate = useNavigate();
@@ -87,7 +92,7 @@ export function DashboardLayout({ title, subtitle, children }: { title: string; 
         {NAV.map((item) => {
           const Icon = item.icon;
           const active = path === item.to || (item.to !== "/dashboard" && path.startsWith(item.to));
-          const badge = item.to === "/dashboard/signalements" ? badges.reports : item.to === "/dashboard/commandes" ? badges.orders : item.to === "/dashboard/avis" ? badges.reviews : 0;
+          const badge = item.to === "/dashboard/signalements" ? badges.reports : item.to === "/dashboard/commandes" ? badges.orders : item.to === "/dashboard/avis" ? badges.reviews : item.to === "/dashboard/notifications" ? badges.notifications : 0;
           return (
             <Link key={item.to} to={item.to} className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition ${active ? "bg-primary/15 text-primary font-semibold" : "text-muted-foreground hover:bg-secondary hover:text-foreground"}`}>
               <Icon size={18} />
@@ -146,10 +151,13 @@ export function DashboardLayout({ title, subtitle, children }: { title: string; 
             <button onClick={toggle} className="w-10 h-10 grid place-items-center rounded-full bg-secondary text-muted-foreground" aria-label="Thème">
               {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
             </button>
-            <button className="relative w-10 h-10 grid place-items-center rounded-full bg-secondary text-muted-foreground" aria-label="Notifications">
-              <Bell size={16} />
-              <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-primary text-black text-[9px] font-bold grid place-items-center">3</span>
+            <button onClick={toggleSound} className="w-10 h-10 grid place-items-center rounded-full bg-secondary text-muted-foreground" aria-label={sound ? "Couper les sons" : "Activer les sons"}>
+              {sound ? <Volume2 size={16} /> : <VolumeX size={16} />}
             </button>
+            <Link to="/dashboard/notifications" className="relative w-10 h-10 grid place-items-center rounded-full bg-secondary text-muted-foreground" aria-label="Notifications">
+              <Bell size={16} />
+              {badges.notifications > 0 && <span className="absolute -top-1 -right-1 min-w-4 h-4 px-1 rounded-full bg-primary text-black text-[9px] font-bold grid place-items-center">{badges.notifications > 99 ? "99+" : badges.notifications}</span>}
+            </Link>
           </div>
         </div>
 
@@ -172,10 +180,13 @@ export function DashboardLayout({ title, subtitle, children }: { title: string; 
               <button onClick={toggle} className="hidden lg:grid w-10 h-10 place-items-center rounded-full bg-secondary text-muted-foreground hover:text-primary transition">
                 {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
               </button>
-              <button className="hidden lg:grid relative w-10 h-10 place-items-center rounded-full bg-secondary text-muted-foreground hover:text-primary transition">
-                <Bell size={18} />
-                <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-primary text-black text-[10px] font-bold grid place-items-center">3</span>
+              <button onClick={toggleSound} className="hidden lg:grid w-10 h-10 place-items-center rounded-full bg-secondary text-muted-foreground hover:text-primary transition" title={sound ? "Couper les sons" : "Activer les sons"}>
+                {sound ? <Volume2 size={18} /> : <VolumeX size={18} />}
               </button>
+              <Link to="/dashboard/notifications" className="hidden lg:grid relative w-10 h-10 place-items-center rounded-full bg-secondary text-muted-foreground hover:text-primary transition" title="Notifications">
+                <Bell size={18} />
+                {badges.notifications > 0 && <span className="absolute -top-1 -right-1 min-w-5 h-5 px-1 rounded-full bg-primary text-black text-[10px] font-bold grid place-items-center">{badges.notifications > 99 ? "99+" : badges.notifications}</span>}
+              </Link>
               <button className="flex items-center gap-2 bg-secondary rounded-full pl-1 pr-3 py-1">
                 <div className="w-8 h-8 rounded-full bg-gradient-primary grid place-items-center text-black text-xs font-bold">{name[0]}</div>
                 <ChevronDown size={14} />

@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { askConfirm } from "@/lib/dialog";
 import { useEffect, useMemo, useState } from "react";
 import { DashboardLayout } from "@/components/seller/dashboard/DashboardLayout";
 import { Tag, Plus, Calendar, X, Trash2, Ticket, Wallet, ShoppingBag, Pencil, Store, Copy } from "lucide-react";
@@ -129,7 +130,7 @@ function PromotionsPage() {
   }
 
   async function remove(c: Coupon) {
-    if (!confirm(`Supprimer le coupon ${c.code} ? Les commandes déjà passées gardent leur réduction.`)) return;
+    if (!(await askConfirm({ title: `Supprimer le coupon ${c.code} ?`, message: "Les commandes déjà passées gardent leur réduction.", danger: true }))) return;
     const { error } = await (supabase as any).from("seller_coupons").delete().eq("id", c.id);
     if (error) return toast.error("Suppression impossible. Réessayez.");
     toast.success("Coupon supprimé");

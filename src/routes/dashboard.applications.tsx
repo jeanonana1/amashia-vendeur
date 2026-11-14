@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { askConfirm } from "@/lib/dialog";
 import { useEffect, useState } from "react";
 import { DashboardLayout } from "@/components/seller/dashboard/DashboardLayout";
 import { Check, X, Plus, Target, BarChart3, Eye, MousePointerClick } from "lucide-react";
@@ -67,8 +68,8 @@ function AppsPage() {
   function toggleStatus(id: string) {
     saveCampaigns(campaigns.map((c) => c.id === id ? { ...c, status: c.status === "active" ? "paused" : "active" } : c));
   }
-  function delCampaign(id: string) {
-    if (!confirm("Supprimer la campagne ?")) return;
+  async function delCampaign(id: string) {
+    if (!(await askConfirm({ title: "Supprimer la campagne ?", danger: true }))) return;
     saveCampaigns(campaigns.filter((c) => c.id !== id));
   }
 

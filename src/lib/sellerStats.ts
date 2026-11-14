@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { playSound } from "@/lib/sound";
 import { supabase } from "@/integrations/supabase/client";
 
 /** Statistiques réelles du vendeur connecté (fonction seller_dashboard_stats de la base). */
@@ -91,10 +92,12 @@ export function dateTime(iso: string) {
 /** Signalé quand le vendeur ouvre la page Commandes (le compteur du menu disparaît). */
 export const ORDERS_SEEN_EVENT = "amashia:orders-seen";
 export const REVIEWS_SEEN_EVENT = "amashia:reviews-seen";
+export const NOTIFS_SEEN_EVENT = "amashia:notifications-seen";
 
 /** Compteurs du menu : produits signalés non traités et nouvelles commandes depuis la dernière visite. */
 export function useNavBadges(refreshMs = 20_000) {
-  const [badges, setBadges] = useState<{ reports: number; orders: number; reviews: number }>({ reports: 0, orders: 0, reviews: 0 });
+  const [badges, setBadges] = useState<{ reports: number; orders: number; reviews: number; notifications: number }>({ reports: 0, orders: 0, reviews: 0, notifications: 0 });
+  const lastNotifs = useRef<number | null>(null);
   useEffect(() => {
     let alive = true;
     const load = async () => {
@@ -102,13 +105,18 @@ export function useNavBadges(refreshMs = 20_000) {
       if (!user) return;
       const db = supabase as any;
       try {
-        const [r, o, v] = await Promise.all([
+        const [r, o, v, n] = await Promise.all([
           db.from("product_reports").select("id", { count: "exact", head: true }).eq("seller_id", user.id).eq("status", "pending"),
           db.rpc("seller_new_orders_count"),
           db.rpc("seller_new_reviews_count"),
+          db.rpc("seller_unread_notifications"),
         ]);
+        const notifications = Number(n.data ?? 0);
+        // un petit son quand une nouvelle notification arrive pendant que le vendeur est connecté
+        if (lastNotifs.current !== null && notifications > lastNotifs.current) playSound("notify");
+        lastNotifs.current = notifications;
         // commandes et avis reçus depuis la dernière visite des pages Commandes / Avis
-        if (alive) setBadges({ reports: r.count ?? 0, orders: Number(o.data ?? 0), reviews: Number(v.data ?? 0) });
+        if (alive) setBadges({ reports: r.count ?? 0, orders: Number(o.data ?? 0), reviews: Number(v.data ?? 0), notifications });
       } catch { /* coupure réseau : nouvel essai au prochain passage */ }
     };
     void load();
@@ -117,11 +125,12 @@ export function useNavBadges(refreshMs = 20_000) {
     const onFocus = () => void load();
     window.addEventListener(ORDERS_SEEN_EVENT, load);
     window.addEventListener(REVIEWS_SEEN_EVENT, load);
+    window.addEventListener(NOTIFS_SEEN_EVENT, load);
     window.addEventListener("focus", onFocus);
     document.addEventListener("visibilitychange", onFocus);
     return () => {
       alive = false; window.clearInterval(t);
-      window.removeEventListener(ORDERS_SEEN_EVENT, load); window.removeEventListener(REVIEWS_SEEN_EVENT, load);
+      window.removeEventListener(ORDERS_SEEN_EVENT, load); window.removeEventListener(REVIEWS_SEEN_EVENT, load); window.removeEventListener(NOTIFS_SEEN_EVENT, load);
       window.removeEventListener("focus", onFocus); document.removeEventListener("visibilitychange", onFocus);
     };
   }, [refreshMs]);

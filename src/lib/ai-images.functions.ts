@@ -58,3 +58,11 @@ export const checkProductShots = createServerFn({ method: "POST" })
     const input = m.CheckInput.parse(data);
     return friendly(() => m.checkShots(input, { supabase: context.supabase as never, userId: context.userId }));
   });
+
+/** Le service d'images IA est-il prêt (clés présentes et acceptées) ? Rien n'est facturé. */
+export const aiImagesStatus = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async () => {
+    const m = await import("@/lib/ai-images.server");
+    return m.aiStatus();
+  });

@@ -147,7 +147,8 @@ export async function startShots(input: z.infer<typeof StartInput>) {
 
 function hfError(status: number, detail?: unknown) {
   if (status === 401) return "Clé Higgsfield refusée : vérifiez la variable HIGGSFIELD_API_KEY sur Vercel.";
-  if (status === 402) return "Crédit Higgsfield insuffisant : rechargez votre compte Higgsfield.";
+  // Higgsfield renvoie 403 quand le solde est insuffisant (402 gardé par sécurité)
+  if (status === 402 || status === 403) return "Crédit Higgsfield insuffisant : rechargez votre compte Higgsfield.";
   if (status === 429) return "Trop de générations en même temps. Réessayez dans une minute.";
   if (status === 404 || status === 423 || status === 503) return "Le modèle d'images n'est pas disponible pour ce compte Higgsfield en ce moment.";
   if (status === 422) return `Demande refusée par Higgsfield${typeof detail === "string" ? ` : ${detail}` : ""}.`;
@@ -189,4 +190,30 @@ export async function checkShots(input: z.infer<typeof CheckInput>, ctx: { supab
       return { id: job.id, status: "pending" };
     }
   }));
+}
+
+// ---------------------------------------------------------------- 0. Le service est-il prêt ?
+
+export type AiStatus = { ready: boolean; message?: string; costUsd?: number | null };
+
+/**
+ * Vérifie, sans rien générer ni facturer, que les clés sont en place et acceptées
+ * (Higgsfield : estimation de coût gratuite).
+ */
+export async function aiStatus(): Promise<AiStatus> {
+  if (!process.env.ANTHROPIC_API_KEY) return { ready: false, message: "Agent IA non configuré : la clé ANTHROPIC_API_KEY manque sur Vercel." };
+  let auth: string;
+  try { auth = higgsfieldAuth(); } catch (e) { return { ready: false, message: (e as Error).message }; }
+  try {
+    const res = await fetch(`${HF_API}/estimate/${HF_MODEL}`, {
+      method: "POST",
+      headers: { Authorization: auth, "Content-Type": "application/json" },
+      body: JSON.stringify({ prompt: "Product photo on a white background", resolution: "2k", aspect_ratio: "1:1", quality: "high", enhance_prompt: false }),
+      signal: AbortSignal.timeout(10_000),
+    });
+    if (res.ok) return { ready: true, costUsd: Number((await res.json() as { usd?: string }).usd) || null };
+    return { ready: false, message: hfError(res.status) };
+  } catch {
+    return { ready: false, message: "Higgsfield ne répond pas pour le moment. Réessayez dans quelques minutes." };
+  }
 }

@@ -16,7 +16,7 @@ import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as FonctionnalitesRouteImport } from './routes/fonctionnalites'
 import { Route as InscriptionRouteImport } from './routes/inscription'
 import { Route as TarificationRouteImport } from './routes/tarification'
-import { Route as ApiAiImageRouteImport } from './routes/api/ai-image'
+import { Route as ApiAiStatusRouteImport } from './routes/api/ai-status'
 import { Route as ApiTranslateRouteImport } from './routes/api/translate'
 import { Route as CaptureSessionRouteImport } from './routes/capture.$session'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard.index'
@@ -74,9 +74,9 @@ const TarificationRoute = TarificationRouteImport.update({
   path: '/tarification',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiAiImageRoute = ApiAiImageRouteImport.update({
-  id: '/api/ai-image',
-  path: '/api/ai-image',
+const ApiAiStatusRoute = ApiAiStatusRouteImport.update({
+  id: '/api/ai-status',
+  path: '/api/ai-status',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiTranslateRoute = ApiTranslateRouteImport.update({
@@ -195,7 +195,7 @@ export interface FileRoutesByFullPath {
   '/fonctionnalites': typeof FonctionnalitesRoute
   '/inscription': typeof InscriptionRoute
   '/tarification': typeof TarificationRoute
-  '/api/ai-image': typeof ApiAiImageRoute
+  '/api/ai-status': typeof ApiAiStatusRoute
   '/api/translate': typeof ApiTranslateRoute
   '/capture/$session': typeof CaptureSessionRoute
   '/dashboard/analytique': typeof DashboardAnalytiqueRoute
@@ -225,7 +225,7 @@ export interface FileRoutesByTo {
   '/fonctionnalites': typeof FonctionnalitesRoute
   '/inscription': typeof InscriptionRoute
   '/tarification': typeof TarificationRoute
-  '/api/ai-image': typeof ApiAiImageRoute
+  '/api/ai-status': typeof ApiAiStatusRoute
   '/api/translate': typeof ApiTranslateRoute
   '/capture/$session': typeof CaptureSessionRoute
   '/dashboard/analytique': typeof DashboardAnalytiqueRoute
@@ -257,7 +257,7 @@ export interface FileRoutesById {
   '/fonctionnalites': typeof FonctionnalitesRoute
   '/inscription': typeof InscriptionRoute
   '/tarification': typeof TarificationRoute
-  '/api/ai-image': typeof ApiAiImageRoute
+  '/api/ai-status': typeof ApiAiStatusRoute
   '/api/translate': typeof ApiTranslateRoute
   '/capture/$session': typeof CaptureSessionRoute
   '/dashboard/analytique': typeof DashboardAnalytiqueRoute
@@ -290,7 +290,7 @@ export interface FileRouteTypes {
     | '/fonctionnalites'
     | '/inscription'
     | '/tarification'
-    | '/api/ai-image'
+    | '/api/ai-status'
     | '/api/translate'
     | '/capture/$session'
     | '/dashboard/analytique'
@@ -320,7 +320,7 @@ export interface FileRouteTypes {
     | '/fonctionnalites'
     | '/inscription'
     | '/tarification'
-    | '/api/ai-image'
+    | '/api/ai-status'
     | '/api/translate'
     | '/capture/$session'
     | '/dashboard/analytique'
@@ -351,7 +351,7 @@ export interface FileRouteTypes {
     | '/fonctionnalites'
     | '/inscription'
     | '/tarification'
-    | '/api/ai-image'
+    | '/api/ai-status'
     | '/api/translate'
     | '/capture/$session'
     | '/dashboard/analytique'
@@ -383,7 +383,7 @@ export interface RootRouteChildren {
   FonctionnalitesRoute: typeof FonctionnalitesRoute
   InscriptionRoute: typeof InscriptionRoute
   TarificationRoute: typeof TarificationRoute
-  ApiAiImageRoute: typeof ApiAiImageRoute
+  ApiAiStatusRoute: typeof ApiAiStatusRoute
   ApiTranslateRoute: typeof ApiTranslateRoute
   CaptureSessionRoute: typeof CaptureSessionRoute
   InscriptionEtapesRoute: typeof InscriptionEtapesRoute
@@ -440,11 +440,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TarificationRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/ai-image': {
-      id: '/api/ai-image'
-      path: '/api/ai-image'
-      fullPath: '/api/ai-image'
-      preLoaderRoute: typeof ApiAiImageRouteImport
+    '/api/ai-status': {
+      id: '/api/ai-status'
+      path: '/api/ai-status'
+      fullPath: '/api/ai-status'
+      preLoaderRoute: typeof ApiAiStatusRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/translate': {
@@ -651,7 +651,7 @@ const rootRouteChildren: RootRouteChildren = {
   FonctionnalitesRoute: FonctionnalitesRoute,
   InscriptionRoute: InscriptionRoute,
   TarificationRoute: TarificationRoute,
-  ApiAiImageRoute: ApiAiImageRoute,
+  ApiAiStatusRoute: ApiAiStatusRoute,
   ApiTranslateRoute: ApiTranslateRoute,
   CaptureSessionRoute: CaptureSessionRoute,
   InscriptionEtapesRoute: InscriptionEtapesRoute,

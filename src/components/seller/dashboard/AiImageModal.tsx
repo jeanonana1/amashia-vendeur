@@ -6,7 +6,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { compressImage } from "@/lib/imageCompress";
 import { imgProps } from "@/lib/img";
-import { planProductShots, startProductShots, checkProductShots } from "@/lib/ai-images.functions";
+import { planProductShots, startProductShots, checkProductShots, aiImagesStatus } from "@/lib/ai-images.functions";
 
 type FormImage = { file?: File; preview: string; existing?: boolean };
 type Shot = { id: string; label: string; why: string; prompt: string };
@@ -54,6 +54,15 @@ export function AiImageModal({ productName, category, description, formImages, o
   const plan = useServerFn(planProductShots);
   const start = useServerFn(startProductShots);
   const check = useServerFn(checkProductShots);
+  const status = useServerFn(aiImagesStatus);
+
+  // le service est-il prêt (clés présentes et acceptées) ? vérifié à l'ouverture, sans frais
+  const [service, setService] = useState<{ ready: boolean; message?: string; costUsd?: number | null } | null>(null);
+  useEffect(() => {
+    let alive = true;
+    status().then((s) => alive && setService(s)).catch(() => alive && setService({ ready: false, message: "Vérification du service impossible. Réessayez dans un instant." }));
+    return () => { alive = false; };
+  }, [status]);
 
   const fileRef = useRef<HTMLInputElement>(null);
   const camRef = useRef<HTMLInputElement>(null);
@@ -218,6 +227,13 @@ export function AiImageModal({ productName, category, description, formImages, o
         </div>
 
         <div className="flex-1 space-y-5 overflow-y-auto p-5">
+          {service && !service.ready && (
+            <div className="flex gap-3 rounded-2xl border border-amber-500/40 bg-amber-500/10 p-4 text-sm">
+              <AlertTriangle size={18} className="mt-0.5 shrink-0 text-amber-400" />
+              <div><p className="font-semibold">Génération d'images indisponible pour le moment</p><p className="mt-0.5 text-xs text-muted-foreground">{service.message}</p></div>
+            </div>
+          )}
+          {service?.ready && service.costUsd ? <p className="text-xs text-muted-foreground">Coût indicatif : environ {service.costUsd.toFixed(2)} $ par image générée, facturé sur votre compte Higgsfield. Les images échouées ne sont pas facturées.</p> : null}
           {/* 1. Photos réelles */}
           <section className="rounded-2xl border border-border p-4">
             <div className="mb-1 flex flex-wrap items-center justify-between gap-2">
@@ -235,7 +251,7 @@ export function AiImageModal({ productName, category, description, formImages, o
               {Array.from({ length: uploading }).map((_, i) => <div key={i} className="grid h-20 w-20 place-items-center rounded-xl bg-secondary"><Loader2 className="animate-spin" size={18} /></div>)}
               {!refs.length && !uploading && <p className="text-xs text-muted-foreground">Aucune photo pour le moment.</p>}
             </div>
-            <button onClick={runPlan} disabled={planning || !activeRefs.length || uploading > 0} className={`${btn} mt-4 w-full bg-gradient-primary py-3 text-sm text-black`}>
+            <button onClick={runPlan} disabled={planning || !activeRefs.length || uploading > 0 || service?.ready === false} className={`${btn} mt-4 w-full bg-gradient-primary py-3 text-sm text-black`}>
               {planning ? <><Loader2 className="animate-spin" size={15} /> Analyse des photos et de la description…</> : <><Sparkles size={15} /> {planned ? "Proposer d'autres angles" : "Proposer les meilleurs angles"}</>}
             </button>
           </section>

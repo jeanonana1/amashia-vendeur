@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { MARKETPLACE_URL, dateTime, money, num, trend, useLiveVisitors, useSellerStats, type SellerStats } from "@/lib/sellerStats";
+import { TrafficSources } from "@/components/seller/dashboard/TrafficSources";
 import { ORDER_FIELDS, OrderDetailModal, type SellerOrderLine } from "@/components/seller/dashboard/OrderDetailModal";
 
 export const Route = createFileRoute("/dashboard/")({
@@ -133,6 +134,9 @@ function DashboardOverview() {
         </div>
         {stats ? <Conversions stats={stats} period={period.sub} /> : <div className="h-[380px] animate-pulse rounded-2xl border border-border bg-card" />}
       </div>
+
+      {/* Sources de trafic, publicités Facebook / Instagram / TikTok et campagnes */}
+      <TrafficSources days={days} period={period.sub} />
 
       {/* Commandes récentes */}
       <div className="rounded-2xl border border-border bg-card p-6">

@@ -180,10 +180,10 @@ revoke execute on function public.admin_log_page(text, text) from public, anon;
 grant execute on function public.admin_log_page(text, text) to authenticated;
 
 -- Liste des membres avec un résumé de leur activité (super administrateurs)
-create or replace function public.admin_reports() returns jsonb
+create or replace function public.admin_team_reports() returns jsonb
 language plpgsql stable security definer set search_path = public as $$
 begin
-  perform public.admin_guard('admin_reports');
+  perform public.admin_guard('admin_team_reports');
   return coalesce((select jsonb_agg(jsonb_build_object('user_id', s.user_id, 'full_name', s.full_name, 'email', s.email, 'job_title', s.job_title,
       'is_super', s.is_super, 'status', s.status, 'me', s.user_id = auth.uid(), 'created_at', s.created_at,
       'pages_7d', (select count(*) from admin_activity a where a.user_id = s.user_id and a.kind = 'page' and a.created_at > now() - interval '7 days'),

@@ -7,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { marketplaceProductUrl } from "@/lib/sellerProfile";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { ORDER_FIELDS, ORDER_STATUS, OrderDetailModal, colorName, type SellerOrderLine } from "@/components/seller/dashboard/OrderDetailModal";
+import { ORDER_FIELDS, ORDER_STATUS, OrderDetailModal, OrderStatusTrack, colorName, type SellerOrderLine } from "@/components/seller/dashboard/OrderDetailModal";
 import { ORDERS_SEEN_EVENT, dateTime } from "@/lib/sellerStats";
 import { X } from "lucide-react";
 
@@ -69,15 +69,12 @@ function CommandesPage() {
     void load();
     // Actualisation automatique toutes les 30 secondes pour voir les nouvelles commandes
     const timer = window.setInterval(() => void load(), 30_000);
-    return () => window.clearInterval(timer);
+    // statut changé par Amashia (admin) ou nouvelle commande : actualisation immédiate
+    const ch = supabase.channel("seller-order-items")
+      .on("postgres_changes", { event: "*", schema: "public", table: "order_items" }, () => void load())
+      .subscribe();
+    return () => { window.clearInterval(timer); void supabase.removeChannel(ch); };
   }, []);
-
-  async function updateOrder(id: string, status: string) {
-    const { error } = await (supabase as any).rpc("seller_set_order_status", { _item_id: id, _status: status });
-    if (error) return toast.error(error.message);
-    setOrders((current) => current.map((order) => order.id === id ? { ...order, status } : order));
-    toast.success(`Commande ${labels[status].toLowerCase()}`);
-  }
 
   const rows = useMemo(() => listings.filter((listing) => listing.title.toLowerCase().includes(query.toLowerCase())).map((listing) => {
     const sales = orders.filter((order) => order.listing_id === listing.id && order.status !== "cancelled");
@@ -100,7 +97,7 @@ function CommandesPage() {
 
       <section className="rounded-xl border border-border bg-card p-4 sm:p-6">
         <h2 className="mb-1 font-bold">Ventes reçues</h2>
-        <p className="mb-5 text-xs text-muted-foreground">Touchez une commande pour voir son détail.</p>
+        <p className="mb-5 text-xs text-muted-foreground">Touchez une commande pour voir son détail. Le statut est géré par Amashia et s'actualise ici en direct.</p>
         {orders.length === 0 ? (
           <p className="py-10 text-center text-sm text-muted-foreground">Les commandes passées par les clients sur Amashia apparaîtront ici.</p>
         ) : (
@@ -128,10 +125,7 @@ function CommandesPage() {
                 </div>
                 <div className="flex items-center justify-between gap-3 md:justify-end" onClick={(e) => e.stopPropagation()}>
                   <p className="font-bold text-primary">{money(order.amount)}</p>
-                  <span className={`w-fit rounded-full px-2.5 py-1 text-xs font-semibold ${statusClass[order.status]}`}>{labels[order.status]}</span>
-                  <select value={order.status} onChange={(e) => void updateOrder(order.id, e.target.value)} className="rounded-lg border border-border bg-background px-3 py-2 text-xs" aria-label="Changer le statut">
-                    {Object.entries(ORDER_STATUS).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
-                  </select>
+                  <OrderStatusTrack status={order.status} compact />
                 </div>
               </article>
             ))}

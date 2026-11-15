@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { imgProps } from "@/lib/img";
-import { X, MapPin, CreditCard, Clock, User, Package } from "lucide-react";
-import { toast } from "sonner";
+import { X, MapPin, CreditCard, Clock, User, Package, Lock, Check } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { dateTime, money } from "@/lib/sellerStats";
 
@@ -36,34 +35,52 @@ export const ORDER_STATUS: Record<string, { label: string; cls: string }> = {
   cancelled: { label: "Annulée", cls: "bg-red-500/15 text-red-400" },
 };
 
+/**
+ * Suivi du statut, en lecture seule : le statut est décidé par Amashia depuis l'espace admin
+ * et s'actualise ici en direct (rien n'est cliquable).
+ */
+const STEPS = ["pending", "preparing", "shipped", "delivered"] as const;
+export function OrderStatusTrack({ status, compact = false }: { status: string; compact?: boolean }) {
+  if (status === "cancelled") return <span className="inline-flex items-center gap-1 rounded-full bg-red-500/15 px-2.5 py-1 text-xs font-semibold text-red-400"><X size={12} /> Annulée par Amashia</span>;
+  const cur = Math.max(0, STEPS.indexOf(status as (typeof STEPS)[number]));
+  return (
+    <div aria-label={`Statut : ${ORDER_STATUS[status]?.label ?? status} (géré par Amashia)`} title="Statut géré par Amashia, mis à jour en direct" className="pointer-events-none select-none">
+      <div className="flex items-center">
+        {STEPS.map((s, i) => (
+          <div key={s} className="flex items-center">
+            <span className={`grid shrink-0 place-items-center rounded-full ${compact ? "h-4 w-4" : "h-5 w-5"} ${i <= cur ? "bg-primary text-black" : "bg-secondary text-muted-foreground"} ${i === cur ? "ring-2 ring-primary/40" : ""}`}>{i < cur ? <Check size={compact ? 9 : 11} strokeWidth={3} /> : <span className="h-1.5 w-1.5 rounded-full bg-current" />}</span>
+            {i < STEPS.length - 1 && <span className={`h-0.5 ${compact ? "w-4 sm:w-6" : "w-6 sm:w-10"} ${i < cur ? "bg-primary" : "bg-secondary"}`} />}
+          </div>
+        ))}
+      </div>
+      <p className={`mt-1 flex items-center gap-1 ${compact ? "text-[10px]" : "text-[11px]"} text-muted-foreground`}><Lock size={compact ? 9 : 10} /><b className="text-foreground">{ORDER_STATUS[status]?.label ?? status}</b> · géré par Amashia</p>
+    </div>
+  );
+}
+
 export const colorName = (c: string | null) => (c ? c.replace(/\s*#[0-9a-f]{3,8}$/i, "") : "");
 
 /**
  * Détail d'une commande pour le vendeur : tous ses articles de cette commande,
- * client (nom et quartier uniquement), paiement, date et heure, statut modifiable.
+ * client (nom et quartier uniquement), paiement, date et heure, statut (décidé par Amashia, en lecture seule).
  */
 export function OrderDetailModal({ line, onClose, onChanged }: { line: SellerOrderLine; onClose: () => void; onChanged?: () => void }) {
   const [lines, setLines] = useState<SellerOrderLine[]>([line]);
-  const [saving, setSaving] = useState<string | null>(null);
 
   useEffect(() => {
     let alive = true;
     void (supabase as any).from("seller_orders").select(ORDER_FIELDS).eq("order_id", line.order_id).order("created_at")
       .then(({ data }: { data: SellerOrderLine[] | null }) => { if (alive && data?.length) setLines(data); });
+    const reload = () => (supabase as any).from("seller_orders").select(ORDER_FIELDS).eq("order_id", line.order_id).order("created_at")
+      .then(({ data }: { data: SellerOrderLine[] | null }) => { if (alive && data?.length) { setLines(data); onChanged?.(); } });
+    // le statut change dans l'admin : mise à jour immédiate
+    const ch = supabase.channel(`order-status:${line.order_id}`)
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "order_items", filter: `order_id=eq.${line.order_id}` }, () => void reload())
+      .subscribe();
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
     window.addEventListener("keydown", onKey);
-    return () => { alive = false; window.removeEventListener("keydown", onKey); };
+    return () => { alive = false; window.removeEventListener("keydown", onKey); void supabase.removeChannel(ch); };
   }, [line.order_id, onClose]);
-
-  async function setStatus(id: string, status: string) {
-    setSaving(id);
-    const { error } = await (supabase as any).rpc("seller_set_order_status", { _item_id: id, _status: status });
-    setSaving(null);
-    if (error) { toast.error(error.message); return; }
-    setLines((ls) => ls.map((l) => (l.id === id ? { ...l, status } : l)));
-    toast.success(`Article ${ORDER_STATUS[status]?.label.toLowerCase() ?? "mis à jour"}`);
-    onChanged?.();
-  }
 
   const total = lines.filter((l) => l.status !== "cancelled").reduce((s, l) => s + Number(l.amount), 0);
 
@@ -98,18 +115,7 @@ export function OrderDetailModal({ line, onClose, onChanged }: { line: SellerOrd
                   <p className="line-clamp-2 text-sm font-semibold">{l.product_title}</p>
                   {(l.color || l.options) && <p className="text-xs text-primary">{[l.color ? `Couleur : ${colorName(l.color)}` : "", l.options ?? ""].filter(Boolean).join(" · ")}</p>}
                   <p className="mt-0.5 text-xs text-muted-foreground">{l.quantity} × {money(Number(l.unit_price))}{Number(l.discount) > 0 && <> − coupon {l.coupon_code} {money(Number(l.discount))}</>} = <b className="text-foreground">{money(Number(l.amount))}</b></p>
-                  <div className="mt-2 flex flex-wrap items-center gap-2">
-                    <span className={`rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${st.cls}`}>{st.label}</span>
-                    <select
-                      value={l.status}
-                      disabled={saving === l.id || l.status === "cancelled"}
-                      onChange={(e) => void setStatus(l.id, e.target.value)}
-                      className="rounded-lg border border-border bg-background px-2 py-1 text-xs"
-                      aria-label="Changer le statut"
-                    >
-                      {Object.entries(ORDER_STATUS).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
-                    </select>
-                  </div>
+                  <div className="mt-2"><OrderStatusTrack status={l.status} /></div>
                 </div>
               </div>
             );
@@ -121,7 +127,7 @@ export function OrderDetailModal({ line, onClose, onChanged }: { line: SellerOrd
           <span className="text-lg font-extrabold text-primary">{money(total)}</span>
         </div>
         <p className="px-5 pb-5 text-[11px] text-muted-foreground">
-          Les coordonnées téléphoniques du client ne sont pas communiquées : la livraison est organisée par Amashia.
+          Le statut de la commande est géré par Amashia et se met à jour ici automatiquement. Les coordonnées du client ne sont pas communiquées : la livraison est organisée par Amashia.
         </p>
       </div>
     </div>

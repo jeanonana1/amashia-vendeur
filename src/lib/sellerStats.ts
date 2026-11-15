@@ -96,7 +96,7 @@ export const NOTIFS_SEEN_EVENT = "amashia:notifications-seen";
 
 /** Compteurs du menu : produits signalés non traités et nouvelles commandes depuis la dernière visite. */
 export function useNavBadges(refreshMs = 20_000) {
-  const [badges, setBadges] = useState<{ reports: number; orders: number; reviews: number; notifications: number }>({ reports: 0, orders: 0, reviews: 0, notifications: 0 });
+  const [badges, setBadges] = useState<{ reports: number; orders: number; reviews: number; notifications: number; returns: number }>({ reports: 0, orders: 0, reviews: 0, notifications: 0, returns: 0 });
   const lastNotifs = useRef<number | null>(null);
   useEffect(() => {
     let alive = true;
@@ -105,18 +105,19 @@ export function useNavBadges(refreshMs = 20_000) {
       if (!user) return;
       const db = supabase as any;
       try {
-        const [r, o, v, n] = await Promise.all([
+        const [r, o, v, n, ret] = await Promise.all([
           db.from("product_reports").select("id", { count: "exact", head: true }).eq("seller_id", user.id).eq("status", "pending"),
           db.rpc("seller_new_orders_count"),
           db.rpc("seller_new_reviews_count"),
           db.rpc("seller_unread_notifications"),
+          db.rpc("seller_returns_todo_count"),
         ]);
         const notifications = Number(n.data ?? 0);
         // un petit son quand une nouvelle notification arrive pendant que le vendeur est connecté
         if (lastNotifs.current !== null && notifications > lastNotifs.current) playSound("notify");
         lastNotifs.current = notifications;
         // commandes et avis reçus depuis la dernière visite des pages Commandes / Avis
-        if (alive) setBadges({ reports: r.count ?? 0, orders: Number(o.data ?? 0), reviews: Number(v.data ?? 0), notifications });
+        if (alive) setBadges({ reports: r.count ?? 0, orders: Number(o.data ?? 0), reviews: Number(v.data ?? 0), notifications, returns: Number(ret.data ?? 0) });
       } catch { /* coupure réseau : nouvel essai au prochain passage */ }
     };
     void load();

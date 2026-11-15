@@ -101,13 +101,13 @@ export function DashboardLayout({ title, subtitle, children }: { title: string; 
         {NAV.map((item) => {
           const Icon = item.icon;
           const active = path === item.to || (item.to !== "/dashboard" && path.startsWith(item.to));
-          const badge = item.to === "/dashboard/signalements" ? badges.reports : item.to === "/dashboard/commandes" ? badges.orders : item.to === "/dashboard/avis" ? badges.reviews : item.to === "/dashboard/notifications" ? badges.notifications : 0;
+          const badge = item.to === "/dashboard/signalements" ? badges.reports : item.to === "/dashboard/commandes" ? badges.orders : item.to === "/dashboard/avis" ? badges.reviews : item.to === "/dashboard/notifications" ? badges.notifications : item.to === "/dashboard/retours" ? badges.returns : 0;
           return (
             <Link key={item.to} to={item.to} className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition ${active ? "bg-primary/15 text-primary font-semibold" : "text-muted-foreground hover:bg-secondary hover:text-foreground"}`}>
               <Icon size={18} />
               <span className="flex-1">{item.label}</span>
               {badge > 0 && (
-                <span className={`min-w-[20px] rounded-full px-1.5 py-0.5 text-center text-[10px] font-bold leading-none text-black ${item.to === "/dashboard/signalements" ? "bg-red-500" : "bg-primary"}`}>
+                <span key={badge} className={`badge-beat min-w-[20px] rounded-full px-1.5 py-0.5 text-center text-[10px] font-bold leading-none text-black ${item.to === "/dashboard/signalements" ? "bg-red-500" : "bg-primary"}`}>
                   {badge > 99 ? "99+" : badge}
                 </span>
               )}
@@ -165,7 +165,7 @@ export function DashboardLayout({ title, subtitle, children }: { title: string; 
             </button>
             <Link to="/dashboard/notifications" className="relative w-10 h-10 grid place-items-center rounded-full bg-secondary text-muted-foreground" aria-label="Notifications">
               <Bell size={16} />
-              {badges.notifications > 0 && <span className="absolute -top-1 -right-1 min-w-4 h-4 px-1 rounded-full bg-primary text-black text-[9px] font-bold grid place-items-center">{badges.notifications > 99 ? "99+" : badges.notifications}</span>}
+              {badges.notifications > 0 && <span key={badges.notifications} className="badge-beat absolute -top-1 -right-1 min-w-4 h-4 px-1 rounded-full bg-primary text-black text-[9px] font-bold grid place-items-center">{badges.notifications > 99 ? "99+" : badges.notifications}</span>}
             </Link>
           </div>
         </div>
@@ -194,7 +194,7 @@ export function DashboardLayout({ title, subtitle, children }: { title: string; 
               </button>
               <Link to="/dashboard/notifications" className="hidden lg:grid relative w-10 h-10 place-items-center rounded-full bg-secondary text-muted-foreground hover:text-primary transition" title="Notifications">
                 <Bell size={18} />
-                {badges.notifications > 0 && <span className="absolute -top-1 -right-1 min-w-5 h-5 px-1 rounded-full bg-primary text-black text-[10px] font-bold grid place-items-center">{badges.notifications > 99 ? "99+" : badges.notifications}</span>}
+                {badges.notifications > 0 && <span key={badges.notifications} className="badge-beat absolute -top-1 -right-1 min-w-5 h-5 px-1 rounded-full bg-primary text-black text-[10px] font-bold grid place-items-center">{badges.notifications > 99 ? "99+" : badges.notifications}</span>}
               </Link>
               <button className="flex items-center gap-2 bg-secondary rounded-full pl-1 pr-3 py-1">
                 {avatar

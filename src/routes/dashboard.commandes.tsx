@@ -38,7 +38,7 @@ function CommandesPage() {
   const [openOrder, setOpenOrder] = useState<Order | null>(null);
   // récapitulatif affiché à l'arrivée sur la page
   const [summaryOpen, setSummaryOpen] = useState(false);
-  const summaryShown = useRef(false);
+  const shownCount = useRef(0);
   // date de la visite précédente : les commandes reçues depuis sont marquées « Nouveau »
   const [seenBefore, setSeenBefore] = useState<string | null | undefined>(undefined);
   useEffect(() => {
@@ -49,6 +49,13 @@ function CommandesPage() {
     })();
   }, []);
   const isNew = (o: SellerOrderLine) => seenBefore !== undefined && (seenBefore === null || o.created_at > seenBefore);
+  // la fenêtre récapitulative ne s'ouvre que s'il y a de nouvelles commandes depuis la dernière visite
+  // (et de nouveau si une autre commande arrive pendant que la page est ouverte)
+  const newCount = useMemo(() => new Set(orders.filter(isNew).map((o) => o.order_id)).size, [orders, seenBefore]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (loading || seenBefore === undefined) return;
+    if (newCount > shownCount.current) { shownCount.current = newCount; setSummaryOpen(true); }
+  }, [newCount, loading, seenBefore]);
 
   async function load() {
     const { data: { user } } = await supabase.auth.getUser();
@@ -62,7 +69,6 @@ function CommandesPage() {
     setListings(listingData || []);
     setOrders(orderData || []);
     setLoading(false);
-    if (!summaryShown.current && !listingError && !orderError) { summaryShown.current = true; setSummaryOpen(true); }
   }
 
   useEffect(() => {
@@ -91,11 +97,6 @@ function CommandesPage() {
       </div>
 
       <section className="mb-6 rounded-xl border border-border bg-card p-4 sm:p-6">
-        <div className="mb-5 flex flex-wrap items-center justify-between gap-3"><div><h2 className="font-bold">Fiches publiées</h2><p className="text-xs text-muted-foreground">Chaque lien ouvre la fiche réellement achetable.</p></div><div className="relative"><Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={15} /><input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Rechercher une fiche" className="rounded-lg border border-border bg-background py-2 pl-9 pr-3 text-sm" /></div></div>
-        {loading ? <p className="py-10 text-center text-sm text-muted-foreground">Chargement…</p> : rows.length === 0 ? <p className="py-10 text-center text-sm text-muted-foreground">Aucune fiche publiée pour le moment.</p> : <div className="grid gap-3">{rows.map(({ listing, count, amount }) => <article key={listing.id} className="grid gap-3 rounded-lg border border-border p-3 sm:grid-cols-[52px_1fr_auto] sm:items-center"><div className="h-13 w-13 overflow-hidden rounded-md bg-secondary">{listing.images?.[0] && <img src={listing.images[0]} alt="" className="h-full w-full object-cover" />}</div><div className="min-w-0"><h3 className="truncate font-semibold">{listing.title}</h3><div className="mt-1 flex flex-wrap items-center gap-2 text-xs"><span className={`rounded-full px-2 py-0.5 font-semibold ${statusClass[listing.status]}`}>{labels[listing.status]}</span><span className="text-muted-foreground">{count} commande{count === 1 ? "" : "s"}</span><span className="font-semibold text-primary">{money(amount)}</span></div></div><Button asChild variant="outline" size="sm"><a href={marketplaceProductUrl(listing.id)} target="_blank" rel="noreferrer"><ExternalLink /> Voir la fiche</a></Button></article>)}</div>}
-      </section>
-
-      <section className="rounded-xl border border-border bg-card p-4 sm:p-6">
         <h2 className="mb-1 font-bold">Ventes reçues</h2>
         <p className="mb-5 text-xs text-muted-foreground">Touchez une commande pour voir son détail. Le statut est géré par Amashia et s'actualise ici en direct.</p>
         {orders.length === 0 ? (
@@ -131,6 +132,11 @@ function CommandesPage() {
             ))}
           </div>
         )}
+      </section>
+
+      <section className="rounded-xl border border-border bg-card p-4 sm:p-6">
+        <div className="mb-5 flex flex-wrap items-center justify-between gap-3"><div><h2 className="font-bold">Fiches publiées</h2><p className="text-xs text-muted-foreground">Chaque lien ouvre la fiche réellement achetable.</p></div><div className="relative"><Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={15} /><input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Rechercher une fiche" className="rounded-lg border border-border bg-background py-2 pl-9 pr-3 text-sm" /></div></div>
+        {loading ? <p className="py-10 text-center text-sm text-muted-foreground">Chargement…</p> : rows.length === 0 ? <p className="py-10 text-center text-sm text-muted-foreground">Aucune fiche publiée pour le moment.</p> : <div className="grid gap-3">{rows.map(({ listing, count, amount }) => <article key={listing.id} className="grid gap-3 rounded-lg border border-border p-3 sm:grid-cols-[52px_1fr_auto] sm:items-center"><div className="h-13 w-13 overflow-hidden rounded-md bg-secondary">{listing.images?.[0] && <img src={listing.images[0]} alt="" className="h-full w-full object-cover" />}</div><div className="min-w-0"><h3 className="truncate font-semibold">{listing.title}</h3><div className="mt-1 flex flex-wrap items-center gap-2 text-xs"><span className={`rounded-full px-2 py-0.5 font-semibold ${statusClass[listing.status]}`}>{labels[listing.status]}</span><span className="text-muted-foreground">{count} commande{count === 1 ? "" : "s"}</span><span className="font-semibold text-primary">{money(amount)}</span></div></div><Button asChild variant="outline" size="sm"><a href={marketplaceProductUrl(listing.id)} target="_blank" rel="noreferrer"><ExternalLink /> Voir la fiche</a></Button></article>)}</div>}
       </section>
 
       {openOrder && <OrderDetailModal line={openOrder} onClose={() => setOpenOrder(null)} onChanged={() => void load()} />}

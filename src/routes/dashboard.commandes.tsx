@@ -167,12 +167,10 @@ function useCountUp(target: number, ms = 900) {
 }
 
 function OrdersSummary({ orders, newOrders, onClose }: { orders: SellerOrderLine[]; newOrders: number; onClose: () => void }) {
-  const byOrder = new Map<string, string[]>();
-  for (const o of orders) byOrder.set(o.order_id, [...(byOrder.get(o.order_id) ?? []), o.status]);
-  const total = byOrder.size;
-  const count = (st: string) => orders.filter((o) => o.status === st).length;
+  // uniquement les commandes reçues aujourd'hui (pas le total depuis l'ouverture de la boutique)
   const today = orders.filter((o) => new Date(o.created_at).toDateString() === new Date().toDateString());
-  const todayOrders = new Set(today.map((o) => o.order_id)).size;
+  const total = new Set(today.map((o) => o.order_id)).size;
+  const count = (st: string) => today.filter((o) => o.status === st).length;
   const rows = [
     ["pending", "À traiter"], ["preparing", "En préparation"], ["shipped", "Expédiés"], ["delivered", "Livrés"], ["cancelled", "Annulés"],
   ] as const;
@@ -185,13 +183,13 @@ function OrdersSummary({ orders, newOrders, onClose }: { orders: SellerOrderLine
         <div className={`mx-auto mb-3 grid h-14 w-14 place-items-center rounded-2xl bg-primary/15 text-primary ${newOrders > 0 ? "summary-bag" : ""}`}><ShoppingBag size={26} /></div>
         <p className="text-sm text-muted-foreground">Vous avez reçu</p>
         <p className="text-5xl font-extrabold tabular-nums">{shownTotal}</p>
-        <p className="mb-4 text-sm font-semibold">commande{total > 1 ? "s" : ""} au total</p>
+        <p className="mb-4 text-sm font-semibold">{total === 0 ? "commande aujourd'hui pour le moment" : `commande${total > 1 ? "s" : ""} aujourd'hui`}</p>
         {newOrders > 0 && (
           <p className="summary-new mb-3 rounded-full bg-primary/15 px-3 py-1.5 text-sm font-bold text-primary">
             ✨ {shownNew} nouvelle{newOrders > 1 ? "s" : ""} commande{newOrders > 1 ? "s" : ""} depuis votre dernière visite
           </p>
         )}
-        {todayOrders > 0 && <p className="mb-4 rounded-full bg-emerald-500/15 px-3 py-1 text-xs font-semibold text-emerald-400">dont {todayOrders} aujourd'hui 🎉</p>}
+        <p className="mb-2 text-left text-xs font-medium text-muted-foreground">Articles du jour par statut</p>
         <div className="grid grid-cols-2 gap-2 text-left text-sm">
           {rows.map(([k, label]) => (
             <div key={k} className="flex items-center justify-between rounded-xl bg-secondary/50 px-3 py-2">

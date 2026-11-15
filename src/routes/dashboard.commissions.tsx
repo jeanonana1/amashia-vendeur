@@ -12,6 +12,7 @@ export const Route = createFileRoute("/dashboard/commissions")({
 
 type Data = {
   balance: number;
+  enabled?: boolean;
   rates: { category: string; pct: number }[];
   totals: { gross: number; commission: number; delivered_net: number; pending_net: number };
   withdrawn: number;
@@ -57,6 +58,7 @@ function CommissionsPage() {
             <div className="rounded-2xl border border-border bg-card p-5">
               <h2 className="mb-1 font-bold">Taux de commission</h2>
               <p className="mb-4 text-xs text-muted-foreground">Fixé par Amashia pour chaque catégorie, appliqué au prix de vente (après réduction éventuelle).</p>
+              {d.enabled === false && <p className="mb-3 rounded-lg bg-green-50 p-2.5 text-xs font-medium text-green-700">Commissions suspendues par Amashia : vos nouvelles commandes n'ont aucune commission pour le moment.</p>}
               <ul className="divide-y divide-border">
                 {d.rates.map((r) => <li key={r.category} className="flex items-center justify-between py-2.5 text-sm"><span>{r.category}</span><b className="text-primary">{n(r.pct)} %</b></li>)}
               </ul>

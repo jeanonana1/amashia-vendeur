@@ -1,6 +1,7 @@
 import { Link, useLocation } from "@tanstack/react-router";
 import { Sun, Moon } from "lucide-react";
 import { useTheme } from "@/components/theme-provider";
+import { SellerLogo } from "@/components/seller/SellerLogo";
 
 const links = [
   { to: "/", label: "Accueil" },
@@ -15,11 +16,8 @@ export function Header() {
   return (
     <header className="sticky top-0 z-50 backdrop-blur-xl bg-background/80 border-b border-border/50">
       <div className="container mx-auto px-6 h-20 flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-3 font-display font-extrabold text-xl">
-          <span className="w-10 h-10 rounded-xl bg-gradient-primary grid place-items-center text-black shadow-soft text-sm">
-            a
-          </span>
-          <span>Amashia Seller</span>
+        <Link to="/" className="flex items-center" aria-label="Accueil amashia seller">
+          <SellerLogo className="h-8 md:h-10" />
         </Link>
         <nav className="hidden md:flex items-center gap-10 text-[15px] font-medium">
           {links.map((l) => {

@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Header } from "@/components/seller/Header";
 import { Footer } from "@/components/seller/Footer";
 import { User, Store, ArrowRight } from "lucide-react";
+import { SellerLogo } from "@/components/seller/SellerLogo";
 
 export const Route = createFileRoute("/inscription")({
   head: () => ({
@@ -22,7 +23,7 @@ function Page() {
       <main className="flex-1 grid place-items-center py-16 px-6">
         <div className="w-full max-w-4xl bg-card border border-border rounded-3xl p-10 md:p-14">
           <div className="text-center mb-10">
-            <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-primary grid place-items-center text-black text-2xl font-extrabold shadow-elegant">a</div>
+            <div className="mb-7 flex justify-center"><SellerLogo className="h-11 md:h-12" /></div>
             <h1 className="text-3xl md:text-4xl font-extrabold">Choisissez votre type de compte</h1>
             <p className="mt-3 text-muted-foreground">Sélectionnez le type de compte qui correspond à vos besoins</p>
           </div>

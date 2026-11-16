@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { SellerLogo } from "@/components/seller/SellerLogo";
 
 export function Footer() {
   return (
@@ -6,9 +7,8 @@ export function Footer() {
       <div className="container mx-auto px-6 py-16">
         <div className="grid md:grid-cols-2 gap-10 mb-12">
           <div>
-            <Link to="/" className="flex items-center gap-3 font-display font-extrabold text-xl mb-4">
-              <span className="w-10 h-10 rounded-xl bg-gradient-primary grid place-items-center text-black text-sm">a</span>
-              <span>Amashia Seller</span>
+            <Link to="/" className="mb-4 flex items-center" aria-label="Accueil amashia seller">
+              <SellerLogo className="h-10" />
             </Link>
           </div>
           <p className="text-muted-foreground max-w-md md:justify-self-end">

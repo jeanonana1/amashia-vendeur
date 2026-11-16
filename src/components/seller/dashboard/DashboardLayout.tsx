@@ -9,6 +9,7 @@ import {
   BarChart3, Megaphone, Star, Bell, MessageSquare, Settings, HelpCircle, LogOut,
   RotateCcw, Sun, Moon, Volume2, VolumeX, Wallet, ChevronDown, AppWindow, Menu, X, AlertTriangle, PackagePlus, Percent } from "lucide-react";
 import { useTheme } from "@/components/theme-provider";
+import { SellerLogo } from "@/components/seller/SellerLogo";
 
 const NAV = [
   { icon: LayoutDashboard, label: "Aperçu", to: "/dashboard" },
@@ -93,9 +94,8 @@ export function DashboardLayout({ title, subtitle, children }: { title: string; 
 
   const SidebarInner = (
     <>
-      <Link to="/" className="flex items-center gap-3 font-display font-extrabold text-lg p-6 border-b border-border">
-        <span className="w-9 h-9 rounded-xl bg-gradient-primary grid place-items-center text-black text-sm">a</span>
-        <span>Amashia Seller</span>
+      <Link to="/" className="flex items-center p-6 border-b border-border" aria-label="Accueil amashia seller">
+        <SellerLogo className="h-9" />
       </Link>
       <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
         {NAV.map((item) => {
@@ -152,9 +152,8 @@ export function DashboardLayout({ title, subtitle, children }: { title: string; 
           <button onClick={() => setDrawerOpen(true)} className="w-10 h-10 grid place-items-center rounded-xl bg-secondary text-foreground" aria-label="Ouvrir le menu">
             <Menu size={20} />
           </button>
-          <Link to="/" className="flex items-center gap-2 font-display font-extrabold text-base">
-            <span className="w-8 h-8 rounded-lg bg-gradient-primary grid place-items-center text-black text-xs">a</span>
-            <span>Amashia</span>
+          <Link to="/" className="flex min-w-0 items-center" aria-label="Accueil amashia seller">
+            <SellerLogo className="h-7 max-w-full" />
           </Link>
           <div className="flex items-center gap-2">
             <button onClick={toggle} className="w-10 h-10 grid place-items-center rounded-full bg-secondary text-muted-foreground" aria-label="Thème">

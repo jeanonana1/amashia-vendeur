@@ -6,6 +6,7 @@ import { Footer } from "@/components/seller/Footer";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { PasswordInput } from "@/components/ui/password-input";
+import { SellerLogo } from "@/components/seller/SellerLogo";
 
 export const Route = createFileRoute("/connexion")({
   head: () => ({
@@ -75,7 +76,7 @@ function Page() {
         <div className="w-full max-w-md">
           <div className="relative bg-card border border-border rounded-3xl p-8 md:p-10 shadow-glow">
             <div className="text-center mb-8">
-              <div className="w-20 h-20 mx-auto mb-5 rounded-2xl bg-gradient-primary grid place-items-center text-black text-2xl font-extrabold shadow-elegant">a</div>
+              <div className="mb-6 flex justify-center"><SellerLogo className="h-11" /></div>
               <h1 className="text-3xl font-extrabold">Connexion</h1>
               <p className="mt-2 text-sm text-muted-foreground">Accédez à votre tableau de bord vendeur</p>
             </div>

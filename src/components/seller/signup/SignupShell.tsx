@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowLeft, Check } from "lucide-react";
+import { SellerLogo } from "@/components/seller/SellerLogo";
 
 const STEPS = ["Infos", "Détails", "Documents", "Paiement", "Localisation", "Vérif.", "Fini"];
 
@@ -8,9 +9,7 @@ export function SignupShell({ step, children, onBack }: { step: number; children
   return (
     <div className="w-full max-w-3xl bg-card border border-border rounded-3xl p-8 md:p-10">
       <div className="flex justify-center mb-6">
-        <div className="w-16 h-16 rounded-2xl bg-gradient-primary grid place-items-center text-black font-extrabold shadow-elegant">
-          a
-        </div>
+        <SellerLogo className="h-10 md:h-12" />
       </div>
       {onBack ? (
         <button onClick={onBack} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary mb-4">

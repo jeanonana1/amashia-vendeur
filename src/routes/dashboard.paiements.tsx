@@ -6,6 +6,8 @@ import { Wallet, ArrowDownToLine, Smartphone, Landmark, Plus, X, Trash2, Pencil,
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { dateTime, money, useSellerStats } from "@/lib/sellerStats";
+import { PhoneInput } from "@/components/seller/PhoneInput";
+import { cmDigits, cmPhoneError, formatCm, toE164 } from "@/lib/phone";
 
 export const Route = createFileRoute("/dashboard/paiements")({
   head: () => ({ meta: [{ title: "Paiements — Amashia Seller" }, { name: "description", content: "Paiements : votre espace vendeur Amashia pour gérer votre activité." }, { property: "og:title", content: "Paiements — Amashia Seller" }, { property: "og:description", content: "Paiements : votre espace vendeur Amashia pour gérer votre activité." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
@@ -238,9 +240,9 @@ function MethodModal({ initial, onClose, onSaved, isFirst }: { initial: Method |
   const [busy, setBusy] = useState(false);
   async function save(e?: React.FormEvent) {
     e?.preventDefault();
-    const number = f.account_number.replace(/\s+/g, "");
+    const number = kind === "bank" ? f.account_number.replace(/\s+/g, "") : cmDigits(f.account_number);
     if (!f.account_name.trim()) return toast.error("Indiquez le nom du compte.");
-    if (kind !== "bank" && !/^(\+?237)?6\d{8}$/.test(number)) return toast.error("Numéro mobile camerounais invalide (ex. 6XXXXXXXX).");
+    if (kind !== "bank") { const pe = cmPhoneError(number); if (pe) return toast.error(pe); }
     if (kind === "bank" && (number.length < 10 || !f.bank_name.trim())) return toast.error("Indiquez la banque et le numéro de compte (RIB).");
     setBusy(true);
     const row = { kind, label: f.label.trim() || null, account_name: f.account_name.trim(), account_number: number, bank_name: kind === "bank" ? f.bank_name.trim() : null };
@@ -277,7 +279,9 @@ function MethodModal({ initial, onClose, onSaved, isFirst }: { initial: Method |
             <input {...noFill} name="amashia-payout-owner" className={`${inp} mt-1`} placeholder="Ex. Jean Onana" value={f.account_name} onChange={(e) => setF({ ...f, account_name: e.target.value })} />
           </label>
           <label className="block text-xs font-semibold">{isBank ? "Numéro de compte / RIB" : `Numéro ${KIND[kind].label}`}
-            <input {...noFill} name="amashia-payout-ref" type="text" className={`${inp} mt-1`} placeholder={isBank ? "Ex. 10005 00001 01234567890 12" : "Ex. 690 00 00 00"} inputMode={isBank ? "text" : "tel"} value={f.account_number} onChange={(e) => setF({ ...f, account_number: e.target.value })} />
+            {isBank
+              ? <input {...noFill} name="amashia-payout-ref" type="text" className={`${inp} mt-1`} placeholder="Ex. 10005 00001 01234567890 12" value={f.account_number} onChange={(e) => setF({ ...f, account_number: e.target.value })} />
+              : <div className="mt-1"><PhoneInput name="amashia-payout-ref" required value={f.account_number} onChange={(v) => setF({ ...f, account_number: v })} className={inp} /></div>}
           </label>
           <label className="block text-xs font-semibold">Nom de ce moyen <span className="font-normal text-muted-foreground">(facultatif)</span>
             <input {...noFill} name="amashia-payout-label" className={`${inp} mt-1`} placeholder="Ex. Mon Orange Money" value={f.label} onChange={(e) => setF({ ...f, label: e.target.value })} />

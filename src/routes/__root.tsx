@@ -15,6 +15,7 @@ import { Toaster, toast } from "sonner";
 import { useEffect } from "react";
 import { DialogHost } from "@/lib/dialog";
 import { installToastSounds } from "@/lib/sound";
+import { ScrollToTop } from "@/components/ScrollToTop";
 
 function NotFoundComponent() {
   return (
@@ -127,6 +128,7 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <Outlet />
+        <ScrollToTop />
         <Toaster richColors position="top-right" />
         <DialogHost />
       </ThemeProvider>

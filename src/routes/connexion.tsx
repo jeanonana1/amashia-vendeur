@@ -7,6 +7,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { PasswordInput } from "@/components/ui/password-input";
 import { SellerLogo } from "@/components/seller/SellerLogo";
+import { PhoneInput } from "@/components/seller/PhoneInput";
+import { cmDigits, cmPhoneError, formatCm, toE164 } from "@/lib/phone";
 
 export const Route = createFileRoute("/connexion")({
   head: () => ({
@@ -55,10 +57,11 @@ function Page() {
         toast.error(tab === "email" ? "Adresse email requise" : "Numéro de téléphone requis");
         return;
       }
+      if (tab === "phone") { const pe = cmPhoneError(cmDigits(identifier)); if (pe) { toast.error(pe); return; } }
 
       const credentials = tab === "email"
         ? { email: identifier.trim(), password }
-        : { phone: identifier.trim(), password };
+        : { phone: toE164(cmDigits(identifier)), password };
       const { error } = await supabase.auth.signInWithPassword(credentials);
       if (error) return toast.error(error.message);
       toast.success("Connexion réussie");
@@ -85,7 +88,7 @@ function Page() {
               {(["email", "phone"] as const).map((t) => (
                 <button
                   key={t}
-                  onClick={() => setTab(t)}
+                  onClick={() => { setTab(t); setIdentifier(""); }}
                   className={`py-2.5 rounded-full text-sm font-semibold transition ${tab === t ? "bg-gradient-primary text-black" : "text-muted-foreground"}`}
                 >
                   {t === "email" ? "Email" : "Téléphone"}
@@ -96,15 +99,19 @@ function Page() {
             <form onSubmit={login} className="space-y-5">
               <div>
                 <label className="block text-sm font-medium mb-2">{tab === "email" ? "Adresse email" : "Numéro de téléphone"}</label>
-                <input
-                  value={identifier}
-                  onChange={(e) => setIdentifier(e.target.value)}
-                  type={tab === "email" ? "email" : "tel"}
-                  disabled={recovery}
-                  required={!recovery}
-                  placeholder={tab === "email" ? "votre@email.com" : "+237 ..."}
-                  className="w-full bg-background border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary"
-                />
+                {tab === "phone" ? (
+                  <PhoneInput value={identifier} onChange={setIdentifier} disabled={recovery} required={!recovery} className="w-full bg-background border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary" />
+                ) : (
+                  <input
+                    value={identifier}
+                    onChange={(e) => setIdentifier(e.target.value)}
+                    type="email"
+                    disabled={recovery}
+                    required={!recovery}
+                    placeholder="votre@email.com"
+                    className="w-full bg-background border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary"
+                  />
+                )}
               </div>
               <div>
                 <label className="block text-sm font-medium mb-2">Mot de passe</label>

@@ -43,12 +43,14 @@ const STEPS = ["pending", "preparing", "shipped", "delivered"] as const;
 export function OrderStatusTrack({ status, compact = false }: { status: string; compact?: boolean }) {
   if (status === "cancelled") return <span className="inline-flex items-center gap-1 rounded-full bg-red-500/15 px-2.5 py-1 text-xs font-semibold text-red-400"><X size={12} /> Annulée par Amashia</span>;
   const cur = Math.max(0, STEPS.indexOf(status as (typeof STEPS)[number]));
+  // dernière étape atteinte (livrée) : elle est terminée, donc cochée elle aussi
+  const done = (i: number) => i < cur || (i === cur && cur === STEPS.length - 1);
   return (
     <div aria-label={`Statut : ${ORDER_STATUS[status]?.label ?? status} (géré par Amashia)`} title="Statut géré par Amashia, mis à jour en direct" className="pointer-events-none select-none">
       <div className="flex items-center">
         {STEPS.map((s, i) => (
           <div key={s} className="flex items-center">
-            <span className={`grid shrink-0 place-items-center rounded-full ${compact ? "h-4 w-4" : "h-5 w-5"} ${i <= cur ? "bg-primary text-black" : "bg-secondary text-muted-foreground"} ${i === cur ? "ring-2 ring-primary/40" : ""}`}>{i < cur ? <Check size={compact ? 9 : 11} strokeWidth={3} /> : <span className="h-1.5 w-1.5 rounded-full bg-current" />}</span>
+            <span className={`grid shrink-0 place-items-center rounded-full ${compact ? "h-4 w-4" : "h-5 w-5"} ${i <= cur ? "bg-primary text-black" : "bg-secondary text-muted-foreground"} ${i === cur && !done(i) ? "ring-2 ring-primary/40" : ""}`}>{done(i) ? <Check size={compact ? 9 : 11} strokeWidth={3} /> : <span className="h-1.5 w-1.5 rounded-full bg-current" />}</span>
             {i < STEPS.length - 1 && <span className={`h-0.5 ${compact ? "w-4 sm:w-6" : "w-6 sm:w-10"} ${i < cur ? "bg-primary" : "bg-secondary"}`} />}
           </div>
         ))}

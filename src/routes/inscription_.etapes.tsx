@@ -8,6 +8,8 @@ import { toast } from "sonner";
 import { Smartphone, CreditCard, MapPin, ShieldCheck, Mail, Send, Check, FileText, Upload, Camera, X, Loader2 } from "lucide-react";
 import { getRegions, getCities, getQuartiers } from "@/lib/locations";
 import { PasswordInput } from "@/components/ui/password-input";
+import { PhoneInput } from "@/components/seller/PhoneInput";
+import { cmDigits, cmPhoneError, formatCm, toE164 } from "@/lib/phone";
 
 type SearchParams = { type?: "particulier" | "entreprise" };
 
@@ -107,7 +109,7 @@ function Page() {
     if (!data.acceptTerms) { toast.error("Vous devez accepter les conditions"); return; }
     setLoading(true);
     try {
-      const metadata = { account_type: type, first_name: data.firstName, last_name: data.lastName, phone: data.phone, seller_profile: buildProfile() };
+      const metadata = { account_type: type, first_name: data.firstName, last_name: data.lastName, phone: formatCm(cmDigits(data.phone)), seller_profile: buildProfile() };
       const result = otpSent
         ? await supabase.auth.resend({ type: "signup", email: data.email, options: { emailRedirectTo: `${window.location.origin}/connexion` } })
         : await supabase.auth.signUp({ email: data.email, password: data.password, options: { data: metadata, emailRedirectTo: `${window.location.origin}/connexion` } });
@@ -130,7 +132,7 @@ function Page() {
   function buildProfile() {
     return {
       account_type: type,
-      first_name: data.firstName, last_name: data.lastName, phone: data.phone,
+      first_name: data.firstName, last_name: data.lastName, phone: formatCm(cmDigits(data.phone)),
       category: data.categories[0] || null,
       categories: data.categories,
       niu: data.docs.niu || null,
@@ -221,11 +223,12 @@ function Page() {
                 <Field label="Nom *"><input value={data.lastName} onChange={(e) => set("lastName", e.target.value)} className={inputCls} /></Field>
               </div>
               <Field label="Adresse email *"><input type="email" value={data.email} onChange={(e) => set("email", e.target.value)} className={inputCls} /></Field>
-              <Field label="Numéro de téléphone *"><input value={data.phone} onChange={(e) => set("phone", e.target.value)} placeholder="+237..." className={inputCls} /></Field>
+              <Field label="Numéro de téléphone *"><PhoneInput required value={data.phone} onChange={(v) => set("phone", v)} className={inputCls} /></Field>
               <Field label="Mot de passe *"><PasswordInput value={data.password} onChange={(e) => set("password", e.target.value)} className={inputCls} /></Field>
               <Field label="Confirmer le mot de passe *"><PasswordInput value={data.confirm} onChange={(e) => set("confirm", e.target.value)} className={inputCls} /></Field>
               <button onClick={() => {
                 if (!data.firstName || !data.lastName || !data.email || !data.phone || !data.password) return toast.error("Veuillez remplir tous les champs");
+                { const pe = cmPhoneError(cmDigits(data.phone)); if (pe) return toast.error(pe); }
                 if (data.password.length < 6) return toast.error("Mot de passe trop court (min 6)");
                 if (data.password !== data.confirm) return toast.error("Les mots de passe ne correspondent pas");
                 next();
@@ -326,7 +329,7 @@ function Page() {
                       <option>MTN Mobile Money</option><option>Orange Money</option><option>Moov Money</option><option>Wave</option>
                     </select>
                   </Field>
-                  <Field label="Numéro Mobile Money *"><input value={data.mmNumber} onChange={(e) => set("mmNumber", e.target.value.replace(/\D/g, ""))} placeholder="6XXXXXXXX" className={inputCls} /></Field>
+                  <Field label="Numéro Mobile Money *"><PhoneInput required value={data.mmNumber} onChange={(v) => set("mmNumber", v)} className={inputCls} /></Field>
                   <Field label="Nom du bénéficiaire *"><input value={data.mmHolder} onChange={(e) => set("mmHolder", e.target.value)} placeholder="Nom complet enregistré sur le compte" className={inputCls} /></Field>
                 </div>
               )}
@@ -349,6 +352,7 @@ function Page() {
               <NavBtns back={back} next={() => {
                 if (!data.paymentMethod) return;
                 if (data.paymentMethod === "mobile" && (!data.mmNumber || !data.mmHolder)) return toast.error("Renseignez votre numéro et nom Mobile Money");
+                if (data.paymentMethod === "mobile") { const pe = cmPhoneError(cmDigits(data.mmNumber)); if (pe) return toast.error(pe); }
                 if (data.paymentMethod === "card" && (!data.cardNumber || !data.cardName || !data.cardExpiry || !data.cardCvv)) return toast.error("Renseignez tous les champs de carte");
                 next();
               }} disabled={!data.paymentMethod} />

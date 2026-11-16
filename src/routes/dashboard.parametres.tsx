@@ -8,6 +8,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { compressImage } from "@/lib/imageCompress";
 import { soundEnabled, setSoundEnabled } from "@/lib/sound";
 import { money } from "@/lib/sellerStats";
+import { PhoneInput } from "@/components/seller/PhoneInput";
+import { cmDigits, cmPhoneError, formatCm, toE164 } from "@/lib/phone";
 
 export const Route = createFileRoute("/dashboard/parametres")({
   head: () => ({ meta: [{ title: "Paramètres — Amashia Seller" }, { name: "description", content: "Paramètres de votre compte vendeur Amashia." }, { property: "og:title", content: "Paramètres — Amashia Seller" }, { name: "twitter:card", content: "summary" }] }),
@@ -116,7 +118,7 @@ function ParametresPage() {
 type SaveFn = (patch: Partial<Profile>, ok?: string) => Promise<boolean>;
 
 function ProfileTab({ uid, email, p, save, setP }: { uid: string; email: string; p: Profile; save: SaveFn; setP: React.Dispatch<React.SetStateAction<Profile | null>> }) {
-  const [f, setF] = useState({ first_name: p.first_name, last_name: p.last_name, phone: p.phone });
+  const [f, setF] = useState({ first_name: p.first_name, last_name: p.last_name, phone: cmDigits(p.phone) });
   const [newEmail, setNewEmail] = useState(email);
   const [busy, setBusy] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -127,7 +129,8 @@ function ProfileTab({ uid, email, p, save, setP }: { uid: string; email: string;
     if (f.first_name.trim().length < 2) return toast.error("Indiquez votre prénom");
     if (f.phone && !/^\+?[\d\s]{8,16}$/.test(f.phone.trim())) return toast.error("Numéro de téléphone invalide");
     setBusy(true);
-    const ok = await save({ first_name: f.first_name.trim(), last_name: f.last_name.trim(), phone: f.phone.trim() }, "Profil mis à jour");
+    if (f.phone) { const pe = cmPhoneError(cmDigits(f.phone)); if (pe) { toast.error(pe); return; } }
+    const ok = await save({ first_name: f.first_name.trim(), last_name: f.last_name.trim(), phone: f.phone ? formatCm(cmDigits(f.phone)) : "" }, "Profil mis à jour");
     if (ok) window.dispatchEvent(new CustomEvent("amashia-profile", { detail: { name: f.first_name.trim() } }));
     if (newEmail.trim() && newEmail.trim().toLowerCase() !== email.toLowerCase()) {
       const { error } = await supabase.auth.updateUser({ email: newEmail.trim() });
@@ -177,7 +180,7 @@ function ProfileTab({ uid, email, p, save, setP }: { uid: string; email: string;
         <label className="block"><span className="block text-sm mb-2">Prénom *</span><input className={inputCls} value={f.first_name} onChange={(e) => setF({ ...f, first_name: e.target.value })} maxLength={60} /></label>
         <label className="block"><span className="block text-sm mb-2">Nom</span><input className={inputCls} value={f.last_name} onChange={(e) => setF({ ...f, last_name: e.target.value })} maxLength={60} /></label>
         <label className="block"><span className="block text-sm mb-2">E-mail de connexion</span><input type="email" className={inputCls} value={newEmail} onChange={(e) => setNewEmail(e.target.value)} /></label>
-        <label className="block"><span className="block text-sm mb-2">Téléphone</span><input type="tel" className={inputCls} value={f.phone} onChange={(e) => setF({ ...f, phone: e.target.value })} placeholder="+237 6XX XX XX XX" /></label>
+        <label className="block"><span className="block text-sm mb-2">Téléphone</span><PhoneInput className={inputCls} value={f.phone} onChange={(v) => setF({ ...f, phone: v })} /></label>
       </div>
       <p className="text-xs text-muted-foreground">Le nom, le logo et la description visibles par les clients se règlent dans <Link to="/dashboard/boutique" className="text-primary hover:underline">Ma Boutique</Link>.</p>
       <button type="submit" disabled={busy} className={btn}>{busy && <Loader2 size={15} className="animate-spin" />} Enregistrer</button>

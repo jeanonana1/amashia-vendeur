@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { imgProps, imgUrl } from "@/lib/img";
 import { useEffect, useRef, useState } from "react";
 import { DashboardLayout } from "@/components/seller/dashboard/DashboardLayout";
-import { Store, MapPin, Phone, Mail, Star, Eye, Heart, Edit, Camera, Loader2, Check, X, ExternalLink } from "lucide-react";
+import { Store, MapPin, Phone, Mail, Star, Eye, Heart, Edit, Camera, Loader2, Check, X, ExternalLink, LocateFixed, Bike } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { ensureSellerProfile } from "@/lib/sellerProfile";
@@ -274,6 +274,8 @@ function BoutiquePage() {
         </div>
       </div>
 
+      <PickupCard />
+
       {/* Edit modal */}
       {editing && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm grid place-items-center p-4" onClick={() => setEditing(false)}>
@@ -336,5 +338,84 @@ function BoutiquePage() {
         </div>
       )}
     </DashboardLayout>
+  );
+}
+
+type Pickup = { lat: number | null; lng: number | null; address: string | null; updated_at: string | null; city: string | null };
+
+/** Point de retrait : les commandes de la boutique sont proposées en priorité aux livreurs les plus proches de cette position. */
+function PickupCard() {
+  const [pk, setPk] = useState<Pickup | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [pos, setPos] = useState<{ lat: number; lng: number; acc: number } | null>(null);
+  const [address, setAddress] = useState("");
+  const [locating, setLocating] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  const load = async () => {
+    const { data } = await supabase.rpc("seller_pickup" as never);
+    const v = (data ?? null) as Pickup | null;
+    setPk(v); setAddress(v?.address ?? ""); setLoading(false);
+  };
+  useEffect(() => { void load(); }, []);
+
+  const locate = () => {
+    if (!navigator.geolocation) return toast.error("La localisation n'est pas disponible sur cet appareil.");
+    setLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (p) => { setPos({ lat: p.coords.latitude, lng: p.coords.longitude, acc: Math.round(p.coords.accuracy) }); setLocating(false); },
+      (e) => { setLocating(false); toast.error(e.code === 1 ? "Autorisez la localisation dans votre navigateur pour enregistrer la position de la boutique." : "Position introuvable. Réessayez à l'extérieur ou près d'une fenêtre."); },
+      { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 },
+    );
+  };
+  const save = async () => {
+    const lat = pos?.lat ?? pk?.lat, lng = pos?.lng ?? pk?.lng;
+    if (lat == null || lng == null) return toast.error("Utilisez d'abord votre position actuelle, depuis la boutique.");
+    setSaving(true);
+    const { error } = await supabase.rpc("seller_set_pickup" as never, { _lat: lat, _lng: lng, _address: address.trim() || null } as never);
+    setSaving(false);
+    if (error) return toast.error(error.message.replace(/^.*?:\s(?=[A-ZÀ-Ü])/, ""));
+    toast.success("Point de retrait enregistré", { description: "Vos commandes seront proposées aux livreurs les plus proches." });
+    setPos(null); void load();
+  };
+
+  const shown = pos ?? (pk?.lat != null && pk?.lng != null ? { lat: pk.lat, lng: pk.lng, acc: 0 } : null);
+  const osm = shown ? `https://www.openstreetmap.org/?mlat=${shown.lat}&mlon=${shown.lng}#map=17/${shown.lat}/${shown.lng}` : null;
+  const map = shown ? `https://www.openstreetmap.org/export/embed.html?bbox=${shown.lng - 0.004},${shown.lat - 0.003},${shown.lng + 0.004},${shown.lat + 0.003}&layer=mapnik&marker=${shown.lat},${shown.lng}` : null;
+
+  return (
+    <div className="mt-5 bg-card border border-border rounded-2xl p-4 sm:p-6">
+      <div className="flex items-start gap-3">
+        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary/15 text-primary"><Bike size={20} /></span>
+        <div className="min-w-0">
+          <h3 className="font-bold">Position de ma boutique (point de retrait)</h3>
+          <p className="text-sm text-muted-foreground">Les livreurs viennent récupérer vos colis ici. Chaque nouvelle commande est proposée d'abord au livreur le plus proche de cette position, ce qui accélère vos livraisons.</p>
+        </div>
+      </div>
+      {loading ? <div className="mt-4 h-24 animate-pulse rounded-xl bg-secondary" /> : (
+        <div className="mt-4 grid gap-4 lg:grid-cols-2">
+          <div className="space-y-3">
+            {pk?.lat == null && !pos && <p className="rounded-xl bg-amber-500/10 px-3 py-2 text-sm text-amber-700 dark:text-amber-400">Position non renseignée : vos commandes sont proposées à tous les livreurs de la ville, ce qui peut être plus lent.</p>}
+            {pk?.lat != null && !pos && <p className="flex items-center gap-2 text-sm"><Check size={16} className="text-green-600" />Position enregistrée{pk.updated_at ? ` le ${new Date(pk.updated_at).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}` : ""}</p>}
+            {pos && <p className="text-sm text-muted-foreground">Nouvelle position détectée (précision ± {pos.acc} m). Vérifiez la carte puis enregistrez.</p>}
+            <button type="button" onClick={locate} disabled={locating} className="flex h-11 w-full items-center justify-center gap-2 rounded-full border border-border bg-secondary text-sm font-semibold disabled:opacity-60">
+              {locating ? <Loader2 size={16} className="animate-spin" /> : <LocateFixed size={16} className="text-primary" />}Utiliser ma position actuelle (dans la boutique)
+            </button>
+            <label className="block text-sm font-medium">Repère pour le livreur
+              <input value={address} onChange={(e) => setAddress(e.target.value)} maxLength={200} placeholder="Ex. Marché Mokolo, porte 3, face pharmacie" className="mt-1.5 h-11 w-full rounded-xl border border-border bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-primary" />
+            </label>
+            <button type="button" onClick={() => void save()} disabled={saving || (!shown)} className="flex h-11 w-full items-center justify-center gap-2 rounded-full bg-primary text-sm font-bold text-black disabled:opacity-50">
+              {saving && <Loader2 size={16} className="animate-spin" />}Enregistrer le point de retrait
+            </button>
+          </div>
+          {map ? (
+            <div className="overflow-hidden rounded-xl border border-border">
+              <iframe title="Position de la boutique" src={map} className="h-56 w-full" loading="lazy" />
+              {osm && <a href={osm} target="_blank" rel="noreferrer" className="flex items-center justify-center gap-1 py-2 text-xs font-semibold text-primary">Agrandir la carte <ExternalLink size={12} /></a>}
+            </div>
+          ) : <div className="grid h-56 place-items-center rounded-xl border border-dashed border-border text-center text-sm text-muted-foreground"><span className="flex flex-col items-center gap-2 px-6"><MapPin size={22} />La carte s'affichera une fois la position détectée.</span></div>}
+        </div>
+      )}
+    </div>
   );
 }

@@ -323,3 +323,19 @@ exception when others then return new;
 end $$;
 drop trigger if exists orders_courier_feed on public.orders;
 create trigger orders_courier_feed after update of status, total_fcfa on public.orders for each row execute function public.orders_courier_feed();
+
+-- 5) Admin : état de l'application de chaque livreur (actualisé en direct dans la liste)
+insert into public.admin_fn_sections (fn, sections) values ('admin_couriers_app', array['livreurs'])
+on conflict (fn) do update set sections = excluded.sections;
+create or replace function public.admin_couriers_app() returns jsonb
+language plpgsql stable security definer set search_path = public as $$
+begin
+  perform admin_guard('admin_couriers_app');
+  return coalesce((select jsonb_object_agg(c.id, jsonb_build_object(
+      'activated', c.user_id is not null,
+      'code_pending', c.activation_hash is not null and c.activation_expires > now(),
+      'code_expires', c.activation_expires,
+      'last_seen_at', c.last_seen_at)) from couriers c), '{}'::jsonb);
+end $$;
+revoke all on function public.admin_couriers_app() from public, anon;
+grant execute on function public.admin_couriers_app() to authenticated;

@@ -17,6 +17,7 @@ import { Route as FonctionnalitesRouteImport } from './routes/fonctionnalites'
 import { Route as InscriptionRouteImport } from './routes/inscription'
 import { Route as TarificationRouteImport } from './routes/tarification'
 import { Route as ApiAiStatusRouteImport } from './routes/api/ai-status'
+import { Route as ApiAssistantRouteImport } from './routes/api/assistant'
 import { Route as ApiTranslateRouteImport } from './routes/api/translate'
 import { Route as CaptureSessionRouteImport } from './routes/capture.$session'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard.index'
@@ -78,6 +79,11 @@ const TarificationRoute = TarificationRouteImport.update({
 const ApiAiStatusRoute = ApiAiStatusRouteImport.update({
   id: '/api/ai-status',
   path: '/api/ai-status',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAssistantRoute = ApiAssistantRouteImport.update({
+  id: '/api/assistant',
+  path: '/api/assistant',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiTranslateRoute = ApiTranslateRouteImport.update({
@@ -202,6 +208,7 @@ export interface FileRoutesByFullPath {
   '/inscription': typeof InscriptionRoute
   '/tarification': typeof TarificationRoute
   '/api/ai-status': typeof ApiAiStatusRoute
+  '/api/assistant': typeof ApiAssistantRoute
   '/api/translate': typeof ApiTranslateRoute
   '/capture/$session': typeof CaptureSessionRoute
   '/dashboard/analytique': typeof DashboardAnalytiqueRoute
@@ -233,6 +240,7 @@ export interface FileRoutesByTo {
   '/inscription': typeof InscriptionRoute
   '/tarification': typeof TarificationRoute
   '/api/ai-status': typeof ApiAiStatusRoute
+  '/api/assistant': typeof ApiAssistantRoute
   '/api/translate': typeof ApiTranslateRoute
   '/capture/$session': typeof CaptureSessionRoute
   '/dashboard/analytique': typeof DashboardAnalytiqueRoute
@@ -266,6 +274,7 @@ export interface FileRoutesById {
   '/inscription': typeof InscriptionRoute
   '/tarification': typeof TarificationRoute
   '/api/ai-status': typeof ApiAiStatusRoute
+  '/api/assistant': typeof ApiAssistantRoute
   '/api/translate': typeof ApiTranslateRoute
   '/capture/$session': typeof CaptureSessionRoute
   '/dashboard/analytique': typeof DashboardAnalytiqueRoute
@@ -300,6 +309,7 @@ export interface FileRouteTypes {
     | '/inscription'
     | '/tarification'
     | '/api/ai-status'
+    | '/api/assistant'
     | '/api/translate'
     | '/capture/$session'
     | '/dashboard/analytique'
@@ -331,6 +341,7 @@ export interface FileRouteTypes {
     | '/inscription'
     | '/tarification'
     | '/api/ai-status'
+    | '/api/assistant'
     | '/api/translate'
     | '/capture/$session'
     | '/dashboard/analytique'
@@ -363,6 +374,7 @@ export interface FileRouteTypes {
     | '/inscription'
     | '/tarification'
     | '/api/ai-status'
+    | '/api/assistant'
     | '/api/translate'
     | '/capture/$session'
     | '/dashboard/analytique'
@@ -396,6 +408,7 @@ export interface RootRouteChildren {
   InscriptionRoute: typeof InscriptionRoute
   TarificationRoute: typeof TarificationRoute
   ApiAiStatusRoute: typeof ApiAiStatusRoute
+  ApiAssistantRoute: typeof ApiAssistantRoute
   ApiTranslateRoute: typeof ApiTranslateRoute
   CaptureSessionRoute: typeof CaptureSessionRoute
   InscriptionEtapesRoute: typeof InscriptionEtapesRoute
@@ -457,6 +470,13 @@ declare module '@tanstack/react-router' {
       path: '/api/ai-status'
       fullPath: '/api/ai-status'
       preLoaderRoute: typeof ApiAiStatusRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/assistant': {
+      id: '/api/assistant'
+      path: '/api/assistant'
+      fullPath: '/api/assistant'
+      preLoaderRoute: typeof ApiAssistantRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/translate': {
@@ -673,6 +693,7 @@ const rootRouteChildren: RootRouteChildren = {
   InscriptionRoute: InscriptionRoute,
   TarificationRoute: TarificationRoute,
   ApiAiStatusRoute: ApiAiStatusRoute,
+  ApiAssistantRoute: ApiAssistantRoute,
   ApiTranslateRoute: ApiTranslateRoute,
   CaptureSessionRoute: CaptureSessionRoute,
   InscriptionEtapesRoute: InscriptionEtapesRoute,

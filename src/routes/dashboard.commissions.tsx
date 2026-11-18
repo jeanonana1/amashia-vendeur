@@ -20,7 +20,7 @@ type Data = {
   items: { order_number: string; title: string; qty: number; status: string; category: string; image: string | null; created_at: string; gross: number; pct: number; commission: number; net: number }[];
 };
 
-const STATUS: Record<string, string> = { pending: "En attente", preparing: "En préparation", shipped: "Expédiée", delivered: "Livrée" };
+const STATUS: Record<string, string> = { pending: "Commande reçue", preparing: "En préparation", shipped: "En cours de livraison", delivered: "Livrée" };
 
 function CommissionsPage() {
   const [d, setD] = useState<Data | null>(null);

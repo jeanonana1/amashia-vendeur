@@ -28,9 +28,9 @@ export interface SellerOrderLine {
 export const ORDER_FIELDS = "id,order_id,order_number,customer_name,delivery_area,product_title,product_image,color,options,quantity,unit_price,amount,discount,coupon_code,payment_method,status,created_at";
 
 export const ORDER_STATUS: Record<string, { label: string; cls: string }> = {
-  pending: { label: "En attente", cls: "bg-amber-500/15 text-amber-400" },
-  preparing: { label: "Préparation", cls: "bg-blue-500/15 text-blue-400" },
-  shipped: { label: "Expédiée", cls: "bg-violet-500/15 text-violet-400" },
+  pending: { label: "Commande reçue", cls: "bg-amber-500/15 text-amber-400" },
+  preparing: { label: "En préparation", cls: "bg-blue-500/15 text-blue-400" },
+  shipped: { label: "En cours de livraison", cls: "bg-violet-500/15 text-violet-400" },
   delivered: { label: "Livrée", cls: "bg-emerald-500/15 text-emerald-400" },
   cancelled: { label: "Annulée", cls: "bg-red-500/15 text-red-400" },
 };

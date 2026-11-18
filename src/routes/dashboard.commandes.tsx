@@ -26,7 +26,7 @@ export const Route = createFileRoute("/dashboard/commandes")({
 type Listing = { id: string; product_id: string; title: string; price: number; status: string; published_at: string; images: string[] };
 type Order = SellerOrderLine & { listing_id: string };
 
-const labels: Record<string, string> = { published: "Publiée", paused: "En pause", archived: "Archivée", pending: "En attente", preparing: "Préparation", shipped: "Expédiée", delivered: "Livrée", cancelled: "Annulée" };
+const labels: Record<string, string> = { published: "Publiée", paused: "En pause", archived: "Archivée", pending: "Commande reçue", preparing: "En préparation", shipped: "En cours de livraison", delivered: "Livrée", cancelled: "Annulée" };
 const statusClass: Record<string, string> = { published: "bg-emerald-500/15 text-emerald-400", paused: "bg-amber-500/15 text-amber-400", archived: "bg-muted text-muted-foreground", pending: "bg-amber-500/15 text-amber-400", preparing: "bg-blue-500/15 text-blue-400", shipped: "bg-violet-500/15 text-violet-400", delivered: "bg-emerald-500/15 text-emerald-400", cancelled: "bg-destructive/15 text-destructive" };
 const money = (value: number) => `${Number(value || 0).toLocaleString("fr-FR")} FCFA`;
 
@@ -172,7 +172,7 @@ function OrdersSummary({ orders, newOrders, onClose }: { orders: SellerOrderLine
   const total = new Set(today.map((o) => o.order_id)).size;
   const count = (st: string) => today.filter((o) => o.status === st).length;
   const rows = [
-    ["pending", "À traiter"], ["preparing", "En préparation"], ["shipped", "Expédiés"], ["delivered", "Livrés"], ["cancelled", "Annulés"],
+    ["pending", "Commande reçue"], ["preparing", "En préparation"], ["shipped", "En cours de livraison"], ["delivered", "Livrée"], ["cancelled", "Annulée"],
   ] as const;
   const shownTotal = useCountUp(total);
   const shownNew = useCountUp(newOrders, 1100);

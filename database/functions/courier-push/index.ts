@@ -64,6 +64,17 @@ Deno.serve(async (req) => {
   // l'application demande si les alertes Firebase sont prêtes (sinon elle garde son service d'arrière-plan)
   if (body?.status) return json({ ready: !!sa?.private_key && !!sa?.project_id });
   if (!sa) return json({ error: "Secret FCM_SERVICE_ACCOUNT absent ou illisible" }, 503);
+  // vérification de la clé : connexion à Google + envoi « à blanc » (aucune notification réelle)
+  if (body?.selftest) {
+    try {
+      const tok = await accessToken(sa);
+      const r = await fetch(`https://fcm.googleapis.com/v1/projects/${sa.project_id}/messages:send`, {
+        method: "POST", headers: { Authorization: `Bearer ${tok}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ validate_only: true, message: { topic: "prime-selftest", data: { kind: "selftest" } } }),
+      });
+      return json({ google_auth: true, project: sa.project_id, fcm_status: r.status, fcm: (await r.text()).slice(0, 200) });
+    } catch (e) { return json({ google_auth: false, error: String((e as Error).message).slice(0, 300) }); }
+  }
 
   // essai depuis l'application (livreur connecté) : alerte sur ses propres téléphones dans 8 secondes
   if (body?.test) {

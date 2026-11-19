@@ -10,6 +10,14 @@ import { imgProps } from "@/lib/img";
 type Review = { name: string; city: string; category: string; rating: number; text: string; at: string; img: string | null };
 type Data = { total: number; avg: number | null; dist: Record<string, number>; items: Review[] };
 
+/** Photo d'illustration par catégorie (public/avis/<catégorie>.webp), utilisée quand la boutique n'a pas de photo. */
+const CAT_IMG: Record<string, string> = {
+  mode: "mode", "mode & vêtements": "mode", vêtements: "mode", "électronique": "electronique", "téléphones & tablettes": "electronique",
+  "beauté": "beaute", "beauté & soins": "beaute", "beauté & cosmétiques": "beaute", maison: "maison", "maison & décoration": "maison", "maison & jardin": "maison",
+  "cuisine & maison": "maison", alimentation: "alimentation", "bijoux & accessoires": "bijoux", bijoux: "bijoux", "sports & loisirs": "sport", services: "services",
+};
+const catImg = (c: string) => { const k = CAT_IMG[c.trim().toLowerCase()]; return k ? `/avis/${k}.webp` : null; };
+
 const AV: [string, string][] = [["oklch(0.68 0.19 42)", "#fff"], ["oklch(0.89 0.18 95)", "#161512"], ["#e9e6df", "#161512"], ["#161512", "#fff"]];
 const initials = (n: string) => n.split(/\s+/).filter(Boolean).map((x) => x[0]).join("").slice(0, 2).toUpperCase();
 const fmt1 = (v: number) => v.toFixed(1).replace(".", ",");
@@ -114,7 +122,9 @@ function Deck({ items }: { items: Review[] }) {
         return (
           <article key={i} className={`avis-card ${single ? "avis-card--still" : ""}`} style={{ animationDelay: `${-4 * i}s` }} aria-hidden={i >= items.length || undefined}>
             <div className="avis-card__media">
-              {r.img && <img {...imgProps(r.img, { width: 640 })} alt={`Boutique de ${r.name}${r.category ? `, vendeur ${r.category.toLowerCase()}` : ""}${r.city ? ` à ${r.city}` : ""}`} loading="lazy" width={800} height={600} />}
+              {r.img
+                ? <img {...imgProps(r.img, { width: 640 })} alt={`Boutique de ${r.name}${r.category ? `, vendeur ${r.category.toLowerCase()}` : ""}${r.city ? ` à ${r.city}` : ""}`} loading="lazy" width={800} height={600} />
+                : catImg(r.category) && <img src={catImg(r.category)!} alt="" loading="lazy" width={800} height={600} onError={(e) => { e.currentTarget.style.display = "none"; }} />}
               {r.category && <span className="avis-card__cat">{r.category.toUpperCase()}</span>}
             </div>
             <div className="avis-card__body">
@@ -139,8 +149,10 @@ function EmptyDeck() {
     <div className="avis-deck">
       {Array.from({ length: 10 }, (_, i) => (
         <article key={i} className="avis-card" style={{ animationDelay: `${-4 * i}s` }} aria-hidden={i > 0 || undefined}>
-          <div className="avis-card__media"><span className="avis-card__cat">{cats[i % cats.length].toUpperCase()}</span>
+          <div className="avis-card__media">
             <div className="absolute inset-0 grid place-items-center text-[44px] text-[#d9d5cc]">★</div>
+            {catImg(cats[i % cats.length]) && <img src={catImg(cats[i % cats.length])!} alt="" loading="lazy" width={800} height={600} onError={(e) => { e.currentTarget.style.display = "none"; }} />}
+            <span className="avis-card__cat">{cats[i % cats.length].toUpperCase()}</span>
           </div>
           <div className="avis-card__body">
             <span className="avis-card__stars"><span className="off">★★★★★</span></span>

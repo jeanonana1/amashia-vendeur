@@ -63,11 +63,13 @@ function ProductMock() {
 /* Trois séries d'exemple : le graphique « bascule » de l'une à l'autre à chaque cycle. */
 const SERIES = [
   { label: "Cette semaine", days: ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"], h: [34, 52, 46, 68, 61, 88, 79] },
-  { label: "Semaine dernière", days: ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"], h: [28, 41, 57, 50, 72, 66, 94] },
-  { label: "Il y a 2 semaines", days: ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"], h: [45, 39, 63, 58, 77, 92, 84] },
+  { label: "Sem. dernière", days: ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"], h: [28, 41, 57, 50, 72, 66, 94] },
+  { label: "Il y a 2 sem.", days: ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"], h: [45, 39, 63, 58, 77, 92, 84] },
 ];
 const PER_POINT = 2500; // 1 % de hauteur = 2 500 FCFA (exemple)
 const fmt = (n: number) => Math.round(n).toLocaleString("fr-FR");
+/** Montant court et de largeur stable : 0, 85 K, 500 K, 1,07 M… */
+const compactFcfa = (n: number) => (n >= 1e6 ? `${(n / 1e6).toFixed(2).replace(".", ",")} M` : n >= 1000 ? `${Math.round(n / 1000)} K` : fmt(n));
 
 function LiveChart() {
   const [set, setSet] = useState(0);
@@ -95,24 +97,25 @@ function LiveChart() {
   const pts = reached.map((h, i) => `${((i + 0.5) / n) * 100},${100 - h}`).join(" ");
 
   return (
-    <div className="p-4 sm:p-6">
-      <div className="flex items-center justify-between gap-2">
+    <div className="p-4 max-[339px]:p-3 sm:p-6" style={{ contain: "layout" }}>
+      {/* dimensions fixes : rien ne bouge pendant l'animation */}
+      <div className="flex h-11 items-center justify-between gap-2 sm:h-12">
         <div className="min-w-0 text-left">
-          <p className="text-[11px] text-muted-foreground">Bonjour 👋</p>
-          <p className="truncate text-base font-bold sm:text-lg">Vos ventes · <span key={set} className="tick-flip inline-block text-primary">{serie.label}</span></p>
+          <p className="h-4 text-[11px] leading-4 text-muted-foreground">Bonjour 👋</p>
+          <p className="h-6 whitespace-nowrap text-[clamp(12.5px,4vw,15px)] font-bold leading-6 sm:h-7 sm:text-lg sm:leading-7">Vos ventes · <span key={set} className="tick-flip inline-block text-primary">{serie.label}</span></p>
         </div>
-        <span className="flex shrink-0 items-center gap-1.5 rounded-full bg-emerald-500/12 px-2.5 py-1 text-[11px] font-semibold text-emerald-500"><span className="relative flex h-2 w-2"><span className="animate-ping-soft absolute inline-flex h-full w-full rounded-full bg-emerald-500" /><span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" /></span>En direct</span>
+        <span className="flex shrink-0 items-center gap-1.5 rounded-full bg-emerald-500/12 px-2 py-1 text-[10px] font-semibold text-emerald-500 sm:px-2.5 sm:text-[11px]"><span className="relative flex h-2 w-2"><span className="animate-ping-soft absolute inline-flex h-full w-full rounded-full bg-emerald-500" /><span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" /></span><span className="max-[339px]:hidden">En direct</span></span>
       </div>
 
       <div className="mt-4 grid grid-cols-3 gap-2 sm:gap-3">
         {[
-          { l: "Ventes", v: total >= 1e6 ? `${(total / 1e6).toFixed(2).replace(".", ",")} M` : fmt(total), unit: "FCFA", c: "text-primary" },
+          { l: "Ventes", v: compactFcfa(total), unit: "FCFA", c: "text-primary" },
           { l: "Commandes", v: fmt(orders), unit: "", c: "text-emerald-500" },
           { l: "Visiteurs", v: fmt(visitors), unit: "", c: "text-sky-400" },
         ].map((k) => (
-          <div key={k.l} className="min-w-0 rounded-xl border border-border bg-[var(--surface-2)] p-2.5 text-left sm:p-3">
+          <div key={k.l} className="h-[66px] min-w-0 overflow-hidden rounded-xl border border-border bg-[var(--surface-2)] p-2.5 text-left max-[339px]:p-2 sm:h-[78px] sm:p-3">
             <p className="text-[10px] text-muted-foreground sm:text-[11px]">{k.l}</p>
-            <p className={`hero-num mt-1 truncate text-sm font-extrabold tabular-nums sm:text-lg ${k.c}`}>{k.v}{k.unit && <span className="ml-0.5 align-super text-[8px] sm:text-[9px]">{k.unit}</span>}</p>
+            <p className={`hero-num mt-1 h-6 whitespace-nowrap text-[clamp(12.5px,3.9vw,15px)] font-extrabold leading-6 tabular-nums sm:h-7 sm:text-lg sm:leading-7 ${k.c}`}>{k.v}{k.unit && <span className="ml-0.5 hidden align-super text-[8px] min-[400px]:inline sm:text-[9px]">{k.unit}</span>}</p>
           </div>
         ))}
       </div>

@@ -9,6 +9,7 @@ import { getRegions, getCities, getQuartiers } from "@/lib/locations";
 import { PasswordInput } from "@/components/ui/password-input";
 import { PhoneInput } from "@/components/seller/PhoneInput";
 import { cmDigits, cmPhoneError, formatCm, toE164 } from "@/lib/phone";
+import { Select } from "@/components/ui/app-select";
 
 type SearchParams = { type?: "particulier" | "entreprise" };
 
@@ -251,24 +252,24 @@ function Page() {
                 </div>
               </Field>
               <Field label="Genre (optionnel)">
-                <select value={data.gender} onChange={(e) => set("gender", e.target.value)} className={inputCls}>
+                <Select value={data.gender} onChange={(e) => set("gender", e.target.value)} className={inputCls}>
                   <option value="">Sélectionner</option><option>Homme</option><option>Femme</option><option>Autre</option>
-                </select>
+                </Select>
               </Field>
               <Field label="Date de naissance"><input type="date" value={data.birthDate} onChange={(e) => set("birthDate", e.target.value)} className={inputCls} /></Field>
               <div className="grid md:grid-cols-2 gap-4">
                 <Field label="Pays *">
-                  <select value={data.country} onChange={(e) => { set("country", e.target.value); set("region", ""); set("shopCity", ""); set("neighborhood", ""); }} className={inputCls}>
+                  <Select value={data.country} onChange={(e) => { set("country", e.target.value); set("region", ""); set("shopCity", ""); set("neighborhood", ""); }} className={inputCls}>
                     <option value="">Sélectionner</option>
                     <option>Cameroun</option><option>Sénégal</option><option>Côte d'Ivoire</option><option>Bénin</option><option>Togo</option>
-                  </select>
+                  </Select>
                 </Field>
                 <Field label="Ville (résidence) *"><input value={data.city} onChange={(e) => set("city", e.target.value)} className={inputCls} /></Field>
               </div>
               <Field label="Langue préférée">
-                <select value={data.language} onChange={(e) => set("language", e.target.value)} className={inputCls}>
+                <Select value={data.language} onChange={(e) => set("language", e.target.value)} className={inputCls}>
                   <option value="fr">Français</option><option value="en">English</option>
-                </select>
+                </Select>
               </Field>
               <NavBtns back={back} next={() => {
                 if (data.categories.length === 0) return toast.error("Sélectionnez au moins une catégorie");
@@ -322,9 +323,9 @@ function Page() {
               {data.paymentMethod === "mobile" && (
                 <div className="space-y-4 bg-background border border-border rounded-2xl p-5 animate-fade-up">
                   <Field label="Opérateur *">
-                    <select value={data.mmOperator} onChange={(e) => set("mmOperator", e.target.value)} className={inputCls}>
+                    <Select value={data.mmOperator} onChange={(e) => set("mmOperator", e.target.value)} className={inputCls}>
                       <option>MTN Mobile Money</option><option>Orange Money</option><option>Moov Money</option><option>Wave</option>
-                    </select>
+                    </Select>
                   </Field>
                   <Field label="Numéro Mobile Money *"><PhoneInput required value={data.mmNumber} onChange={(v) => set("mmNumber", v)} className={inputCls} /></Field>
                   <Field label="Nom du bénéficiaire *"><input value={data.mmHolder} onChange={(e) => set("mmHolder", e.target.value)} placeholder="Nom complet enregistré sur le compte" className={inputCls} /></Field>
@@ -387,24 +388,24 @@ function Page() {
               </div>
 
               <Field label="Région *">
-                <select value={data.region} onChange={(e) => { set("region", e.target.value); set("shopCity", ""); set("neighborhood", ""); }} className={inputCls} disabled={!data.country}>
+                <Select value={data.region} onChange={(e) => { set("region", e.target.value); set("shopCity", ""); set("neighborhood", ""); }} className={inputCls} disabled={!data.country}>
                   <option value="">{data.country ? "Sélectionner une région" : "Sélectionnez d'abord un pays (étape 2)"}</option>
                   {regions.map((r) => <option key={r}>{r}</option>)}
-                </select>
+                </Select>
               </Field>
 
               <Field label="Ville *">
-                <select value={data.shopCity} onChange={(e) => { set("shopCity", e.target.value); set("neighborhood", ""); }} className={inputCls} disabled={!data.region}>
+                <Select value={data.shopCity} onChange={(e) => { set("shopCity", e.target.value); set("neighborhood", ""); }} className={inputCls} disabled={!data.region}>
                   <option value="">{data.region ? "Sélectionner une ville" : "Choisissez d'abord une région"}</option>
                   {cities.map((c) => <option key={c}>{c}</option>)}
-                </select>
+                </Select>
               </Field>
 
               <Field label="Quartier *">
-                <select value={data.neighborhood} onChange={(e) => set("neighborhood", e.target.value)} className={inputCls} disabled={!data.shopCity}>
+                <Select value={data.neighborhood} onChange={(e) => set("neighborhood", e.target.value)} className={inputCls} disabled={!data.shopCity}>
                   <option value="">{data.shopCity ? "Sélectionner un quartier" : "Choisissez d'abord une ville"}</option>
                   {quartiers.map((q) => <option key={q}>{q}</option>)}
-                </select>
+                </Select>
               </Field>
 
               <NavBtns back={back} next={() => {

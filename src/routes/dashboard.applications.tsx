@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { DashboardLayout } from "@/components/seller/dashboard/DashboardLayout";
 import { Check, X, Plus, Target, BarChart3, Eye, MousePointerClick } from "lucide-react";
 import { toast } from "sonner";
+import { Select } from "@/components/ui/app-select";
 
 export const Route = createFileRoute("/dashboard/applications")({
   head: () => ({ meta: [{ title: "Applications — Amashia Seller" }, { name: "description", content: "Applications : votre espace vendeur Amashia pour gérer votre activité." }, { property: "og:title", content: "Applications — Amashia Seller" }, { property: "og:description", content: "Applications : votre espace vendeur Amashia pour gérer votre activité." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
@@ -154,9 +155,9 @@ function AppsPage() {
         <Modal title={`Nouvelle campagne ${creating === "facebook" ? "Facebook" : "TikTok"}`} onClose={() => setCreating(null)}>
           <Field label="Nom de la campagne *"><input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className={inputCls} /></Field>
           <Field label="Objectif">
-            <select value={form.objective} onChange={(e) => setForm({ ...form, objective: e.target.value })} className={inputCls}>
+            <Select value={form.objective} onChange={(e) => setForm({ ...form, objective: e.target.value })} className={inputCls}>
               {APPS.find((a) => a.id === creating)!.objectives.map((o) => <option key={o}>{o}</option>)}
-            </select>
+            </Select>
           </Field>
           <div className="grid grid-cols-2 gap-3">
             <Field label="Budget journalier (FCFA)"><input type="number" value={form.budget} onChange={(e) => setForm({ ...form, budget: e.target.value })} className={inputCls} /></Field>

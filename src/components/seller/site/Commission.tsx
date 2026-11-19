@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Calculator } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { Select } from "@/components/ui/app-select";
 
 export type Rate = { slug: string; name: string; rate: number };
 
@@ -35,9 +36,9 @@ export function CommissionCalculator({ rates }: { rates: Rate[] | null }) {
           </div>
         </label>
         <label className="text-sm font-medium text-muted-foreground">Catégorie
-          <select value={cat} onChange={(e) => setCat(e.target.value)} className="mt-1.5 h-12 w-full rounded-xl border border-border bg-[var(--surface-2)] px-3 text-[15px] font-semibold text-foreground outline-none focus:ring-2 focus:ring-primary">
+          <Select value={cat} onChange={(e) => setCat(e.target.value)} className="mt-1.5 h-12 w-full rounded-xl border border-border bg-[var(--surface-2)] px-3 text-[15px] font-semibold text-foreground outline-none focus:ring-2 focus:ring-primary">
             {(rates ?? []).map((r) => <option key={r.slug} value={r.slug}>{r.name} · {r.rate} %</option>)}
-          </select>
+          </Select>
         </label>
       </div>
       <div className="mt-6 space-y-3 rounded-2xl bg-[var(--surface-2)] p-5">

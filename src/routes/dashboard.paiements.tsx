@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { dateTime, money, useSellerStats } from "@/lib/sellerStats";
 import { PhoneInput } from "@/components/seller/PhoneInput";
 import { cmDigits, cmPhoneError, formatCm, toE164 } from "@/lib/phone";
+import { Select } from "@/components/ui/app-select";
 
 export const Route = createFileRoute("/dashboard/paiements")({
   head: () => ({ meta: [{ title: "Paiements — Amashia Seller" }, { name: "description", content: "Paiements : votre espace vendeur Amashia pour gérer votre activité." }, { property: "og:title", content: "Paiements — Amashia Seller" }, { property: "og:description", content: "Paiements : votre espace vendeur Amashia pour gérer votre activité." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
@@ -84,35 +85,51 @@ function PaiementsPage() {
 
   return (
     <DashboardLayout title="Paiements" subtitle="Votre solde, vos moyens de retrait et l'historique de vos gains">
-      <div className="mb-6 grid grid-cols-1 gap-5 lg:grid-cols-3">
-        <div className="rounded-2xl bg-gradient-primary p-6 text-black lg:col-span-2">
-          <div className="mb-4 flex items-center gap-3 opacity-90"><Wallet size={20} /><span className="text-sm font-semibold">Solde disponible</span></div>
-          <p className="text-4xl font-extrabold">{stats ? money(balance) : "…"}</p>
-          <p className="mt-1 text-xs opacity-80">Ventes livrées, moins les retraits demandés ou déjà payés.</p>
-          <p className="mt-3 flex items-start gap-2 rounded-xl bg-black/10 px-3 py-2 text-xs font-medium">
-            <BadgeCheck size={16} className="mt-px shrink-0" />
-            Ce solde vous appartient entièrement : la commission Amashia a déjà été prélevée sur chaque vente. <Link to="/dashboard/commissions" className="underline">Voir le détail</Link>
-          </p>
-          <div className="mt-5 flex flex-wrap gap-2">
-            <button
-              onClick={() => (methods.length ? setOpenWithdraw(true) : (toast.info("Ajoutez d'abord un moyen de retrait."), setOpenMethod(true)))}
-              disabled={!stats || balance < 1000}
-              className="flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-bold text-black disabled:opacity-50"
-            >
-              <ArrowDownToLine size={16} /> Retirer mon argent
-            </button>
-            {stats && balance < 1000 && <span className="self-center text-xs opacity-80">Retrait possible à partir de 1 000 FCFA</span>}
+      {/* Solde disponible */}
+      <section className="relative mb-6 overflow-hidden rounded-[1.5rem] border border-border bg-card shadow-card">
+        <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-primary/20 blur-3xl" />
+        <div className="pointer-events-none absolute inset-0 bg-grid opacity-40" />
+        <div className="relative grid grid-cols-[minmax(0,1fr)] gap-6 p-5 sm:p-7 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)] lg:items-center">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="grid h-9 w-9 place-items-center rounded-xl bg-primary text-black"><Wallet size={18} /></span>
+              <span className="text-sm font-semibold text-muted-foreground">Solde disponible</span>
+              <span className="ml-auto rounded-full border border-border bg-background/60 px-2.5 py-1 text-[10px] font-semibold text-muted-foreground">Retrait dès 1 000 FCFA</span>
+            </div>
+            <p className="mt-4 flex items-start gap-1 font-extrabold tabular-nums leading-none tracking-tight">
+              <span className="text-[2.6rem] sm:text-5xl">{stats ? Math.round(balance).toLocaleString("fr-FR") : "…"}</span>
+              <span className="mt-1 text-xs font-bold text-primary sm:text-sm">FCFA</span>
+            </p>
+            <p className="mt-2 text-xs text-muted-foreground">Ventes livrées, moins les retraits demandés ou déjà payés.</p>
+            <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:items-center">
+              <button
+                onClick={() => (methods.length ? setOpenWithdraw(true) : (toast.info("Ajoutez d'abord un moyen de retrait."), setOpenMethod(true)))}
+                disabled={!stats || balance < 1000}
+                className="flex h-12 items-center justify-center gap-2 rounded-full bg-primary px-6 text-sm font-bold text-black shadow-[0_10px_30px_-10px_var(--primary)] transition hover:brightness-95 disabled:opacity-50 disabled:shadow-none"
+              >
+                <ArrowDownToLine size={16} /> Retirer mon argent
+              </button>
+              <Link to="/dashboard/commissions" className="flex h-12 items-center justify-center gap-1.5 rounded-full border border-border px-5 text-sm font-semibold hover:border-primary hover:text-primary">
+                Détail des commissions <ArrowUpRight size={14} />
+              </Link>
+            </div>
+            {stats && balance < 1000 && <p className="mt-2 text-[11px] text-muted-foreground">Il vous manque {money(1000 - balance)} pour pouvoir retirer.</p>}
+          </div>
+
+          <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-px overflow-hidden rounded-2xl border border-border bg-border">
+            <BalanceRow icon={Clock} tone="text-amber-400 bg-amber-500/12" label="En attente de livraison" hint="Ventes pas encore livrées (après commission)" value={stats?.pending_balance ?? 0} />
+            <BalanceRow icon={ArrowDownToLine} tone="text-sky-400 bg-sky-500/12" label="Retraits en cours" hint="En cours de traitement par Amashia" value={pendingOut} />
+            <BalanceRow icon={CheckCircle2} tone="text-emerald-400 bg-emerald-500/12" label="Déjà versé" hint="Retraits payés sur votre compte" value={paidOut} />
           </div>
         </div>
-        <div className="grid grid-cols-1 gap-3">
-          <Kpi label="En attente de livraison" value={money(stats?.pending_balance ?? 0)} hint="Ventes pas encore livrées (après commission)" />
-          <Kpi label="Retraits en cours" value={money(pendingOut)} hint="En cours de traitement" />
-          <Kpi label="Déjà versé" value={money(paidOut)} hint="Retraits payés" />
-        </div>
-      </div>
+        <p className="relative flex items-start gap-2 border-t border-border bg-background/40 px-5 py-3 text-[11px] text-muted-foreground sm:px-7">
+          <BadgeCheck size={14} className="mt-px shrink-0 text-primary" />
+          Ce solde vous appartient entièrement : la commission Amashia a déjà été prélevée sur chaque vente.
+        </p>
+      </section>
 
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
-        <div className="rounded-2xl border border-border bg-card p-6 lg:col-span-2">
+        <div className="min-w-0 rounded-2xl border border-border bg-card p-4 sm:p-6 lg:col-span-2">
           <div className="mb-4 flex items-center justify-between">
             <h3 className="font-bold">Historique</h3>
             {txs.length > 6 && <button onClick={() => setShowAll(true)} className="flex items-center gap-1 text-xs text-primary"><History size={13} /> Tout voir</button>}
@@ -181,40 +198,54 @@ function PaiementsPage() {
 
 function TxList({ txs }: { txs: { id: string; credit: boolean; desc: string; amount: number; date: string; status: Withdrawal["status"] | null }[] }) {
   return (
-    <div className="divide-y divide-border">
-      {txs.map((t) => {
-        const st = t.status ? WSTATUS[t.status] : null;
-        return (
-          <div key={t.id} className="flex items-center gap-3 py-3">
-            <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-full ${t.credit ? "bg-emerald-500/15 text-emerald-400" : "bg-secondary text-foreground"}`}>
-              {t.credit ? <ArrowUpRight size={15} className="rotate-180" /> : <ArrowDownToLine size={15} />}
-            </span>
-            <div className="min-w-0 flex-1">
-              <p className="line-clamp-1 text-sm font-medium">{t.desc}</p>
-              <p className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
-                {dateTime(t.date)}
-                {st && <span className={`flex items-center gap-1 ${st.cls}`}><st.icon size={11} /> {st.label}</span>}
+    <div>
+      {/* trois colonnes : opération · montant · statut */}
+      <div className="grid grid-cols-[minmax(0,1fr)_auto_4.75rem] items-center gap-3 border-b border-border pb-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground sm:grid-cols-[minmax(0,1fr)_9rem_8.5rem]">
+        <span>Opération</span><span className="text-right">Montant</span><span className="text-right">Statut</span>
+      </div>
+      <div className="divide-y divide-border">
+        {txs.map((t) => {
+          const st = t.status ? WSTATUS[t.status] : null;
+          return (
+            <div key={t.id} className="grid grid-cols-[minmax(0,1fr)_auto_4.75rem] items-center gap-3 py-3 sm:grid-cols-[minmax(0,1fr)_9rem_8.5rem]">
+              <div className="flex min-w-0 items-center gap-2.5">
+                <span className={`hidden h-9 w-9 shrink-0 place-items-center rounded-full sm:grid ${t.credit ? "bg-emerald-500/15 text-emerald-400" : "bg-secondary text-foreground"}`}>
+                  {t.credit ? <ArrowUpRight size={15} className="rotate-180" /> : <ArrowDownToLine size={15} />}
+                </span>
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-medium">{t.desc}</p>
+                  <p className="truncate text-[11px] text-muted-foreground">{dateTime(t.date)}</p>
+                </div>
+              </div>
+              <p className={`whitespace-nowrap text-right text-[13px] font-bold tabular-nums sm:text-sm ${t.credit ? "text-emerald-400" : t.status === "rejected" ? "text-muted-foreground line-through" : ""}`}>
+                {t.credit ? "+" : "−"}{Math.round(t.amount).toLocaleString("fr-FR")}<span className="ml-0.5 align-super text-[8px]">FCFA</span>
               </p>
+              <div className="flex justify-end">
+                {st
+                  ? <span className={`inline-flex max-w-full items-center gap-1 rounded-full bg-secondary px-2 py-1 text-[10px] font-semibold ${st.cls}`}><st.icon size={11} className="shrink-0" /><span className="truncate">{t.status === "pending" ? "En cours" : st.label}</span></span>
+                  : <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/12 px-2 py-1 text-[10px] font-semibold text-emerald-400"><CheckCircle2 size={11} /> Crédité</span>}
+              </div>
             </div>
-            <p className={`whitespace-nowrap text-sm font-bold ${t.credit ? "text-emerald-400" : t.status === "rejected" ? "text-muted-foreground line-through" : ""}`}>
-              {t.credit ? "+" : "−"}{money(t.amount)}
-            </p>
-          </div>
-        );
-      })}
+          );
+        })}
+      </div>
     </div>
   );
 }
 
-function Kpi({ label, value, hint }: { label: string; value: string; hint: string }) {
+function BalanceRow({ icon: Icon, tone, label, hint, value }: { icon: typeof Clock; tone: string; label: string; hint: string; value: number }) {
   return (
-    <div className="rounded-2xl border border-border bg-card p-4">
-      <p className="text-xs text-muted-foreground">{label}</p>
-      <p className="text-lg font-extrabold">{value}</p>
-      <p className="text-[10px] text-muted-foreground">{hint}</p>
+    <div className="flex items-center gap-3 bg-card px-4 py-3.5">
+      <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-xl ${tone}`}><Icon size={16} /></span>
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-sm font-semibold">{label}</p>
+        <p className="truncate text-[11px] text-muted-foreground">{hint}</p>
+      </div>
+      <p className="shrink-0 whitespace-nowrap text-right font-extrabold tabular-nums">{Math.round(value).toLocaleString("fr-FR")}<span className="ml-0.5 align-super text-[9px] text-muted-foreground">FCFA</span></p>
     </div>
   );
 }
+
 
 function Modal({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
   return (
@@ -317,9 +348,9 @@ function WithdrawModal({ balance, methods, onClose, onDone }: { balance: number;
         {[0.25, 0.5, 1].map((p) => <button key={p} onClick={() => setAmount(String(Math.floor(balance * p)))} className="rounded-full bg-secondary px-3 py-1 text-xs">{p === 1 ? "Tout" : `${p * 100} %`}</button>)}
       </div>
       <label className="mb-1 mt-4 block text-xs font-semibold">Vers</label>
-      <select className={inp} value={method} onChange={(e) => setMethod(e.target.value)}>
+      <Select className={inp} value={method} onChange={(e) => setMethod(e.target.value)}>
         {methods.map((m) => <option key={m.id} value={m.id}>{(m.label || KIND[m.kind].label)} · {mask(m.account_number)}</option>)}
-      </select>
+      </Select>
       <button onClick={submit} disabled={busy} className="mt-5 w-full rounded-full bg-gradient-primary py-3 text-sm font-semibold text-black disabled:opacity-60">{busy ? "Envoi…" : "Confirmer le retrait"}</button>
       <p className="mt-3 text-[11px] text-muted-foreground">Le montant est réservé immédiatement et versé par l'équipe Amashia sous 48 h ouvrées.</p>
     </Modal>

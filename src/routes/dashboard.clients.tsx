@@ -4,6 +4,7 @@ import { DashboardLayout } from "@/components/seller/dashboard/DashboardLayout";
 import { Search, X, MapPin, ShoppingBag, Wallet, Calendar, Users, Repeat } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { dateTime, money, num } from "@/lib/sellerStats";
+import { Select } from "@/components/ui/app-select";
 
 export const Route = createFileRoute("/dashboard/clients")({
   head: () => ({ meta: [{ title: "Clients — Amashia Seller" }, { name: "description", content: "Clients : votre espace vendeur Amashia pour gérer votre activité." }, { property: "og:title", content: "Clients — Amashia Seller" }, { property: "og:description", content: "Clients : votre espace vendeur Amashia pour gérer votre activité." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
@@ -90,9 +91,9 @@ function ClientsPage() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={15} />
             <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Rechercher un client ou une ville" className="w-full rounded-xl border border-border bg-background py-2.5 pl-9 pr-3 text-sm" />
           </div>
-          <select value={sort} onChange={(e) => setSort(e.target.value as keyof typeof SORTS)} className="rounded-xl border border-border bg-background px-3 py-2.5 text-sm">
+          <Select title="Trier les clients" value={sort} onChange={(e) => setSort(e.target.value as keyof typeof SORTS)} className="rounded-xl border border-border bg-background px-3 py-2.5 text-sm">
             {Object.entries(SORTS).map(([k, v]) => <option key={k} value={k}>Trier : {v}</option>)}
-          </select>
+          </Select>
         </div>
 
         {error && clients === null && <p className="py-6 text-center text-sm text-red-400">Connexion impossible pour le moment. Nouvel essai automatique dans quelques secondes…</p>}
@@ -169,16 +170,16 @@ function ClientsPage() {
 
       {selected && (
         <div className="fixed inset-0 z-50 grid place-items-center bg-black/60 p-4 backdrop-blur-sm" onClick={() => setSelected(null)}>
-          <div className="max-h-[92vh] w-full max-w-md overflow-y-auto rounded-2xl border border-border bg-card p-6" onClick={(e) => e.stopPropagation()}>
-            <div className="mb-5 flex items-start justify-between">
-              <div className="flex items-center gap-3">
-                <span className="grid h-12 w-12 place-items-center rounded-full bg-primary/15 font-bold text-primary">{initials(selected.name)}</span>
-                <div>
-                  <h3 className="text-lg font-bold">{selected.name}</h3>
-                  <p className="flex items-center gap-1 text-xs text-muted-foreground"><MapPin size={12} /> {selected.area || "—"}</p>
+          <div className="max-h-[92vh] w-full max-w-md overflow-y-auto rounded-2xl border border-border bg-card p-4 sm:p-6" onClick={(e) => e.stopPropagation()}>
+            <div className="mb-5 flex items-start justify-between gap-3">
+              <div className="flex min-w-0 items-center gap-3">
+                <span className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-primary/15 font-bold text-primary">{initials(selected.name)}</span>
+                <div className="min-w-0">
+                  <h3 className="line-clamp-2 break-words text-lg font-bold leading-tight">{selected.name}</h3>
+                  <p className="flex min-w-0 items-center gap-1 text-xs text-muted-foreground"><MapPin size={12} className="shrink-0" /><span className="truncate">{selected.area || "—"}</span></p>
                 </div>
               </div>
-              <button onClick={() => setSelected(null)} className="grid h-8 w-8 place-items-center rounded-full hover:bg-secondary" aria-label="Fermer"><X size={16} /></button>
+              <button onClick={() => setSelected(null)} className="grid h-8 w-8 shrink-0 place-items-center rounded-full hover:bg-secondary" aria-label="Fermer"><X size={16} /></button>
             </div>
             <div className="grid grid-cols-2 gap-3 text-sm">
               <Detail icon={ShoppingBag} label="Commandes" value={String(selected.orders)} />
@@ -194,8 +195,8 @@ function ClientsPage() {
                   return (
                     <div key={o.order_number} className="rounded-xl border border-border p-3 text-sm">
                       <div className="flex items-center justify-between gap-2">
-                        <span className="font-semibold">{o.order_number}</span>
-                        <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${st.cls}`}>{st.label}</span>
+                        <span className="min-w-0 truncate font-semibold">{o.order_number}</span>
+                        <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold ${st.cls}`}>{st.label}</span>
                       </div>
                       <p className="text-[11px] text-muted-foreground">{dateTime(o.created_at)} · {o.items} article{o.items > 1 ? "s" : ""} · <b className="text-foreground">{money(o.amount)}</b></p>
                       <ul className="mt-1 text-xs text-muted-foreground">{o.products.map((p, i) => <li key={i} className="line-clamp-1">• {p}</li>)}</ul>
@@ -218,19 +219,26 @@ function initials(n: string) {
 
 function Kpi({ icon: Icon, label, value }: { icon: typeof Users; label: string; value: string }) {
   return (
-    <div className="rounded-2xl border border-border bg-card p-4">
+    <div className="min-w-0 rounded-2xl border border-border bg-card p-3.5 sm:p-4">
       <Icon size={18} className="mb-2 text-primary" />
-      <p className="text-xl font-extrabold">{value}</p>
-      <p className="text-[11px] text-muted-foreground">{label}</p>
+      <p className="truncate text-lg font-extrabold tabular-nums sm:text-xl" title={value}><Val v={value} /></p>
+      <p className="text-[11px] leading-snug text-muted-foreground">{label}</p>
     </div>
   );
 }
 
 function Detail({ icon: Icon, label, value }: { icon: typeof Users; label: string; value: string }) {
   return (
-    <div className="rounded-xl bg-secondary/40 p-3">
-      <p className="flex items-center gap-1.5 text-[11px] text-muted-foreground"><Icon size={12} /> {label}</p>
-      <p className="mt-0.5 font-semibold">{value}</p>
+    <div className="min-w-0 rounded-xl bg-secondary/40 p-3">
+      <p className="flex items-center gap-1.5 text-[11px] text-muted-foreground"><Icon size={12} className="shrink-0" /> {label}</p>
+      <p className="mt-0.5 break-words text-sm font-semibold tabular-nums"><Val v={value} /></p>
     </div>
   );
+}
+
+/** Montant : la devise est affichée plus petite pour que le chiffre tienne dans sa case. */
+function Val({ v }: { v: string }) {
+  const m = v.match(/^(.*?)\s*(FCFA)$/);
+  if (!m) return <>{v}</>;
+  return <>{m[1]}<span className="ml-0.5 align-super text-[9px] font-bold">{m[2]}</span></>;
 }

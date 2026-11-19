@@ -1,10 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { imgProps } from "@/lib/img";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { DashboardLayout } from "@/components/seller/dashboard/DashboardLayout";
-import { TrendingUp, Eye, ShoppingCart, Users, Package, Wallet, Percent, MousePointerClick } from "lucide-react";
+import { TrendingUp, Eye, ShoppingCart, Users, Package, Wallet, Percent, MousePointerClick, ArrowUpRight, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { money, num } from "@/lib/sellerStats";
+import { Select } from "@/components/ui/app-select";
 
 export const Route = createFileRoute("/dashboard/analytique")({
   head: () => ({
@@ -51,6 +52,7 @@ function AnalytiquePage() {
   const [from, setFrom] = useState(iso(new Date(today.getTime() - 29 * DAY)));
   const [to, setTo] = useState(iso(today));
   const [grain, setGrain] = useState<Grain>("day");
+  const [topAll, setTopAll] = useState(false);
   const [data, setData] = useState<Analytics | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -107,9 +109,9 @@ function AnalytiquePage() {
           <input type="date" value={to} min={from} max={iso(today)} onChange={(e) => { setTo(e.target.value); setPreset("custom"); }} className="mt-1 block rounded-lg border border-border bg-background px-2 py-1.5 text-sm text-foreground" />
         </label>
         <label className="text-xs text-muted-foreground">Regrouper par
-          <select value={grain} onChange={(e) => setGrain(e.target.value as Grain)} className="mt-1 block rounded-lg border border-border bg-background px-2 py-1.5 text-sm text-foreground">
+          <Select value={grain} onChange={(e) => setGrain(e.target.value as Grain)} className="mt-1 block rounded-lg border border-border bg-background px-2 py-1.5 text-sm text-foreground">
             <option value="day">Jour</option><option value="week">Semaine</option><option value="month">Mois</option>
-          </select>
+          </Select>
         </label>
         {loading && <span className="text-xs text-muted-foreground">Mise à jour…</span>}
       </div>
@@ -136,7 +138,7 @@ function AnalytiquePage() {
         </div>
         {data ? (
           <>
-            <div className="-mx-1 overflow-x-auto px-1 pb-1 [scrollbar-width:thin]"><div className="min-w-[640px] sm:min-w-0"><SalesChart data={data} /></div></div>
+            <DataScroller data={data}><SalesChart data={data} /></DataScroller>
             <p className="mt-1 text-right text-[10px] text-muted-foreground sm:hidden">Faites glisser pour voir toute la période →</p>
           </>
         ) : <div className="h-64 animate-pulse rounded-xl bg-secondary/40" />}
@@ -158,11 +160,14 @@ function AnalytiquePage() {
       </div>
 
       <div className="rounded-2xl border border-border bg-card p-4 sm:p-6">
-        <h3 className="mb-4 font-bold">Top produits</h3>
+        <div className="mb-4 flex items-center justify-between gap-3">
+          <h3 className="font-bold">Top produits</h3>
+          {data && data.top_products.length > 0 && <button type="button" onClick={() => setTopAll(true)} className="flex items-center gap-1 text-xs font-semibold text-primary sm:hidden">Tout voir <ArrowUpRight size={12} /></button>}
+        </div>
         {data && data.top_products.length > 0 ? (
           <>
           <ul className="grid grid-cols-[minmax(0,1fr)] gap-2 sm:hidden">
-            {data.top_products.map((p, i) => (
+            {data.top_products.slice(0, 5).map((p, i) => (
               <li key={i} className="flex items-center gap-3 rounded-xl border border-border/70 p-2.5">
                 <div className="aspect-square h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-white">{p.image && <img {...imgProps(p.image, { width: 64 })} loading="lazy" alt="" className="h-full w-full object-cover" />}</div>
                 <div className="min-w-0 flex-1">
@@ -209,7 +214,45 @@ function AnalytiquePage() {
           </>
         ) : <Empty text="Vos produits en ligne apparaîtront ici avec leurs statistiques." />}
       </div>
+      {topAll && data && <TopProductsModal rows={data.top_products} onClose={() => setTopAll(false)} />}
     </DashboardLayout>
+  );
+}
+
+function TopProductsModal({ rows, onClose }: { rows: Analytics["top_products"]; onClose: () => void }) {
+  useEffect(() => { const o = document.body.style.overflow; document.body.style.overflow = "hidden"; return () => { document.body.style.overflow = o; }; }, []);
+  const pct = (a: number, b: number) => (b ? `${Math.min(100, (a / b) * 100).toFixed(1).replace(".", ",")} %` : "—");
+  return (
+    <div className="fixed inset-0 z-[120] flex items-end justify-center bg-black/60 backdrop-blur-sm sm:items-center sm:p-4" onClick={onClose}>
+      <div className="app-select-sheet flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden rounded-t-3xl border border-border bg-card sm:rounded-3xl" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center justify-between gap-3 border-b border-border px-5 py-4">
+          <div><p className="font-bold">Tous les produits</p><p className="text-[11px] text-muted-foreground">{rows.length} produit{rows.length > 1 ? "s" : ""} · sur la période choisie</p></div>
+          <button onClick={onClose} className="grid h-8 w-8 place-items-center rounded-full bg-secondary" aria-label="Fermer"><X size={16} /></button>
+        </div>
+        <ul className="min-h-0 flex-1 divide-y divide-border overflow-y-auto overscroll-contain px-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
+          {rows.map((p, i) => (
+            <li key={i} className="py-4">
+              <div className="flex items-center gap-3">
+                <span className="w-5 shrink-0 text-center text-xs font-bold text-muted-foreground">{i + 1}</span>
+                <div className="aspect-square h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-white">{p.image && <img {...imgProps(p.image, { width: 64 })} loading="lazy" alt="" className="h-full w-full object-cover" />}</div>
+                <div className="min-w-0 flex-1">
+                  <p className="line-clamp-2 text-sm font-semibold leading-snug">{p.title}</p>
+                  <p className="mt-0.5 text-sm font-bold text-primary">{money(p.revenue)}</p>
+                </div>
+              </div>
+              <div className="mt-3 grid grid-cols-3 divide-x divide-border overflow-hidden rounded-xl border border-border text-center">
+                {[["Vues", num(p.views)], ["Ajouts panier", num(p.carts)], ["Vendus", num(p.items)], ["Taux d'ajout", pct(p.carts, p.views)], ["Conversion", pct(p.items, p.views)], ["Revenu / vente", p.items ? money(Math.round(p.revenue / p.items)) : "—"]].map(([l, v], k) => (
+                  <div key={l} className={`min-w-0 px-1.5 py-2 ${k >= 3 ? "border-t border-border" : ""}`}>
+                    <p className="truncate text-[10px] text-muted-foreground">{l}</p>
+                    <p className="truncate text-xs font-bold tabular-nums">{v}</p>
+                  </div>
+                ))}
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
   );
 }
 
@@ -249,6 +292,25 @@ function compact(n: number) {
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(n % 1_000_000 ? 1 : 0).replace(".", ",")}M`;
   if (n >= 1_000) return `${(n / 1_000).toFixed(n % 1_000 ? 1 : 0).replace(".", ",")}K`;
   return String(Math.round(n));
+}
+
+/** Sur mobile, le graphique défile : on l'ouvre directement sur la période qui contient des données. */
+function DataScroller({ data, children }: { data: Analytics; children: React.ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || el.scrollWidth <= el.clientWidth + 4) return;
+    const s = data.series;
+    let i = -1;
+    for (let k = s.length - 1; k >= 0; k--) if (s[k].revenue || s[k].visits || s[k].orders) { i = k; break; }
+    if (i < 0) { el.scrollLeft = el.scrollWidth; return; }
+    const axis = 52, inner = el.scrollWidth - axis;
+    const xPx = axis + ((i + 0.5) / s.length) * inner;
+    requestAnimationFrame(() => el.scrollTo({ left: Math.max(0, xPx - el.clientWidth * 0.6), behavior: "smooth" }));
+  }, [data]);
+  return (
+    <div ref={ref} className="-mx-1 overflow-x-auto px-1 pb-1 [scrollbar-width:thin]"><div className="min-w-[640px] sm:min-w-0">{children}</div></div>
+  );
 }
 
 function SalesChart({ data }: { data: Analytics }) {

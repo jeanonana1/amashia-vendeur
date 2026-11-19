@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
 import { generateSeoContent } from "@/lib/ai-seo.functions";
 import { useTaxonomy } from "@/lib/categories";
+import { Select } from "@/components/ui/app-select";
 
 type Props = {
   initialName?: string;
@@ -121,7 +122,7 @@ export function AiSeoModal({ initialName = "", initialCategory = "", initialPric
                 <div><label className="block text-xs font-semibold mb-1.5">Nom du produit *</label><input value={form.productName} onChange={(e) => set("productName", e.target.value)} className={inp} placeholder="Ex : Égreneur de maïs manuel" /></div>
                 <div><label className="block text-xs font-semibold mb-1.5">Catégorie</label>
                   {/* liste fermée : uniquement les catégories du site Amashia */}
-                  <select value={form.category} onChange={(e) => set("category", e.target.value)} className={inp}>
+                  <Select value={form.category} onChange={(e) => set("category", e.target.value)} className={inp}>
                     <option value="">Choisir une catégorie</option>
                     {form.category && !SITE_CATEGORIES.includes(form.category) && <option value={form.category}>{form.category}</option>}
                     {SITE_CATEGORY_GROUPS.map((g) => (
@@ -129,7 +130,7 @@ export function AiSeoModal({ initialName = "", initialCategory = "", initialPric
                         {g.categories.map((c) => <option key={c} value={c}>{c}</option>)}
                       </optgroup>
                     ))}
-                  </select>
+                  </Select>
                 </div>
                 <div><label className="block text-xs font-semibold mb-1.5">Marque</label><input value={form.brand} onChange={(e) => set("brand", e.target.value)} className={inp} /></div>
                 <div><label className="block text-xs font-semibold mb-1.5">Prix (FCFA)</label><input value={form.price} onChange={(e) => set("price", e.target.value)} className={inp} /></div>

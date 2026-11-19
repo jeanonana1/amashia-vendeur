@@ -1,3 +1,4 @@
+import { createPortal } from "react-dom";
 import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { askConfirm } from "@/lib/dialog";
 import { imgProps } from "@/lib/img";
@@ -14,6 +15,7 @@ import { AiImageModal } from "@/components/seller/dashboard/AiImageModal";
 import { PriceTipModal, charmPrice } from "@/components/seller/dashboard/PriceTipModal";
 import { detectSubcategory } from "@/lib/autoCategory";
 import { useTaxonomy } from "@/lib/categories";
+import { Select } from "@/components/ui/app-select";
 
 type ProductSearch = { id?: string };
 
@@ -390,16 +392,30 @@ function AddProductPage() {
   const firstStepRender = useRef(true);
   useEffect(() => { if (firstStepRender.current) { firstStepRender.current = false; return; } window.scrollTo({ top: 0, behavior: "smooth" }); }, [step]);
 
-  // Détection automatique de la sous-catégorie à partir du titre
+  // Catégorie (rubrique de la base) choisie par le vendeur ; retrouvée depuis la sous-catégorie enregistrée
+  const [parentCat, setParentCat] = useState("");
   useEffect(() => {
-    if (catManual.current || !form.name.trim()) return;
+    if (!form.category) return;
+    const g = SITE_CATEGORY_GROUPS.find((x) => x.categories.includes(form.category));
+    if (g && g.group !== parentCat) setParentCat(g.group);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form.category, SITE_CATEGORY_GROUPS.length]);
+  const subOptions = SITE_CATEGORY_GROUPS.find((g) => g.group === parentCat)?.categories ?? [];
+
+  // Détection automatique de la sous-catégorie : uniquement parmi les sous-catégories
+  // de la catégorie choisie (telles qu'elles existent dans la base), d'après le titre
+  const [catNoMatch, setCatNoMatch] = useState(false);
+  useEffect(() => {
+    if (catManual.current || !parentCat || !subOptions.length) return;
     const t = window.setTimeout(() => {
-      const g = detectSubcategory(form.name, SITE_CATEGORIES);
-      if (g && g.sub !== form.category) { setForm((f) => ({ ...f, category: g.sub })); setCatAuto(true); }
-    }, 350);
+      const g = form.name.trim() ? detectSubcategory(form.name, subOptions) : null;
+      const sub = g?.sub ?? (subOptions.length === 1 ? subOptions[0] : "");
+      setCatNoMatch(!sub && !!form.name.trim());
+      if (sub && sub !== form.category) { setForm((f) => ({ ...f, category: sub })); setCatAuto(true); }
+    }, 300);
     return () => window.clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [form.name, SITE_CATEGORIES.length]);
+  }, [form.name, parentCat, subOptions.length]);
 
   // Specs presets when category changes
   function suggestSpecs(silent = false) {
@@ -680,22 +696,28 @@ function AddProductPage() {
                 <RichTextEditor value={form.description} onChange={(v) => set("description", v)} placeholder="Décrivez votre produit... utilisez la barre pour formater, ajouter des listes, titres, etc." />
               </div>
               <div className="grid md:grid-cols-2 gap-4">
-                <div><label className="block text-sm mb-2">Sous-catégorie *</label>
-                  <select value={form.category} onChange={(e) => { catManual.current = true; setCatAuto(false); set("category", e.target.value); }} className={`${inp} ${!form.category ? "text-muted-foreground" : ""} ${catAuto ? "border-primary ring-2 ring-primary/25" : ""}`}>
-                    <option value="">Choisir la catégorie du produit</option>
-                    {SITE_CATEGORY_GROUPS.map((g) => (
-                      <optgroup key={g.group} label={`Rubrique ${g.group}`}>
-                        {g.categories.map((c) => <option key={c} value={c}>{c}</option>)}
-                      </optgroup>
-                    ))}
-                    {form.category && !SITE_CATEGORIES.includes(form.category) && <option value={form.category}>{form.category}</option>}
-                  </select>
-                  {catAuto && form.category && <p className="mt-1.5 inline-flex items-center gap-1.5 rounded-full bg-primary/12 px-2.5 py-1 text-[11px] font-semibold text-primary">✨ Sous-catégorie détectée d'après le titre — modifiable</p>}
-                  {form.category
-                    ? <p className="mt-1 text-[11px] text-muted-foreground">Publié sur Amashia dans : <b className="text-foreground">{SITE_CATEGORY_GROUPS.find((g) => g.categories.includes(form.category))?.group ?? "—"} › {form.category}</b></p>
-                    : <p className="mt-1 text-[11px] text-muted-foreground">Le produit apparaîtra sur Amashia dans la rubrique correspondant à cette catégorie.</p>}
+                <div><label className="block text-sm mb-2">Catégorie *</label>
+                  <Select value={parentCat} title="Catégorie du produit" onChange={(e) => {
+                    const v = e.target.value; setParentCat(v); catManual.current = false; setCatAuto(false); setCatNoMatch(false);
+                    const subs = SITE_CATEGORY_GROUPS.find((g) => g.group === v)?.categories ?? [];
+                    if (!subs.includes(form.category)) set("category", "");
+                  }} className={inp}>
+                    <option value="">Choisir la catégorie</option>
+                    {SITE_CATEGORY_GROUPS.map((g) => <option key={g.group} value={g.group}>{g.group}</option>)}
+                  </Select>
+                  <p className="mt-1 text-[11px] text-muted-foreground">La sous-catégorie est ensuite détectée d'après le titre du produit.</p>
                 </div>
-                <div><label className="block text-sm mb-2">SKU</label><input value={form.sku} onChange={(e) => set("sku", e.target.value)} className={inp} /></div>
+                <div><label className="block text-sm mb-2">Sous-catégorie *</label>
+                  <Select value={form.category} title={parentCat ? `Sous-catégorie · ${parentCat}` : "Sous-catégorie"} disabled={!parentCat} onChange={(e) => { catManual.current = true; setCatAuto(false); set("category", e.target.value); }} className={`${inp} ${catAuto ? "border-primary ring-2 ring-primary/25" : ""}`}>
+                    <option value="">{parentCat ? "Choisir la sous-catégorie" : "Choisissez d'abord la catégorie"}</option>
+                    {subOptions.map((c) => <option key={c} value={c}>{c}</option>)}
+                    {form.category && !subOptions.includes(form.category) && <option value={form.category}>{form.category}</option>}
+                  </Select>
+                  {catAuto && form.category && <p className="mt-1.5 inline-flex items-center gap-1.5 rounded-full bg-primary/12 px-2.5 py-1 text-[11px] font-semibold text-primary">✨ Détectée d'après le titre — modifiable</p>}
+                  {!form.category && catNoMatch && <p className="mt-1 text-[11px] text-amber-400">Aucune sous-catégorie de « {parentCat} » ne correspond au titre : choisissez-la dans la liste.</p>}
+                  {form.category && <p className="mt-1 text-[11px] text-muted-foreground">Publié sur Amashia dans : <b className="text-foreground">{parentCat || "—"} › {form.category}</b></p>}
+                </div>
+                <div className="md:col-span-2"><label className="block text-sm mb-2">SKU</label><input value={form.sku} onChange={(e) => set("sku", e.target.value)} className={inp} /></div>
               </div>
             </div>
           )}
@@ -858,10 +880,10 @@ function AddProductPage() {
                     return (
                       <div className="space-y-3">
                         <div className="grid grid-cols-[1fr_auto] gap-2">
-                          <select value={newAttr.name} onChange={(e) => { setNewAttr({ name: e.target.value, values: "" }); setCustomAttrName(""); }} className={inp}>
+                          <Select value={newAttr.name} onChange={(e) => { setNewAttr({ name: e.target.value, values: "" }); setCustomAttrName(""); }} className={inp}>
                             <option value="">— Sélectionner un attribut —</option>
                             {Object.keys(ATTR_PRESETS).map((n) => <option key={n} value={n}>{n}</option>)}
-                          </select>
+                          </Select>
                           <button onClick={addAttr} disabled={!effName || !newAttr.values} className="px-4 rounded-xl bg-gradient-primary text-black text-sm font-semibold flex items-center gap-1 disabled:opacity-40"><Plus size={14} /> Ajouter</button>
                         </div>
 
@@ -1018,13 +1040,13 @@ function AddProductPage() {
                   {bundleItems.map((b, i) => (
                     <div key={i} className="grid grid-cols-[1fr_80px_auto] gap-2 mb-2">
                       {myProducts.length > 0 ? (
-                        <select value={b.product_id || ""} onChange={(e) => {
+                        <Select value={b.product_id || ""} onChange={(e) => {
                           const p = myProducts.find((x) => x.id === e.target.value);
                           setBundleItems(bundleItems.map((x, j) => j === i ? { ...x, product_id: e.target.value, name: p?.name || x.name } : x));
                         }} className={inp}>
                           <option value="">— Saisir manuellement —</option>
                           {myProducts.map((p) => <option key={p.id} value={p.id}>{p.name} ({fmtFCFA(p.price)} FCFA)</option>)}
-                        </select>
+                        </Select>
                       ) : (
                         <input placeholder="Nom du produit" value={b.name} onChange={(e) => setBundleItems(bundleItems.map((x, j) => j === i ? { ...x, name: e.target.value } : x))} className={inp} />
                       )}
@@ -1113,14 +1135,21 @@ function AddProductPage() {
           )}
 
           {/* Mobile : barre d'actions épinglée en bas ; ordinateur : sous le formulaire */}
-          <div className="fixed inset-x-0 bottom-0 z-40 flex items-center justify-between gap-3 border-t border-border bg-background px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] shadow-[0_-8px_30px_-12px_rgba(0,0,0,0.5)] lg:static lg:z-auto lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none">
-            <button disabled={step === 0} onClick={() => setStep(step - 1)} className="h-11 px-4 rounded-full bg-secondary text-sm font-semibold disabled:opacity-40 flex items-center gap-2 lg:h-auto lg:px-5 lg:py-2.5"><ArrowLeft size={15} /> Précédent</button>
-            <span className="text-xs font-semibold text-muted-foreground lg:hidden">Étape {step + 1}/{STEPS.length}</span>
-            {step < STEPS.length - 1 ? (
-              <button disabled={!canNext()} onClick={() => setStep(step + 1)} className="h-11 px-5 rounded-full bg-primary text-black text-sm font-bold disabled:opacity-40 flex items-center gap-2 lg:h-auto lg:py-2.5">Suivant <ArrowRight size={15} /></button>
-            ) : <span className="w-[104px] lg:hidden" />}
+          <div className="hidden items-center justify-between gap-3 lg:flex">
+            <button disabled={step === 0} onClick={() => setStep(step - 1)} className="px-5 py-2.5 rounded-full bg-secondary text-sm font-semibold disabled:opacity-40 flex items-center gap-2"><ArrowLeft size={15} /> Précédent</button>
+            {step < STEPS.length - 1 && <button disabled={!canNext()} onClick={() => setStep(step + 1)} className="px-5 py-2.5 rounded-full bg-primary text-black text-sm font-bold disabled:opacity-40 flex items-center gap-2">Suivant <ArrowRight size={15} /></button>}
           </div>
-          <div className="h-20 lg:hidden" />
+          {/* Mobile : barre collée tout en bas de l'écran (rendue hors des blocs animés pour rester vraiment épinglée) */}
+          <BottomBar>
+            <div className="fixed inset-x-0 bottom-0 z-40 flex items-center justify-between gap-3 border-t border-border bg-background/95 px-4 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] backdrop-blur shadow-[0_-8px_30px_-12px_rgba(0,0,0,0.5)] lg:hidden">
+              <button disabled={step === 0} onClick={() => setStep(step - 1)} className="h-10 px-4 rounded-full bg-secondary text-sm font-semibold disabled:opacity-40 flex items-center gap-1.5"><ArrowLeft size={15} /> Précédent</button>
+              <span className="text-xs font-semibold text-muted-foreground">Étape {step + 1}/{STEPS.length}</span>
+              {step < STEPS.length - 1 ? (
+                <button disabled={!canNext()} onClick={() => setStep(step + 1)} className="h-10 px-5 rounded-full bg-primary text-black text-sm font-bold disabled:opacity-40 flex items-center gap-1.5">Suivant <ArrowRight size={15} /></button>
+              ) : <span className="w-[96px]" />}
+            </div>
+          </BottomBar>
+          <div className="h-16 lg:hidden" />
         </div>
 
         {/* Live preview */}
@@ -1185,4 +1214,12 @@ function AddProductPage() {
       )}
     </DashboardLayout>
   );
+}
+
+/** Rend son contenu directement dans <body> : un élément « fixed » placé dans un bloc animé
+ *  (transform) ne serait plus collé au bas de l'écran. */
+function BottomBar({ children }: { children: React.ReactNode }) {
+  const [el, setEl] = useState<HTMLElement | null>(null);
+  useEffect(() => setEl(document.body), []);
+  return el ? createPortal(children, el) : null;
 }

@@ -3,6 +3,7 @@ import { Link2, Copy, Check, Megaphone, Info } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { MARKETPLACE_URL, money, num } from "@/lib/sellerStats";
+import { Select } from "@/components/ui/app-select";
 
 /**
  * Sources de trafic et campagnes publicitaires (Facebook / Instagram / TikTok Ads…).
@@ -72,7 +73,36 @@ export function TrafficSources({ days, period }: { days: number; period: string 
         ) : rows.length === 0 ? (
           <p className="py-8 text-center text-sm text-muted-foreground">Aucune visite sur cette période.</p>
         ) : (
-          <div className="-mx-1 overflow-x-auto px-1 [scrollbar-width:thin]">
+          <>
+          {/* Mobile : une carte par source, chiffres séparés par des traits */}
+          <ul className="grid grid-cols-[minmax(0,1fr)] gap-3 sm:hidden">
+            {rows.map((r) => {
+              const c = ch(r.channel);
+              const share = total.visitors ? (r.visitors / total.visitors) * 100 : 0;
+              return (
+                <li key={r.channel} className="overflow-hidden rounded-xl border border-border">
+                  <div className="flex items-center gap-2.5 px-3 py-2.5">
+                    <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-xs font-bold text-black" style={{ background: c.color }}>{c.icon}</span>
+                    <div className="min-w-0 flex-1">
+                      <p className="flex min-w-0 items-center gap-1.5 text-sm font-semibold"><span className="truncate">{c.label}</span>{r.paid_visitors > 0 && <span className="shrink-0 rounded-full bg-primary/15 px-1.5 py-0.5 text-[10px] font-semibold text-primary">Pub</span>}</p>
+                      <div className="mt-1 h-1 w-full overflow-hidden rounded-full bg-secondary"><div className="h-full rounded-full" style={{ width: `${share}%`, background: c.color }} /></div>
+                    </div>
+                    <span className="shrink-0 text-xs font-bold text-emerald-400">{rate(r.orders, r.visitors)}</span>
+                  </div>
+                  <div className="grid grid-cols-3 divide-x divide-border border-t border-border text-center">
+                    {[["Visiteurs", num(r.visitors)], ["Visites", num(r.visits)], ["Ajouts panier", num(r.carts)]].map(([l, v]) => (
+                      <div key={l} className="min-w-0 px-1.5 py-2"><p className="truncate text-[10px] text-muted-foreground">{l}</p><p className="truncate text-sm font-bold tabular-nums">{v}</p></div>
+                    ))}
+                  </div>
+                  <div className="grid grid-cols-[1fr_2fr] divide-x divide-border border-t border-border text-center">
+                    <div className="min-w-0 px-1.5 py-2"><p className="truncate text-[10px] text-muted-foreground">Commandes</p><p className="truncate text-sm font-bold tabular-nums">{num(r.orders)}</p></div>
+                    <div className="min-w-0 px-1.5 py-2"><p className="truncate text-[10px] text-muted-foreground">Ventes</p><p className="truncate text-sm font-bold tabular-nums">{money(Number(r.revenue))}</p></div>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+          <div className="hidden overflow-x-auto sm:block">
             <table className="w-full min-w-[640px] text-sm">
               <thead>
                 <tr className="text-left text-xs text-muted-foreground">
@@ -112,6 +142,7 @@ export function TrafficSources({ days, period }: { days: number; period: string 
               </tbody>
             </table>
           </div>
+          </>
         )}
       </div>
 
@@ -243,16 +274,16 @@ function CampaignLink() {
       <div className="space-y-3">
         <label className="block">
           <span className="mb-1 block text-xs font-semibold text-muted-foreground">Page à promouvoir</span>
-          <select value={target} onChange={(e) => setTarget(e.target.value)} className={inp}>
+          <Select value={target} onChange={(e) => setTarget(e.target.value)} className={inp}>
             <option value="shop">Ma boutique</option>
             {products.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
-          </select>
+          </Select>
         </label>
         <label className="block">
           <span className="mb-1 block text-xs font-semibold text-muted-foreground">Plateforme</span>
-          <select value={platform} onChange={(e) => setPlatform(e.target.value)} className={inp}>
+          <Select value={platform} onChange={(e) => setPlatform(e.target.value)} className={inp}>
             {PLATFORMS.map((p) => <option key={p.id} value={p.id}>{p.label}</option>)}
-          </select>
+          </Select>
         </label>
         <label className="block">
           <span className="mb-1 block text-xs font-semibold text-muted-foreground">Nom de la campagne</span>

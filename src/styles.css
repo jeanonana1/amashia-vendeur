@@ -253,3 +253,9 @@
 @keyframes loading-bar { 0% { transform: translateX(-100%); } 100% { transform: translateX(250%); } }
 .animate-loading { animation: loading-bar 1.2s ease-in-out infinite; }
 @media (prefers-reduced-motion: reduce) { .animate-bob, .animate-bar, .animate-breathe, .animate-drift, .animate-shimmer, .animate-pop, .animate-width { animation: none; } }
+
+/* Menu déroulant Amashia (feuille en bas sur mobile, fenêtre centrée sur ordinateur) */
+@keyframes app-select-up { from { transform: translateY(100%); } to { transform: none; } }
+@keyframes app-select-pop { from { opacity: 0; transform: scale(.96) translateY(8px); } to { opacity: 1; transform: none; } }
+.app-select-sheet { animation: app-select-up .28s cubic-bezier(.2,.8,.2,1); }
+@media (min-width: 640px) { .app-select-sheet { animation: app-select-pop .2s ease-out; } }

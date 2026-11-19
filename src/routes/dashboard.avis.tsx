@@ -5,6 +5,7 @@ import { DashboardLayout } from "@/components/seller/dashboard/DashboardLayout";
 import { Star, MessageSquare, BadgeCheck, Search } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { dateTime, num, REVIEWS_SEEN_EVENT } from "@/lib/sellerStats";
+import { Select } from "@/components/ui/app-select";
 
 export const Route = createFileRoute("/dashboard/avis")({
   head: () => ({ meta: [{ title: "Avis — Amashia Seller" }, { name: "description", content: "Avis : votre espace vendeur Amashia pour gérer votre activité." }, { property: "og:title", content: "Avis — Amashia Seller" }, { property: "og:description", content: "Avis : votre espace vendeur Amashia pour gérer votre activité." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
@@ -106,10 +107,10 @@ function AvisPage() {
             <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Rechercher" className="rounded-xl border border-border bg-background py-2 pl-8 pr-3 text-sm" />
           </div>
           {products.length > 1 && (
-            <select value={product} onChange={(e) => setProduct(e.target.value)} className="max-w-[220px] rounded-xl border border-border bg-background px-3 py-2 text-sm">
+            <Select value={product} onChange={(e) => setProduct(e.target.value)} className="max-w-[220px] rounded-xl border border-border bg-background px-3 py-2 text-sm">
               <option value="">Tous les produits</option>
               {products.map(([id, t]) => <option key={id} value={id}>{t}</option>)}
-            </select>
+            </Select>
           )}
         </div>
 

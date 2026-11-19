@@ -56,7 +56,7 @@ const RULES: Rule[] = [
   { sub: "Ustensiles de cuisine", keys: ["casserole", "poele", "marmite", "cocotte", "couteau", "spatule", "louche", "ustensile", "ustensiles", "planche a decouper", "rape", "passoire", "fouet", "moule a gateau"] },
   { sub: "Vaisselle", keys: ["assiette", "assiettes", "verre", "verres", "tasse", "tasses", "bol", "bols", "couverts", "fourchette", "cuillere", "plateau", "service a the", "carafe", "mug", "gobelet"] },
   { sub: "Rangement", keys: ["boite de rangement", "rangement", "etagere", "panier", "organisateur", "range chaussures", "porte manteau", "cintre", "caisse"] },
-  { sub: "Linge de maison", keys: ["serviette de bain", "serviette", "nappe", "torchon", "tablier", "housse de canape", "coussin"] },
+  { sub: "Linge de maison", keys: ["drap", "draps", "drap housse", "parure de lit", "housse de couette", "couette", "taie", "taie d oreiller", "rideau", "rideaux", "serviette de bain", "serviette", "nappe", "torchon", "tablier", "housse de canape", "coussin"] },
   { sub: "Éclairage", keys: ["lampe", "ampoule", "led", "lustre", "torche", "lampe torche", "projecteur", "spot", "veilleuse", "guirlande"] },
   { sub: "Salle de bain", keys: ["pommeau de douche", "pommeau", "robinet", "porte serviette", "tapis de bain", "rideau de douche", "lavabo", "wc", "toilette"] },
 ];
@@ -64,6 +64,8 @@ const RULES: Rule[] = [
 export type CategoryGuess = { sub: string; score: number };
 
 /** Meilleure sous-catégorie pour ce titre, parmi celles qui existent (`allowed`). */
+const STOP = new Set(["pour", "avec", "sans", "autres", "autre", "accessoires", "produits", "articles", "divers", "homme", "femme", "enfant", "enfants", "maison"]);
+
 export function detectSubcategory(title: string, allowed: string[]): CategoryGuess | null {
   const t = ` ${norm(title)} `;
   if (t.trim().length < 3) return null;
@@ -80,6 +82,25 @@ export function detectSubcategory(title: string, allowed: string[]): CategoryGue
     if (!score) continue;
     score += r.boost ?? 0;
     if (!best || score > best.score) best = { sub: r.sub, score };
+  }
+  // Repli : les mots du nom même de la sous-catégorie (telle qu'elle existe dans la base)
+  if (!best) {
+    for (const sub of allowed) {
+      for (const w of norm(sub).split(/[^a-z0-9]+/)) {
+        if (w.length < 4 || STOP.has(w)) continue;
+        const stem = w.endsWith("s") || w.endsWith("x") ? w.slice(0, -1) : w;
+        if (t.includes(` ${w} `) || t.includes(` ${stem} `) || t.includes(` ${stem}s `)) {
+          const score = w.length;
+          if (!best || score > best.score) best = { sub, score };
+        }
+      }
+    }
+  }
+  // « homme » / « femme » dans le titre : on préfère la variante genrée quand elle existe dans la base
+  if (best) {
+    const g = / homme| hommes| garcon/.test(t) ? "Homme" : / femme| femmes| fille| dame/.test(t) ? "Femme" : null;
+    const gendered = g ? allowed.find((a) => norm(a) === norm(`${best!.sub} ${g}`)) : undefined;
+    if (gendered) best = { sub: gendered, score: best.score };
   }
   return best;
 }

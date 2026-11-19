@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { money, num } from "@/lib/sellerStats";
 import { imgProps } from "@/lib/img";
 import { askConfirm } from "@/lib/dialog";
+import { Select } from "@/components/ui/app-select";
 
 export const Route = createFileRoute("/dashboard/sponsoring")({
   head: () => ({ meta: [{ title: "Sponsoring — Amashia Seller" }, { name: "description", content: "Mettez vos produits en avant sur Amashia et suivez les résultats." }] }),
@@ -95,8 +96,11 @@ function SponsoringPage() {
 
   const inp = "w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm";
 
+  const newCampaign = () => setForm({ name: "", productId: products[0]?.id ?? "", placement: "all", start: today(), end: "", budget: "" });
   return (
-    <DashboardLayout title="Sponsoring" subtitle="Mettez vos produits en avant et suivez chaque résultat">
+    <DashboardLayout title="Sponsoring" subtitle="Mettez vos produits en avant et suivez chaque résultat" actions={
+      <button onClick={newCampaign} disabled={!products.length} className="flex h-10 items-center gap-1.5 rounded-full bg-primary px-4 text-sm font-bold text-black shadow-[0_8px_24px_-10px_var(--primary)] disabled:opacity-50 sm:h-11 sm:px-5"><Plus size={16} /><span className="hidden min-[380px]:inline">Nouvelle campagne</span><span className="min-[380px]:hidden">Créer</span></button>
+    }>
       <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
         {[
           { icon: Megaphone, label: "Campagnes actives", value: num(totals.active) },
@@ -106,9 +110,9 @@ function SponsoringPage() {
           { icon: BadgeCheck, label: "Achats", value: num(totals.purchases) },
           { icon: Wallet, label: "Ventes générées", value: money(totals.revenue) },
         ].map((k) => (
-          <div key={k.label} className="rounded-2xl border border-border bg-card p-4">
+          <div key={k.label} className="min-w-0 rounded-2xl border border-border bg-card p-3.5 sm:p-4">
             <k.icon size={18} className="mb-2 text-primary" />
-            <p className="text-xl font-extrabold">{k.value}</p>
+            <p className="truncate text-lg font-extrabold tabular-nums sm:text-xl" title={k.value}>{k.value}</p>
             <p className="text-[11px] text-muted-foreground">{k.label}</p>
           </div>
         ))}
@@ -120,7 +124,7 @@ function SponsoringPage() {
             <h3 className="font-bold">Mes campagnes</h3>
             <p className="text-xs text-muted-foreground">Le produit sponsorisé apparaît avec la mention « Sponsorisé » sur l'accueil et/ou en tête des recherches d'Amashia.</p>
           </div>
-          <button onClick={() => setForm({ name: "", productId: products[0]?.id ?? "", placement: "all", start: today(), end: "", budget: "" })} disabled={!products.length} className="flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-black disabled:opacity-50"><Plus size={14} /> Nouvelle campagne</button>
+          <button onClick={newCampaign} disabled={!products.length} className="hidden sm:flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-black disabled:opacity-50"><Plus size={14} /> Nouvelle campagne</button>
         </div>
 
         {list === null ? (
@@ -137,7 +141,7 @@ function SponsoringPage() {
                   <div className="flex flex-wrap items-center gap-3">
                     <div className="grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-xl bg-white">{c.product_image ? <img {...imgProps(c.product_image, { width: 64 })} alt="" className="h-full w-full object-contain" /> : <Megaphone size={18} className="text-primary" />}</div>
                     <div className="min-w-[180px] flex-1">
-                      <div className="flex flex-wrap items-center gap-2"><p className="font-bold">{c.name}</p><span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${st.cls}`}>{st.label}</span></div>
+                      <div className="flex min-w-0 flex-wrap items-center gap-2"><p className="min-w-0 max-w-full truncate font-bold">{c.name}</p><span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${st.cls}`}>{st.label}</span></div>
                       <p className="line-clamp-1 text-xs text-muted-foreground">{c.product_title} · {PLACEMENT[c.placement]}{c.ends_at ? ` · jusqu'au ${new Date(c.ends_at).toLocaleDateString("fr-FR")}` : ""}</p>
                     </div>
                     <div className="flex gap-2">
@@ -189,15 +193,15 @@ function SponsoringPage() {
               <label className="block"><span className="mb-1 block text-xs font-semibold text-muted-foreground">Nom de la campagne</span><input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} maxLength={80} placeholder="Ex. Rentrée scolaire — montres" className={inp} /></label>
               <label className="block">
                 <span className="mb-1 block text-xs font-semibold text-muted-foreground">Produit à sponsoriser</span>
-                <select value={form.productId} onChange={(e) => setForm({ ...form, productId: e.target.value })} className={inp}>
+                <Select value={form.productId} onChange={(e) => setForm({ ...form, productId: e.target.value })} className={inp}>
                   {products.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
-                </select>
+                </Select>
               </label>
               <label className="block">
                 <span className="mb-1 block text-xs font-semibold text-muted-foreground">Emplacement</span>
-                <select value={form.placement} onChange={(e) => setForm({ ...form, placement: e.target.value as Campaign["placement"] })} className={inp}>
+                <Select value={form.placement} onChange={(e) => setForm({ ...form, placement: e.target.value as Campaign["placement"] })} className={inp}>
                   {Object.entries(PLACEMENT).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
-                </select>
+                </Select>
               </label>
               <div className="grid grid-cols-2 gap-3">
                 <label className="block"><span className="mb-1 block text-xs font-semibold text-muted-foreground">Début</span><input type="date" value={form.start} onChange={(e) => setForm({ ...form, start: e.target.value })} className={inp} /></label>

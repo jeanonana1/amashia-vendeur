@@ -45,7 +45,7 @@ const GROUPS: { title: string; items: NavItem[] }[] = [
 ];
 const NAV = GROUPS.flatMap((g) => g.items);
 
-export function DashboardLayout({ title, subtitle, children }: { title: string; subtitle?: string; children: ReactNode }) {
+export function DashboardLayout({ title, subtitle, actions, children }: { title: string; subtitle?: string; actions?: ReactNode; children: ReactNode }) {
   const badges = useNavBadges();
   // sons de l'espace vendeur : activés par défaut, coupables d'un clic
   const [sound, setSound] = useState(true);
@@ -212,9 +212,12 @@ export function DashboardLayout({ title, subtitle, children }: { title: string; 
         </header>
 
         <div data-dash className="mx-auto max-w-[1440px] p-4 sm:p-6 lg:p-8">
-          <div className="mb-6 md:mb-8">
-            <h1 className="break-words text-2xl font-extrabold md:text-[2rem]">{title}</h1>
-            {subtitle && <p className="mt-1 text-sm text-muted-foreground md:text-[15px]">{subtitle}</p>}
+          <div className="mb-6 flex items-start justify-between gap-3 md:mb-8">
+            <div className="min-w-0">
+              <h1 className="break-words text-2xl font-extrabold md:text-[2rem]">{title}</h1>
+              {subtitle && <p className="mt-1 text-sm text-muted-foreground md:text-[15px]">{subtitle}</p>}
+            </div>
+            {actions && <div className="shrink-0">{actions}</div>}
           </div>
           {children}
         </div>

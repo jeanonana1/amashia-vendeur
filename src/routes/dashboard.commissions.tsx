@@ -40,7 +40,7 @@ function CommissionsPage() {
         <div className="space-y-6">
           <div className="rounded-2xl bg-gradient-primary p-6 text-black">
             <div className="flex items-center gap-2 text-sm font-semibold opacity-90"><Wallet size={18} /> Votre solde disponible</div>
-            <p className="mt-1 text-4xl font-extrabold">{money(n(d.balance))}</p>
+            <p className="mt-1 break-words text-3xl font-extrabold sm:text-4xl">{money(n(d.balance))}</p>
             <p className="mt-3 flex max-w-2xl items-start gap-2 rounded-xl bg-black/10 px-3 py-2 text-sm font-medium">
               <BadgeCheck size={18} className="mt-px shrink-0" />
               Ce solde est le vôtre : les commissions Amashia ont déjà été prélevées. Vous pouvez le retirer en totalité depuis la page Paiements.
@@ -64,13 +64,28 @@ function CommissionsPage() {
                 {d.rates.map((r) => <li key={r.category} className="flex items-center justify-between py-2.5 text-sm"><span>{r.category}</span><b className="text-primary">{n(r.pct)} %</b></li>)}
               </ul>
             </div>
-            <div className="rounded-2xl border border-border bg-card p-5 lg:col-span-2">
+            <div className="min-w-0 rounded-2xl border border-border bg-card p-4 sm:p-5 lg:col-span-2">
               <h2 className="mb-3 font-bold">Comment votre solde est calculé</h2>
-              <div className="space-y-2 text-sm">
-                <Row l="Gains des ventes livrées (après commission)" v={money(n(d.totals.delivered_net))} />
-                <Row l="Retraits demandés ou déjà versés" v={`− ${money(n(d.withdrawn))}`} />
-                {n(d.refunds) > 0 && <Row l="Remboursements clients" v={`− ${money(n(d.refunds))}`} />}
-                <div className="flex items-center justify-between border-t border-border pt-2 font-bold"><span>Solde disponible</span><span>{money(n(d.balance))}</span></div>
+              <div className="-mx-1 overflow-x-auto px-1 pb-1 [scrollbar-width:thin]">
+                <table className="w-full min-w-[330px] border-separate border-spacing-0 overflow-hidden rounded-xl border border-border text-sm">
+                  <thead>
+                    <tr className="bg-secondary/50 text-left">
+                      <th className="border-b border-border px-3 py-2.5">Élément</th>
+                      <th className="w-12 border-b border-l border-border px-2 py-2.5 text-center sm:w-24 sm:px-3"><span className="sm:hidden">±</span><span className="hidden sm:inline">Opération</span></th>
+                      <th className="border-b border-l border-border px-3 py-2.5 text-right sm:w-40">Montant</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <CalcRow l="Gains des ventes livrées (après commission)" op="+" v={n(d.totals.delivered_net)} />
+                    <CalcRow l="Retraits demandés ou déjà versés" op="−" v={n(d.withdrawn)} />
+                    {n(d.refunds) > 0 && <CalcRow l="Remboursements clients" op="−" v={n(d.refunds)} />}
+                    <tr className="bg-primary/10 font-bold">
+                      <td className="px-3 py-3">Solde disponible</td>
+                      <td className="border-l border-border px-2 py-3 text-center text-primary sm:px-3">=</td>
+                      <td className="whitespace-nowrap border-l border-border px-3 py-3 text-right tabular-nums text-primary">{money(n(d.balance))}</td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
               <p className="mt-4 flex items-start gap-2 rounded-xl bg-secondary p-3 text-xs text-muted-foreground"><Info size={14} className="mt-px shrink-0" />Les ventes encore en préparation ou en livraison s'ajoutent à votre solde dès qu'elles sont livrées. Les commandes passées avant la mise en place des commissions ne sont pas concernées (0 %).</p>
             </div>
@@ -123,12 +138,18 @@ function CommissionsPage() {
 
 function Kpi({ icon: Icon, label, value }: { icon: typeof Wallet; label: string; value: string }) {
   return (
-    <div className="rounded-2xl border border-border bg-card p-4">
-      <div className="mb-2 flex items-center gap-2 text-xs text-muted-foreground"><Icon size={14} />{label}</div>
-      <p className="text-xl font-extrabold">{value}</p>
+    <div className="min-w-0 rounded-2xl border border-border bg-card p-3.5 sm:p-4">
+      <div className="mb-2 flex items-start gap-2 text-[11px] leading-snug text-muted-foreground sm:text-xs"><Icon size={14} className="mt-px shrink-0" />{label}</div>
+      <p className="break-words text-base font-extrabold tabular-nums sm:text-xl">{value}</p>
     </div>
   );
 }
-function Row({ l, v }: { l: string; v: string }) {
-  return <div className="flex items-center justify-between"><span className="text-muted-foreground">{l}</span><span className="font-semibold">{v}</span></div>;
+function CalcRow({ l, op, v }: { l: string; op: "+" | "−"; v: number }) {
+  return (
+    <tr>
+      <td className="border-b border-border px-3 py-3 text-[13px] leading-snug text-muted-foreground sm:text-sm">{l}</td>
+      <td className={`border-b border-l border-border px-2 py-3 text-center font-bold sm:px-3 ${op === "+" ? "text-emerald-400" : "text-red-400"}`}>{op}</td>
+      <td className="whitespace-nowrap border-b border-l border-border px-3 py-3 text-right font-semibold tabular-nums">{money(v)}</td>
+    </tr>
+  );
 }

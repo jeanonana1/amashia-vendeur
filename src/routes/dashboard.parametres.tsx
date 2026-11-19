@@ -10,6 +10,7 @@ import { soundEnabled, setSoundEnabled } from "@/lib/sound";
 import { money } from "@/lib/sellerStats";
 import { PhoneInput } from "@/components/seller/PhoneInput";
 import { cmDigits, cmPhoneError, formatCm, toE164 } from "@/lib/phone";
+import { Select } from "@/components/ui/app-select";
 
 export const Route = createFileRoute("/dashboard/parametres")({
   head: () => ({ meta: [{ title: "Paramètres — Amashia Seller" }, { name: "description", content: "Paramètres de votre compte vendeur Amashia." }, { property: "og:title", content: "Paramètres — Amashia Seller" }, { name: "twitter:card", content: "summary" }] }),
@@ -287,7 +288,7 @@ function BillingTab({ uid, p, save }: { uid: string; p: Profile; save: SaveFn })
         <h3 className="font-bold text-lg">Paiements & facturation</h3>
         <div className="grid md:grid-cols-2 gap-4">
           <label className="block"><span className="block text-sm mb-2">Moyen de paiement préféré pour vos retraits</span>
-            <select className={inputCls} value={f.payment_method} onChange={(e) => setF({ ...f, payment_method: e.target.value })}>{PAYMENT_METHODS.map((m) => <option key={m}>{m}</option>)}</select>
+            <Select className={inputCls} value={f.payment_method} onChange={(e) => setF({ ...f, payment_method: e.target.value })}>{PAYMENT_METHODS.map((m) => <option key={m}>{m}</option>)}</Select>
           </label>
           <label className="block"><span className="block text-sm mb-2">NIU (numéro d'identifiant unique)</span><input className={inputCls} value={f.niu} onChange={(e) => setF({ ...f, niu: e.target.value })} maxLength={30} placeholder="Facultatif" /></label>
         </div>

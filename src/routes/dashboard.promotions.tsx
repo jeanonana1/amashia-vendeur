@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { money } from "@/lib/sellerStats";
 import { imgProps } from "@/lib/img";
 import { FlashSales } from "@/components/seller/dashboard/FlashSales";
+import { Select } from "@/components/ui/app-select";
 
 export const Route = createFileRoute("/dashboard/promotions")({
   head: () => ({ meta: [{ title: "Promotions — Amashia Seller" }, { name: "description", content: "Créez des coupons de réduction pour vos produits Amashia." }] }),
@@ -232,10 +233,10 @@ function PromotionsPage() {
             <div className="space-y-4">
               <label className="block">
                 <span className="mb-1 block text-xs font-semibold text-muted-foreground">Produit concerné</span>
-                <select value={form.productId} onChange={(e) => setForm({ ...form, productId: e.target.value })} className={input}>
+                <Select value={form.productId} onChange={(e) => setForm({ ...form, productId: e.target.value })} className={input}>
                   <option value="">Toute la boutique (tous mes produits)</option>
                   {products.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
-                </select>
+                </Select>
               </label>
 
               <label className="block">
@@ -246,10 +247,10 @@ function PromotionsPage() {
               <div className="grid grid-cols-2 gap-3">
                 <label className="block">
                   <span className="mb-1 block text-xs font-semibold text-muted-foreground">Type de réduction</span>
-                  <select value={form.kind} onChange={(e) => setForm({ ...form, kind: e.target.value as Form["kind"] })} className={input}>
+                  <Select value={form.kind} onChange={(e) => setForm({ ...form, kind: e.target.value as Form["kind"] })} className={input}>
                     <option value="percent">Pourcentage (%)</option>
                     <option value="fixed">Montant (FCFA)</option>
-                  </select>
+                  </Select>
                 </label>
                 <label className="block">
                   <span className="mb-1 block text-xs font-semibold text-muted-foreground">{form.kind === "percent" ? "Réduction (%)" : "Réduction (FCFA)"}</span>

@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { marketplaceProductUrl } from "@/lib/sellerProfile";
 import { toast } from "sonner";
 import { PublishAmashiaModal, type PublishProduct } from "@/components/seller/dashboard/PublishAmashiaModal";
+import { Select } from "@/components/ui/app-select";
 
 export const Route = createFileRoute("/dashboard/produits/")({
   head: () => ({
@@ -176,10 +177,10 @@ function ProduitsPage() {
               {showFilter && (
                 <div className="absolute right-0 top-full mt-2 z-20 bg-card border border-border rounded-xl shadow-elegant p-3 w-64">
                   <p className="text-xs font-semibold mb-2">Catégorie</p>
-                  <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)} className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm mb-2">
+                  <Select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)} className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm mb-2">
                     <option value="">Toutes</option>
                     {categories.map((c) => <option key={c}>{c}</option>)}
-                  </select>
+                  </Select>
                   <button onClick={() => { setCategoryFilter(""); setFilter("all"); setShowFilter(false); }} className="w-full py-2 rounded-lg bg-secondary text-xs font-semibold">Réinitialiser</button>
                 </div>
               )}
@@ -200,7 +201,7 @@ function ProduitsPage() {
               const b = statusBadge(p);
               const isActive = p.status === "active";
               return (
-                <article key={p.id} className="group bg-background/40 border border-border rounded-2xl overflow-hidden flex flex-col hover:border-primary/50 transition">
+                <article key={p.id} className="group min-w-0 bg-background/40 border border-border rounded-2xl overflow-hidden flex flex-col hover:border-primary/50 transition">
                   <div className="relative w-full aspect-square overflow-hidden bg-white">
                     {p.images && p.images[0] ? (
                       // image entière, sans zoom (comme sur le site client)
@@ -212,11 +213,11 @@ function ProduitsPage() {
 
                   <div className="p-3.5 flex flex-col gap-2.5 flex-1">
                     <div className="min-w-0">
-                      <h3 className="font-semibold text-sm leading-snug" title={p.name}>{truncate(p.name, 52)}</h3>
-                      <p className="text-[11px] text-muted-foreground mt-1">{p.category || "Sans catégorie"}</p>
+                      <h3 className="line-clamp-2 break-words font-semibold text-sm leading-snug" title={p.name}>{p.name}</h3>
+                      <p className="truncate text-[11px] text-muted-foreground mt-1">{p.category || "Sans catégorie"}</p>
                     </div>
 
-                    <div className="flex items-center justify-between gap-2 mt-auto">
+                    <div className="flex flex-wrap items-center justify-between gap-2 mt-auto">
                       <span className="font-extrabold text-primary text-sm whitespace-nowrap">{Number(p.price).toLocaleString("fr-FR")} FCFA</span>
                       <button
                         onClick={() => setStockEdit({ product: p, value: String(p.stock) })}
@@ -227,7 +228,7 @@ function ProduitsPage() {
                       </button>
                     </div>
 
-                    <div className="flex items-center justify-between gap-2 pt-2 border-t border-border">
+                    <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-border">
                       <button
                         onClick={() => toggleStatus(p)}
                         title={isActive ? "Cliquer pour désactiver" : "Cliquer pour publier"}

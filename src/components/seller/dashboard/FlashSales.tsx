@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { money } from "@/lib/sellerStats";
 import { imgProps } from "@/lib/img";
 import { askConfirm } from "@/lib/dialog";
+import { Select } from "@/components/ui/app-select";
 
 /** Ventes flash : prix réduit sur une période ; appliqué automatiquement sur le site et à la commande. */
 type Flash = {
@@ -145,17 +146,17 @@ export function FlashSales() {
             <div className="space-y-4">
               <label className="block">
                 <span className="mb-1 block text-xs font-semibold text-muted-foreground">Produit</span>
-                <select value={form.productId} onChange={(e) => setForm({ ...form, productId: e.target.value })} className={inp}>
+                <Select value={form.productId} onChange={(e) => setForm({ ...form, productId: e.target.value })} className={inp}>
                   {products.map((p) => <option key={p.id} value={p.id}>{p.name} — {money(p.price)}</option>)}
-                </select>
+                </Select>
               </label>
               <div className="grid grid-cols-2 gap-3">
                 <label className="block">
                   <span className="mb-1 block text-xs font-semibold text-muted-foreground">Type de réduction</span>
-                  <select value={form.kind} onChange={(e) => setForm({ ...form, kind: e.target.value as "percent" | "fixed" })} className={inp}>
+                  <Select value={form.kind} onChange={(e) => setForm({ ...form, kind: e.target.value as "percent" | "fixed" })} className={inp}>
                     <option value="percent">Pourcentage (%)</option>
                     <option value="fixed">Montant (FCFA)</option>
-                  </select>
+                  </Select>
                 </label>
                 <label className="block">
                   <span className="mb-1 block text-xs font-semibold text-muted-foreground">{form.kind === "percent" ? "Réduction (%)" : "Réduction (FCFA)"}</span>

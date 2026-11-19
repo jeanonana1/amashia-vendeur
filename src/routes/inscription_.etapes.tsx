@@ -1,8 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Header } from "@/components/seller/Header";
-import { Footer } from "@/components/seller/Footer";
 import { SignupShell } from "@/components/seller/signup/SignupShell";
+import { AuthSplit } from "@/components/seller/site/AuthSplit";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Smartphone, CreditCard, MapPin, ShieldCheck, Mail, Send, Check, FileText, Upload, Camera, X, Loader2 } from "lucide-react";
@@ -210,9 +209,7 @@ function Page() {
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <Header />
-      <main className="flex-1 grid place-items-center py-16 px-6">
+    <AuthSplit wide>
         <SignupShell step={step} onBack={back}>
           {/* STEP 1 */}
           {step === 1 && (
@@ -467,9 +464,7 @@ function Page() {
             </div>
           )}
         </SignupShell>
-      </main>
-      <Footer />
-    </div>
+    </AuthSplit>
   );
 }
 

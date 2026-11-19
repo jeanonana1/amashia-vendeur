@@ -1,61 +1,45 @@
 import { Link } from "@tanstack/react-router";
 import { SellerLogo } from "@/components/seller/SellerLogo";
 
+const CLIENT = "https://amashia-client.vercel.app";
+
 export function Footer() {
+  const cols = [
+    { title: "Produit", links: [
+      { label: "Fonctionnalités", to: "/fonctionnalites" }, { label: "Comment ça marche", to: "/comment-ca-marche" }, { label: "Tarifs et commissions", to: "/tarification" }, { label: "Ouvrir ma boutique", to: "/inscription" },
+    ] },
+    { title: "Vendeurs", links: [
+      { label: "Se connecter", to: "/connexion" }, { label: "Tableau de bord", to: "/dashboard" },
+    ] },
+    { title: "Amashia", links: [
+      { label: "Le site Amashia", href: CLIENT }, { label: "Nous contacter", href: `${CLIENT}/contact` }, { label: "Carrières", href: `${CLIENT}/careers` },
+    ] },
+    { title: "Légal", links: [
+      { label: "Conditions d'utilisation", href: `${CLIENT}/legal/terms` }, { label: "Conditions de vente", href: `${CLIENT}/legal/sales` }, { label: "Confidentialité", href: `${CLIENT}/legal/privacy` },
+    ] },
+  ] as const;
   return (
-    <footer className="border-t border-border/50 bg-background">
-      <div className="container mx-auto px-6 py-16">
-        <div className="grid md:grid-cols-2 gap-10 mb-12">
+    <footer className="relative mt-10 border-t border-border">
+      <div className="mx-auto max-w-[1200px] px-5 py-14 sm:px-8">
+        <div className="grid gap-10 md:grid-cols-[1.3fr_repeat(4,1fr)]">
           <div>
-            <Link to="/" className="mb-4 flex items-center" aria-label="Accueil amashia seller">
-              <SellerLogo className="h-10" />
-            </Link>
+            <Link to="/" aria-label="Accueil amashia seller"><SellerLogo className="h-8" /></Link>
+            <p className="mt-4 max-w-xs text-sm leading-relaxed text-muted-foreground">La plateforme des vendeurs d'Amashia : vendez partout au Cameroun, nous nous occupons du paiement et de la livraison.</p>
           </div>
-          <p className="text-muted-foreground max-w-md md:justify-self-end">
-            Autonomiser les vendeurs africains avec des outils modernes pour développer leur activité en ligne.
-          </p>
+          {cols.map((c) => (
+            <div key={c.title}>
+              <p className="mb-4 text-sm font-bold">{c.title}</p>
+              <ul className="space-y-2.5 text-sm text-muted-foreground">
+                {c.links.map((l) => (
+                  <li key={l.label}>{"to" in l ? <Link to={l.to as never} className="transition hover:text-foreground">{l.label}</Link> : <a href={l.href} className="transition hover:text-foreground">{l.label}</a>}</li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </div>
-        <div className="grid md:grid-cols-4 gap-10">
-          <div>
-            <h4 className="font-bold mb-4">Produit</h4>
-            <ul className="space-y-3 text-muted-foreground text-sm">
-              <li><Link to="/fonctionnalites" className="hover:text-primary">Fonctionnalités</Link></li>
-              <li><Link to="/tarification" className="hover:text-primary">Tarification</Link></li>
-              <li><Link to="/comment-ca-marche" className="hover:text-primary">Comment ça marche</Link></li>
-              <li><a href="#" className="hover:text-primary">Aperçu Dashboard</a></li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="font-bold mb-4">Entreprise</h4>
-            <ul className="space-y-3 text-muted-foreground text-sm">
-              <li><a href="#" className="hover:text-primary">À propos</a></li>
-              <li><a href="#" className="hover:text-primary">Contact</a></li>
-              <li><a href="#" className="hover:text-primary">Support</a></li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="font-bold mb-4">Légal</h4>
-            <ul className="space-y-3 text-muted-foreground text-sm">
-              <li><a href="#" className="hover:text-primary">Mentions légales</a></li>
-              <li><a href="#" className="hover:text-primary">Politique de confidentialité</a></li>
-              <li><a href="#" className="hover:text-primary">Conditions d'utilisation</a></li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="font-bold mb-4">Restez informé</h4>
-            <p className="text-muted-foreground text-sm mb-3">Recevez nos dernières actualités et offres.</p>
-            <form className="flex gap-2">
-              <input
-                type="email"
-                placeholder="Votre email"
-                className="flex-1 bg-input border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary"
-              />
-              <button className="w-10 h-10 grid place-items-center rounded-lg bg-gradient-primary text-black">→</button>
-            </form>
-          </div>
-        </div>
-        <div className="mt-12 pt-8 border-t border-border/50 text-sm text-muted-foreground text-center">
-          © 2026 Amashia Seller. Tous droits réservés.
+        <div className="mt-12 flex flex-col items-center justify-between gap-3 border-t border-border pt-6 text-xs text-muted-foreground sm:flex-row">
+          <p>© {new Date().getFullYear()} Amashia. Tous droits réservés.</p>
+          <p>Fait au Cameroun, pour les vendeurs du Cameroun.</p>
         </div>
       </div>
     </footer>

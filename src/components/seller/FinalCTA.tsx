@@ -1,45 +1,22 @@
-import { Link } from "@tanstack/react-router";
-import { ArrowRight, Check } from "lucide-react";
+import { Container, GhostCta, PrimaryCta } from "@/components/seller/site/ui";
 
 export function FinalCTA() {
   return (
-    <section className="py-24 md:py-32 relative overflow-hidden">
-      <div className="absolute inset-0 -z-10 bg-gradient-primary opacity-10" />
-      <div className="container mx-auto px-6">
-        <div className="relative overflow-hidden rounded-[2rem] border border-primary/30 bg-gradient-to-br from-card via-card to-primary/10 p-10 md:p-20 text-center">
-          <div className="absolute -top-20 -right-20 w-80 h-80 rounded-full bg-primary/30 blur-3xl" />
-          <div className="absolute -bottom-20 -left-20 w-80 h-80 rounded-full bg-gold/20 blur-3xl" />
-          <div className="relative">
-            <h2 className="text-4xl md:text-6xl font-extrabold leading-tight max-w-3xl mx-auto">
-              Prêt à développer <span className="text-gradient">votre business</span> ?
-            </h2>
-            <p className="mt-6 max-w-2xl mx-auto text-muted-foreground text-lg">
-              Rejoignez des milliers de vendeurs africains qui ont choisi Amashia Seller pour transformer leur activité. Commencez gratuitement dès aujourd'hui.
-            </p>
-            <div className="mt-10 flex flex-wrap justify-center gap-4">
-              <Link
-                to="/inscription"
-                className="inline-flex items-center gap-2 px-8 py-4 rounded-full bg-gradient-primary text-black font-semibold shadow-elegant hover:shadow-glow transition"
-              >
-                Créer mon compte vendeur <ArrowRight size={18} />
-              </Link>
-              <Link
-                to="/comment-ca-marche"
-                className="inline-flex items-center px-8 py-4 rounded-full border-2 border-border bg-background/50 backdrop-blur font-semibold hover:border-primary transition"
-              >
-                En savoir plus
-              </Link>
-            </div>
-            <div className="mt-10 flex flex-wrap justify-center gap-8 text-sm text-muted-foreground">
-              {["Gratuit pour commencer", "Sans engagement", "Support 24/7"].map((t) => (
-                <span key={t} className="inline-flex items-center gap-2">
-                  <Check size={16} className="text-primary" /> {t}
-                </span>
-              ))}
-            </div>
+    <section className="py-16 md:py-24">
+      <Container>
+        <div className="relative isolate overflow-hidden rounded-[2rem] border border-border bg-[#0b0e14] px-6 py-16 text-center text-white sm:px-12 md:py-24">
+          <div aria-hidden className="absolute inset-0 -z-10">
+            <div className="absolute inset-0 opacity-60 [background-image:linear-gradient(rgba(255,255,255,.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.05)_1px,transparent_1px)] [background-size:44px_44px] [mask-image:radial-gradient(ellipse_at_center,#000_30%,transparent_75%)]" />
+            <div className="absolute left-1/2 top-full h-[30rem] w-[50rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#ff6800]/40 blur-[110px]" />
+          </div>
+          <h2 className="mx-auto max-w-3xl text-balance text-3xl font-extrabold leading-[1.05] sm:text-5xl md:text-6xl">Votre prochaine vente commence aujourd'hui.</h2>
+          <p className="mx-auto mt-5 max-w-xl text-white/70 md:text-lg">Ouvrez votre boutique en quelques minutes et touchez les clients d'Amashia partout au Cameroun.</p>
+          <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <PrimaryCta className="w-full sm:w-auto">Ouvrir ma boutique gratuitement</PrimaryCta>
+            <GhostCta to="/connexion" className="w-full border-white/15 bg-white/5 text-white hover:bg-white/10 sm:w-auto">J'ai déjà un compte</GhostCta>
           </div>
         </div>
-      </div>
+      </Container>
     </section>
   );
 }

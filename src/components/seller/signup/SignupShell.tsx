@@ -1,16 +1,12 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowLeft, Check } from "lucide-react";
-import { SellerLogo } from "@/components/seller/SellerLogo";
 
 const STEPS = ["Infos", "Détails", "Documents", "Paiement", "Localisation", "Vérif.", "Fini"];
 
 export function SignupShell({ step, children, onBack }: { step: number; children: React.ReactNode; onBack?: () => void }) {
   const progress = (step / STEPS.length) * 100;
   return (
-    <div className="w-full max-w-3xl bg-card border border-border rounded-3xl p-8 md:p-10">
-      <div className="flex justify-center mb-6">
-        <SellerLogo className="h-10 md:h-12" />
-      </div>
+    <div className="w-full rounded-[1.6rem] border border-border bg-card p-6 shadow-card sm:p-8 md:p-10">
       {onBack ? (
         <button onClick={onBack} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary mb-4">
           <ArrowLeft size={16} /> Retour

@@ -1,8 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { Header } from "@/components/seller/Header";
-import { Footer } from "@/components/seller/Footer";
 import { User, Store, ArrowRight } from "lucide-react";
-import { SellerLogo } from "@/components/seller/SellerLogo";
+import { AuthSplit } from "@/components/seller/site/AuthSplit";
 
 export const Route = createFileRoute("/inscription")({
   head: () => ({
@@ -18,45 +16,28 @@ function Page() {
   const navigate = useNavigate();
   const go = (type: "particulier" | "entreprise") => navigate({ to: "/inscription/etapes", search: { type } });
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <Header />
-      <main className="flex-1 grid place-items-center py-16 px-6">
-        <div className="w-full max-w-4xl bg-card border border-border rounded-3xl p-10 md:p-14">
-          <div className="text-center mb-10">
-            <div className="mb-7 flex justify-center"><SellerLogo className="h-11 md:h-12" /></div>
-            <h1 className="text-3xl md:text-4xl font-extrabold">Choisissez votre type de compte</h1>
-            <p className="mt-3 text-muted-foreground">Sélectionnez le type de compte qui correspond à vos besoins</p>
-          </div>
-          <div className="grid md:grid-cols-2 gap-6">
-            <button onClick={() => go("particulier")} className="group text-left bg-background border border-border rounded-2xl p-7 hover:border-primary transition">
-              <div className="w-14 h-14 rounded-2xl bg-primary/15 text-primary grid place-items-center mb-5">
-                <User size={26} />
-              </div>
-              <h3 className="text-xl font-bold mb-2">Particulier</h3>
-              <p className="text-sm text-muted-foreground mb-6">Créez un compte pour acheter des produits et utiliser des services sur Amashia</p>
-              <span className="inline-flex items-center gap-2 text-primary font-semibold text-sm">
-                Continuer <ArrowRight size={16} />
-              </span>
-            </button>
-            <button onClick={() => go("entreprise")} className="group text-left bg-background border-2 border-primary/50 rounded-2xl p-7 hover:border-primary transition relative">
-              <span className="absolute top-4 right-4 px-3 py-1 rounded-full bg-primary text-black text-xs font-bold">Vendeur</span>
-              <div className="w-14 h-14 rounded-2xl bg-gradient-primary text-black grid place-items-center mb-5">
-                <Store size={26} />
-              </div>
-              <h3 className="text-xl font-bold mb-2">Entreprise</h3>
-              <p className="text-sm text-muted-foreground mb-6">Créez votre boutique et vendez vos produits ou services sur Amashia</p>
-              <span className="inline-flex items-center gap-2 text-primary font-semibold text-sm">
-                Continuer <ArrowRight size={16} />
-              </span>
-            </button>
-          </div>
-          <p className="text-center mt-8 text-sm text-muted-foreground">
-            Vous avez déjà un compte ?{" "}
-            <Link to="/connexion" className="text-primary font-semibold hover:underline">Se connecter</Link>
-          </p>
+    <AuthSplit wide>
+      <div>
+        <p className="eyebrow">Inscription gratuite</p>
+        <h1 className="mt-3 text-3xl font-extrabold sm:text-4xl">Quel compte souhaitez-vous créer ?</h1>
+        <p className="mt-2 text-muted-foreground">Vous pourrez compléter les informations de votre boutique à l'étape suivante.</p>
+        <div className="mt-8 grid gap-4 md:grid-cols-2">
+          <button onClick={() => go("entreprise")} className="ring-gradient group relative rounded-[1.4rem] border border-primary/40 bg-card p-6 text-left shadow-card transition hover:border-primary">
+            <span className="absolute right-4 top-4 rounded-full bg-primary px-2.5 py-1 text-[11px] font-bold text-black">Recommandé</span>
+            <span className="grid h-12 w-12 place-items-center rounded-2xl bg-primary text-black"><Store size={22} /></span>
+            <h3 className="mt-5 text-xl font-bold">Entreprise</h3>
+            <p className="mt-2 text-sm text-muted-foreground">Votre boutique sur Amashia, avec des catégories illimitées. Idéal pour les commerces et marques.</p>
+            <span className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-primary">Continuer <ArrowRight size={16} className="transition group-hover:translate-x-0.5" /></span>
+          </button>
+          <button onClick={() => go("particulier")} className="group rounded-[1.4rem] border border-border bg-card p-6 text-left shadow-card transition hover:border-foreground/25">
+            <span className="grid h-12 w-12 place-items-center rounded-2xl bg-secondary text-foreground"><User size={22} /></span>
+            <h3 className="mt-5 text-xl font-bold">Particulier</h3>
+            <p className="mt-2 text-sm text-muted-foreground">Vendez quelques produits en tant que personne physique, sans structure d'entreprise.</p>
+            <span className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-muted-foreground group-hover:text-foreground">Continuer <ArrowRight size={16} /></span>
+          </button>
         </div>
-      </main>
-      <Footer />
-    </div>
+        <p className="mt-8 text-sm text-muted-foreground">Vous avez déjà un compte ? <Link to="/connexion" className="font-semibold text-primary hover:underline">Se connecter</Link></p>
+      </div>
+    </AuthSplit>
   );
 }

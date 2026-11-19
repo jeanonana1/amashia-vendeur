@@ -1,75 +1,60 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { Header } from "@/components/seller/Header";
 import { Footer } from "@/components/seller/Footer";
 import { FinalCTA } from "@/components/seller/FinalCTA";
-import { Store, Package, ShoppingBag, CreditCard, BarChart3, Users, CheckCircle2 } from "lucide-react";
+import { Features } from "@/components/seller/Features";
+import { Container, PageHero, PrimaryCta, GhostCta } from "@/components/seller/site/ui";
+import { Store, Package, ShoppingBag, Wallet, BarChart3, Megaphone, Check } from "lucide-react";
 
 export const Route = createFileRoute("/fonctionnalites")({
   head: () => ({
     meta: [
-      { title: "Fonctionnalités — Amashia Seller" }, { property: "og:title", content: "Fonctionnalités — Amashia Seller" }, { property: "og:description", content: "Découvrez toutes les fonctionnalités d'Amashia Seller pour gérer et développer votre boutique en ligne." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" },
-      { name: "description", content: "Découvrez toutes les fonctionnalités d'Amashia Seller pour gérer et développer votre boutique en ligne." },
+      { title: "Fonctionnalités — Amashia Seller" }, { name: "description", content: "Boutique, produits, commandes, livraison Prime, paiements, analytique, promotions : tous les outils pour vendre sur Amashia." },
+      { property: "og:title", content: "Fonctionnalités — Amashia Seller" }, { property: "og:description", content: "Tous les outils pour vendre sur Amashia." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" },
     ],
   }),
   component: Page,
 });
 
-const features = [
-  { icon: Store, title: "Création de boutique", desc: "Créez votre boutique en ligne professionnelle en quelques minutes. Personnalisez le design, ajoutez votre logo et vos couleurs de marque.", items: ["Design personnalisable", "Nom de domaine personnalisé", "Templates professionnels", "Responsive mobile"] },
-  { icon: Package, title: "Gestion des produits et services", desc: "Ajoutez et gérez facilement vos produits ou services. Photos multiples, descriptions détaillées, variations et gestion des stocks.", items: ["Catalogue illimité", "Gestion des stocks", "Variations de produits", "Import en masse"] },
-  { icon: ShoppingBag, title: "Commandes et livraison", desc: "Recevez et gérez vos commandes en temps réel. Notifications instantanées, suivi de livraison et gestion des retours.", items: ["Notifications en temps réel", "Suivi de livraison", "Gestion des retours", "Historique complet"] },
-  { icon: CreditCard, title: "Paiements et revenus", desc: "Acceptez plusieurs méthodes de paiement. Recevez vos paiements rapidement et en toute sécurité avec des frais transparents.", items: ["Paiements sécurisés", "Multiples méthodes", "Virements rapides", "Frais transparents"] },
-  { icon: BarChart3, title: "Analytique", desc: "Suivez vos performances avec des tableaux de bord détaillés. Analysez vos ventes, revenus, clients et produits populaires.", items: ["Tableaux de bord en temps réel", "Rapports détaillés", "Analyse des ventes", "Insights clients"] },
-  { icon: Users, title: "Gestion de la clientèle", desc: "Gérez vos relations clients efficacement. Base de données clients, historique des achats et communication directe.", items: ["Base de données clients", "Historique des achats", "Chat intégré", "Fidélisation"] },
+const blocks = [
+  { icon: Store, tag: "Boutique", title: "Une vitrine à votre image", text: "Logo, bannière, description et catégories : votre boutique a sa propre page sur Amashia, avec un lien « Visiter la boutique » sur chacun de vos produits.", items: ["Page boutique publique", "Logo et bannière recadrables", "Point de retrait géolocalisé pour les livreurs", "Ancienneté et avis affichés"] },
+  { icon: Package, tag: "Produits", title: "Des fiches complètes en quelques minutes", text: "Ajoutez photos, variantes et prix par option. L'assistant IA rédige la fiche à partir de vos informations, et l'enregistrement automatique évite de tout perdre.", items: ["Couleurs, tailles et attributs", "Prix différent par option", "Photos par couleur", "Alertes de stock et réapprovisionnement"] },
+  { icon: ShoppingBag, tag: "Commandes", title: "Chaque commande, suivie de bout en bout", text: "Sonnerie et notification à chaque commande, puis le même statut partout : Commande reçue, En préparation, En cours de livraison, Livrée.", items: ["Alerte même navigateur fermé", "Statut synchronisé avec le livreur", "Retours et remboursements", "Coordonnées clients protégées"] },
+  { icon: Wallet, tag: "Paiements", title: "Votre argent, en toute transparence", text: "Le client paie Amashia. Votre solde disponible et le montant en attente de livraison sont visibles en direct, commission comprise.", items: ["Paiement à la livraison", "Orange Money et MTN MoMo", "Détail des commissions par commande", "Historique des versements"] },
+  { icon: BarChart3, tag: "Analytique", title: "Comprenez ce qui fait vendre", text: "Ventes, commandes, visiteurs en direct, conversion et sources de trafic : identifiez vos meilleurs produits et vos meilleures campagnes.", items: ["Visiteurs en temps réel", "Évolution des ventes", "Sources : Facebook, TikTok…", "Clients et produits les plus vendus"] },
+  { icon: Megaphone, tag: "Croissance", title: "Des outils pour accélérer", text: "Ventes flash avec compte à rebours, coupons réservés à vos articles et campagnes sponsorisées avec statistiques détaillées.", items: ["Ventes flash", "Codes promo vendeur", "Produits sponsorisés", "Mesure des vues, clics et ventes"] },
 ];
 
 function Page() {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen overflow-x-clip bg-background">
       <Header />
       <main>
-        <section className="pt-20 pb-24 md:pt-28 md:pb-32">
-          <div className="container mx-auto px-6 text-center max-w-4xl">
-            <h1 className="text-5xl md:text-7xl font-extrabold leading-[1.05]">
-              Des <span className="text-gradient">fonctionnalités</span> puissantes pour votre succès
-            </h1>
-            <p className="mt-8 text-lg text-muted-foreground">
-              Tous les outils dont vous avez besoin pour gérer et développer votre activité de vente en ligne, le tout dans une seule plateforme intuitive.
-            </p>
-          </div>
-        </section>
-        <section className="pb-24">
-          <div className="container mx-auto px-6">
-            <div className="grid md:grid-cols-2 gap-6">
-              {features.map((f) => (
-                <div key={f.title} className="bg-card border border-border rounded-2xl p-8 hover:border-primary/50 transition group">
-                  <div className="w-14 h-14 rounded-2xl bg-gradient-primary grid place-items-center text-black mb-6 group-hover:scale-110 transition">
-                    <f.icon size={24} />
-                  </div>
-                  <h3 className="text-2xl font-bold mb-3">{f.title}</h3>
-                  <p className="text-muted-foreground mb-6">{f.desc}</p>
-                  <ul className="space-y-3">
-                    {f.items.map((it) => (
-                      <li key={it} className="flex items-center gap-3 text-sm">
-                        <CheckCircle2 size={18} className="text-primary shrink-0" />
-                        <span>{it}</span>
-                      </li>
-                    ))}
-                  </ul>
+        <PageHero eyebrow="Fonctionnalités" title={<>Tout pour vendre. <span className="text-gradient">Rien de superflu.</span></>}
+          text="Votre espace vendeur réunit la boutique, les produits, les commandes, les paiements et la croissance, dans une interface pensée pour le téléphone.">
+          <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row"><PrimaryCta /><GhostCta to="/tarification">Voir les tarifs</GhostCta></div>
+        </PageHero>
+        <section className="py-10">
+          <Container className="space-y-6">
+            {blocks.map((b, i) => (
+              <div key={b.title} className="grid items-center gap-8 rounded-[1.6rem] border border-border bg-card p-6 shadow-card sm:p-10 md:grid-cols-2">
+                <div className={i % 2 ? "md:order-2" : ""}>
+                  <span className="inline-flex items-center gap-2 rounded-full bg-primary/12 px-3 py-1 text-xs font-bold text-primary"><b.icon size={14} />{b.tag}</span>
+                  <h2 className="mt-4 text-2xl font-extrabold leading-tight sm:text-3xl">{b.title}</h2>
+                  <p className="mt-3 leading-relaxed text-muted-foreground">{b.text}</p>
                 </div>
-              ))}
-            </div>
-          </div>
+                <ul className={`grid gap-3 sm:grid-cols-2 ${i % 2 ? "md:order-1" : ""}`}>
+                  {b.items.map((it) => (
+                    <li key={it} className="flex items-start gap-3 rounded-2xl border border-border bg-[var(--surface-2)] p-4 text-sm font-medium">
+                      <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-primary text-black"><Check size={13} strokeWidth={3} /></span>{it}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </Container>
         </section>
-        <section className="py-16">
-          <div className="container mx-auto px-6 text-center">
-            <h2 className="text-3xl md:text-5xl font-extrabold">Prêt à <span className="text-gradient">commencer</span> ?</h2>
-            <p className="mt-4 text-muted-foreground">Créez votre compte gratuitement et découvrez toutes nos fonctionnalités</p>
-            <Link to="/inscription" className="inline-flex mt-8 px-8 py-4 rounded-full bg-gradient-primary text-black font-semibold shadow-elegant hover:shadow-glow transition">
-              Créer mon compte vendeur
-            </Link>
-          </div>
-        </section>
+        <Features />
         <FinalCTA />
       </main>
       <Footer />

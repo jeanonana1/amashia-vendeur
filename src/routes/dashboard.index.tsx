@@ -4,6 +4,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { DashboardLayout, useSellerName } from "@/components/seller/dashboard/DashboardLayout";
 import {
   Wallet, Package, ShoppingCart, Users, TrendingUp, TrendingDown, ArrowUpRight, Eye, Radio, MousePointerClick, ExternalLink, Minus,
+  Plus,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { MARKETPLACE_URL, dateTime, money, num, trend, useLiveVisitors, useSellerStats, type SellerStats } from "@/lib/sellerStats";
@@ -74,7 +75,7 @@ function DashboardOverview() {
   }, []);
 
   const cards = stats ? [
-    { icon: Wallet, color: "text-emerald-400 bg-emerald-500/10", label: "Chiffre d'affaires", value: money(stats.revenue), t: trend(stats.revenue, stats.revenue_prev) },
+    { icon: Wallet, color: "text-emerald-400 bg-emerald-500/10", label: "Panier moyen", value: stats.orders ? money(stats.revenue / stats.orders) : "—", t: stats.orders && stats.orders_prev ? trend(stats.revenue / stats.orders, stats.revenue_prev / stats.orders_prev) : undefined },
     { icon: ShoppingCart, color: "text-blue-400 bg-blue-500/10", label: "Commandes", value: num(stats.orders), t: trend(stats.orders, stats.orders_prev) },
     { icon: Users, color: "text-primary bg-primary/10", label: "Clients", value: num(stats.customers), t: trend(stats.customers, stats.customers_prev) },
     { icon: Package, color: "text-violet-400 bg-violet-500/10", label: "Produits en ligne", value: `${num(stats.products_online)} / ${num(stats.products)}`, t: undefined },
@@ -82,38 +83,45 @@ function DashboardOverview() {
 
   return (
     <DashboardLayout title={`${greeting}, ${name}! 👋`} subtitle="Voici l'activité réelle de votre boutique">
-      {/* Période */}
-      <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-        <div className="flex rounded-full bg-secondary p-1 text-xs">
-          {PERIODS.map((p) => (
-            <button key={p.days} onClick={() => setDays(p.days)} className={`rounded-full px-3.5 py-1.5 transition ${days === p.days ? "bg-primary font-semibold text-black" : "text-muted-foreground hover:text-foreground"}`}>
-              {p.label}
-            </button>
-          ))}
+      {/* Bandeau : période, raccourcis */}
+      <div className="ring-gradient relative mb-6 overflow-hidden rounded-[1.4rem] border border-border bg-card p-5 shadow-card sm:p-6">
+        <div aria-hidden className="glow-orb pointer-events-none absolute -right-24 -top-28 h-72 w-72 opacity-70" />
+        <div className="relative flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">Chiffre d'affaires · {period.sub}</p>
+            <p className="tabular mt-1 text-4xl font-extrabold sm:text-5xl">{stats ? money(stats.revenue) : "…"}</p>
+            <div className="mt-2 flex items-center gap-2 text-xs text-muted-foreground">{stats && <Trend value={trend(stats.revenue, stats.revenue_prev)} />}<span>comparé à {period.prev}</span></div>
+          </div>
+          <div className="flex flex-col gap-3 sm:items-end">
+            <div className="flex w-fit rounded-full border border-border bg-secondary p-1 text-xs">
+              {PERIODS.map((p) => (
+                <button key={p.days} onClick={() => setDays(p.days)} className={`rounded-full px-3.5 py-1.5 transition ${days === p.days ? "bg-primary font-semibold text-black" : "text-muted-foreground hover:text-foreground"}`}>{p.label}</button>
+              ))}
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Link to="/dashboard/produits/ajouter" className="inline-flex h-10 items-center gap-1.5 rounded-full bg-primary px-4 text-sm font-bold text-black hover:bg-[#ff7a1f]"><Plus size={16} />Ajouter un produit</Link>
+              <Link to="/dashboard/commandes" className="inline-flex h-10 items-center gap-1.5 rounded-full border border-border bg-card px-4 text-sm font-semibold hover:bg-secondary"><ShoppingCart size={15} />Commandes</Link>
+              {stats?.shop && <a href={`${MARKETPLACE_URL}/seller/${stats.shop.slug}`} target="_blank" rel="noreferrer" className="inline-flex h-10 items-center gap-1.5 rounded-full border border-border bg-card px-4 text-sm font-semibold hover:bg-secondary">Ma boutique <ExternalLink size={13} /></a>}
+            </div>
+          </div>
         </div>
-        {stats?.shop && (
-          <a href={`${MARKETPLACE_URL}/seller/${stats.shop.slug}`} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 text-xs text-primary hover:underline">
-            Voir ma boutique sur Amashia <ExternalLink size={12} />
-          </a>
-        )}
       </div>
 
       {error && !stats && <p className="mb-4 rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-400">Connexion impossible pour le moment. Nouvel essai automatique dans une minute…</p>}
 
       {/* Indicateurs */}
-      <div className="mb-6 grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-4">
+      <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {(loading && !stats ? Array.from({ length: 4 }) : cards).map((s, i) => {
           if (!s) return <div key={i} className="h-[138px] animate-pulse rounded-2xl border border-border bg-card" />;
           const c = s as (typeof cards)[number];
           const Icon = c.icon;
           return (
-            <div key={c.label} className="rounded-2xl border border-border bg-card p-5">
-              <div className="mb-4 flex items-start justify-between">
-                <div className={`grid h-11 w-11 place-items-center rounded-xl ${c.color}`}><Icon size={20} /></div>
+            <div key={c.label} className="group rounded-[1.25rem] border border-border bg-card p-5 shadow-card transition hover:border-primary/30">
+              <div className="mb-5 flex items-center justify-between">
+                <div className="flex items-center gap-2.5"><div className={`grid h-9 w-9 place-items-center rounded-xl ${c.color}`}><Icon size={17} /></div><p className="text-sm font-medium text-muted-foreground">{c.label}</p></div>
                 {c.t !== undefined && <Trend value={c.t} />}
               </div>
-              <p className="text-sm text-muted-foreground">{c.label}</p>
-              <p className="mt-1 text-2xl font-extrabold">{c.value}</p>
+              <p className="tabular text-[1.75rem] font-extrabold leading-none">{c.value}</p>
               <p className="mt-2 text-[11px] text-muted-foreground">{period.sub}{c.t !== undefined ? ` · comparé à ${period.prev}` : ""}</p>
             </div>
           );
@@ -124,7 +132,7 @@ function DashboardOverview() {
       {stats && <VisitsSection stats={stats} live={live} period={period.sub} />}
 
       <div className="mb-6 grid grid-cols-1 gap-5 lg:grid-cols-3">
-        <div className="rounded-2xl border border-border bg-card p-6 lg:col-span-2">
+        <div className="rounded-[1.25rem] border border-border bg-card p-5 shadow-card sm:p-6 lg:col-span-2">
           <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
             <div>
               <h3 className="font-bold">Performance</h3>
@@ -150,7 +158,7 @@ function DashboardOverview() {
       <TrafficSources days={days} period={period.sub} />
 
       {/* Commandes récentes */}
-      <div className="rounded-2xl border border-border bg-card p-6">
+      <div className="rounded-[1.25rem] border border-border bg-card p-5 shadow-card sm:p-6">
         <div className="mb-5 flex items-center justify-between">
           <h3 className="font-bold">Commandes récentes</h3>
           <Link to="/dashboard/commandes" className="flex items-center gap-1 text-xs text-primary">Voir tout <ArrowUpRight size={12} /></Link>
@@ -220,7 +228,7 @@ function VisitsSection({ stats, live, period }: { stats: SellerStats; live: numb
   const t = trend(stats.visits, stats.visits_prev);
   return (
     <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
-      <div className="col-span-2 flex items-center gap-4 rounded-2xl border border-emerald-500/30 bg-emerald-500/5 p-5 lg:col-span-1">
+      <div className="col-span-2 flex items-center gap-4 rounded-[1.25rem] border border-emerald-500/30 bg-emerald-500/5 p-5 lg:col-span-1">
         <span className="relative grid h-12 w-12 shrink-0 place-items-center rounded-full bg-emerald-500/15 text-emerald-400">
           <Radio size={20} />
           {live > 0 && <span className="absolute right-1 top-1 h-2.5 w-2.5 animate-ping rounded-full bg-emerald-400" />}
@@ -239,9 +247,9 @@ function VisitsSection({ stats, live, period }: { stats: SellerStats; live: numb
 
 function Mini({ icon: Icon, label, value, extra }: { icon: typeof Eye; label: string; value: string; extra?: React.ReactNode }) {
   return (
-    <div className="rounded-2xl border border-border bg-card p-4">
+    <div className="rounded-[1.25rem] border border-border bg-card p-4 shadow-card">
       <div className="mb-2 flex items-center justify-between"><Icon size={16} className="text-primary" />{extra}</div>
-      <p className="text-xl font-extrabold">{value}</p>
+      <p className="tabular text-xl font-extrabold">{value}</p>
       <p className="mt-0.5 text-[11px] text-muted-foreground">{label}</p>
     </div>
   );

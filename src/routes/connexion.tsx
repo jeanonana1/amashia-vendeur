@@ -2,6 +2,7 @@ import { AuthSplit } from "@/components/seller/site/AuthSplit";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { signInSeller } from "@/lib/sellerLogin";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { PasswordInput } from "@/components/ui/password-input";
@@ -57,11 +58,10 @@ function Page() {
       }
       if (tab === "phone") { const pe = cmPhoneError(cmDigits(identifier)); if (pe) { toast.error(pe); return; } }
 
-      const credentials = tab === "email"
-        ? { email: identifier.trim(), password }
-        : { phone: toE164(cmDigits(identifier)), password };
-      const { error } = await supabase.auth.signInWithPassword(credentials);
-      if (error) return toast.error(error.message);
+      const err = tab === "email"
+        ? await signInSeller({ email: identifier.trim(), password })
+        : await signInSeller({ phone: cmDigits(identifier), password });
+      if (err) return toast.error(err);
       toast.success("Connexion réussie");
       navigate({ to: "/dashboard", replace: true });
     } catch (error) {

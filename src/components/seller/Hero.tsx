@@ -10,9 +10,9 @@ export function Hero() {
       <Container>
         <div className="mx-auto max-w-4xl text-center animate-rise">
           <Eyebrow>La plateforme des vendeurs Amashia · Cameroun</Eyebrow>
-          <h1 className="mt-6 text-balance text-[2.6rem] font-extrabold leading-[1.02] sm:text-6xl md:text-7xl">
-            Vendez partout au Cameroun.
-            <br className="hidden sm:block" /> <span className="text-gradient">On s'occupe du reste.</span>
+          <h1 className="mt-6 font-extrabold leading-[1.05]">
+            <span className="block whitespace-nowrap text-[clamp(1.15rem,5.8vw,3.5rem)]">Vendez partout au Cameroun.</span>
+            <span className="mt-1 block text-balance text-[clamp(1.9rem,8.6vw,4.4rem)] text-gradient">On s'occupe du reste.</span>
           </h1>
           <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-muted-foreground md:text-xl">
             Publiez vos produits en quelques minutes, recevez vos commandes en temps réel. Le paiement et la livraison sont gérés par Amashia, de votre boutique jusqu'au client.
@@ -55,11 +55,7 @@ function ProductMock() {
         </div>
       </div>
 
-      {/* bulles flottantes */}
-      <FloatCard className="-left-1 -top-6 sm:left-[-2.5rem] sm:top-24" delay={0.9} dur={5} icon={<Bell size={16} />} tone="bg-primary text-black" title="Nouvelle commande" text="Sonnerie dans votre espace" />
-      <FloatCard className="hidden sm:flex sm:right-[-2.5rem] sm:top-40" delay={1.3} dur={6} icon={<Bike size={16} />} tone="bg-sky-500 text-white" title="Livreur Prime en route" text="Récupération chez vous" />
-      <FloatCard className="bottom-[-1.5rem] left-1/2 -translate-x-1/2 sm:left-[16%] sm:translate-x-0" delay={1.7} dur={5.5} icon={<Wallet size={16} />} tone="bg-emerald-500 text-white" title="Commande livrée" text="Le montant passe dans votre solde" />
-      <p className="mt-24 text-center text-[11px] text-muted-foreground sm:mt-16">Illustration de l'espace vendeur (exemple)</p>
+      <p className="mt-5 text-center text-[11px] text-muted-foreground">Illustration de l'espace vendeur (exemple)</p>
     </div>
   );
 }
@@ -156,24 +152,6 @@ function LiveChart() {
   );
 }
 
-function FloatCard({ className, delay, dur, icon, tone, title, text }: { className: string; delay: number; dur: number; icon: React.ReactNode; tone: string; title: string; text: string }) {
-  return (
-    <div className={`absolute z-20 ${className.includes("hidden") ? "" : "flex"} ${className}`}>
-      <div className="animate-pop" style={{ animationDelay: `${delay}s` }}>
-        <div className="animate-bob flex items-center gap-2.5 rounded-2xl border border-border bg-card/95 px-3 py-2.5 shadow-card backdrop-blur sm:gap-3 sm:px-3.5 sm:py-3" style={{ animationDuration: `${dur}s`, animationDelay: `${delay}s` }}>
-          <span className={`relative grid h-8 w-8 place-items-center rounded-xl sm:h-9 sm:w-9 ${tone}`}>
-            <span className={`animate-ping-soft absolute inset-0 rounded-xl ${tone} opacity-60`} style={{ animationDelay: `${delay}s` }} />
-            <span className="relative">{icon}</span>
-          </span>
-          <div className="text-left">
-            <p className="text-[12px] font-bold leading-tight sm:text-[13px]">{title}</p>
-            <p className="hidden text-[11px] text-muted-foreground sm:block">{text}</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 /** Bandeau défilant : moyens de paiement et services inclus. */
 function PartnerMarquee() {

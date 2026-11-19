@@ -4,8 +4,10 @@ import { SignupShell } from "@/components/seller/signup/SignupShell";
 import { AuthSplit } from "@/components/seller/site/AuthSplit";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Smartphone, CreditCard, MapPin, ShieldCheck, Mail, Send, Check, FileText, Upload, Camera, X, Loader2 } from "lucide-react";
-import { getRegions, getCities, getQuartiers } from "@/lib/locations";
+import { Smartphone, CreditCard, MapPin, ShieldCheck, Mail, Send, Check, FileText, Upload, Camera, X, Loader2, LocateFixed, Store, Home, Clock } from "lucide-react";
+import { OPEN_CITIES, isOpenCity, useCmLocations } from "@/lib/cmLocations";
+import { accountHint, signInSeller, type AccountHint } from "@/lib/sellerLogin";
+import { preferredLang, setSellerLang } from "@/lib/sellerLang";
 import { PasswordInput } from "@/components/ui/password-input";
 import { PhoneInput } from "@/components/seller/PhoneInput";
 import { cmDigits, cmPhoneError, formatCm, toE164 } from "@/lib/phone";
@@ -75,7 +77,7 @@ function Page() {
     firstName: "", lastName: "", email: "", phone: "", password: "", confirm: "",
     categories: [],
     gender: "", birthDate: "",
-    country: "", city: "", language: "fr",
+    country: "Cameroun", city: "", language: "fr",
     paymentMethod: "",
     mmOperator: "MTN", mmNumber: "", mmHolder: "",
     cardNumber: "", cardName: "", cardExpiry: "", cardCvv: "",
@@ -85,6 +87,8 @@ function Page() {
     docs: {},
   });
 
+  // langue proposée d'après le téléphone / l'ordinateur (ou le choix déjà fait)
+  useEffect(() => { const l = preferredLang(); if (l !== "fr") setData((d) => ({ ...d, language: l })); }, []);
   const set = <K extends keyof FormState>(k: K, v: FormState[K]) => setData((d) => ({ ...d, [k]: v }));
   const next = () => setStep((s) => Math.min(7, s + 1));
   const back = () => (step > 1 ? setStep((s) => s - 1) : navigate({ to: "/inscription" }));
@@ -101,9 +105,42 @@ function Page() {
     return () => navigator.geolocation.clearWatch(id);
   }, [data.shareLocation]);
 
-  const regions = useMemo(() => getRegions(data.country), [data.country]);
-  const cities = useMemo(() => getCities(data.country, data.region), [data.country, data.region]);
-  const quartiers = useMemo(() => getQuartiers(data.country, data.region, data.shopCity), [data.country, data.region, data.shopCity]);
+  // régions, villes et quartiers de la base (les quartiers ajoutés depuis l'admin apparaissent ici)
+  const loc = useCmLocations();
+  const regions = loc?.regions ?? [];
+  const cities = useMemo(() => (loc && data.region ? loc.citiesByRegion[data.region] ?? [] : []), [loc, data.region]);
+  const quartiers = useMemo(() => (loc && data.shopCity ? loc.districtsByCity[data.shopCity] ?? [] : []), [loc, data.shopCity]);
+  const allCities = useMemo(() => (loc ? Object.keys(loc.regionOfCity).sort((a, b) => (isOpenCity(a) ? 0 : 1) - (isOpenCity(b) ? 0 : 1) || a.localeCompare(b, "fr")) : OPEN_CITIES), [loc]);
+  // la ville de résidence pré-remplit la localisation de la boutique
+  useEffect(() => {
+    if (!loc || !data.city || data.shopCity || !isOpenCity(data.city)) return;
+    setData((d) => ({ ...d, region: loc.regionOfCity[d.city] ?? d.region, shopCity: d.city }));
+  }, [loc, data.city]); // eslint-disable-line react-hooks/exhaustive-deps
+  const [locInfoOpen, setLocInfoOpen] = useState(false);
+
+  // Compte déjà existant : détecté dès la saisie de l'e-mail ou du numéro
+  const [hint, setHint] = useState<(AccountHint & { key: string }) | null>(null);
+  const [hintOpen, setHintOpen] = useState(false);
+  const dismissed = useRef(new Set<string>());
+  useEffect(() => {
+    if (step !== 1) return;
+    const email = data.email.trim().toLowerCase();
+    const digits = cmDigits(data.phone);
+    const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
+    const phoneOk = digits.length === 9 && !cmPhoneError(digits);
+    if (!emailOk && !phoneOk) return;
+    const t = window.setTimeout(async () => {
+      const tries: [string, { email?: string; phone?: string }][] = [];
+      if (emailOk) tries.push([`e:${email}`, { email }]);
+      if (phoneOk) tries.push([`p:${digits}`, { phone: digits }]);
+      for (const [key, q] of tries) {
+        if (dismissed.current.has(key)) continue;
+        const h = await accountHint(q);
+        if (h.exists && h.is_seller) { setHint({ ...h, key }); setHintOpen(true); return; }
+      }
+    }, 650);
+    return () => window.clearTimeout(t);
+  }, [data.email, data.phone, step]);
 
   async function sendCode() {
     if (!data.acceptTerms) { toast.error("Vous devez accepter les conditions"); return; }
@@ -229,6 +266,7 @@ function Page() {
                 { const pe = cmPhoneError(cmDigits(data.phone)); if (pe) return toast.error(pe); }
                 if (data.password.length < 6) return toast.error("Mot de passe trop court (min 6)");
                 if (data.password !== data.confirm) return toast.error("Les mots de passe ne correspondent pas");
+                if (hint && !dismissed.current.has(hint.key)) { setHintOpen(true); return; }
                 next();
               }} className={ctaCls}>Continuer</button>
             </div>
@@ -251,29 +289,45 @@ function Page() {
                   })}
                 </div>
               </Field>
-              <Field label="Genre (optionnel)">
-                <Select value={data.gender} onChange={(e) => set("gender", e.target.value)} className={inputCls}>
-                  <option value="">Sélectionner</option><option>Homme</option><option>Femme</option><option>Autre</option>
-                </Select>
+              <Field label="Genre *">
+                <div className="grid grid-cols-2 gap-2">
+                  {["Homme", "Femme"].map((g) => (
+                    <button key={g} type="button" onClick={() => set("gender", g)} className={`flex items-center justify-center gap-2 rounded-xl border py-3 text-sm font-semibold transition ${data.gender === g ? "border-primary bg-primary/15 text-primary" : "border-border bg-background hover:border-primary/50"}`}>
+                      <span className={`grid h-4 w-4 place-items-center rounded-full border-2 ${data.gender === g ? "border-primary" : "border-muted-foreground/40"}`}>{data.gender === g && <span className="h-2 w-2 rounded-full bg-primary" />}</span>{g}
+                    </button>
+                  ))}
+                </div>
               </Field>
-              <Field label="Date de naissance"><input type="date" value={data.birthDate} onChange={(e) => set("birthDate", e.target.value)} className={inputCls} /></Field>
+              <Field label="Date de naissance *"><BirthDate value={data.birthDate} onChange={(v) => set("birthDate", v)} /></Field>
               <div className="grid md:grid-cols-2 gap-4">
                 <Field label="Pays *">
-                  <Select value={data.country} onChange={(e) => { set("country", e.target.value); set("region", ""); set("shopCity", ""); set("neighborhood", ""); }} className={inputCls}>
+                  <Select title="Pays" value={data.country} onChange={(e) => { set("country", e.target.value); set("region", ""); set("shopCity", ""); set("neighborhood", ""); }} className={inputCls}>
                     <option value="">Sélectionner</option>
-                    <option>Cameroun</option><option>Sénégal</option><option>Côte d'Ivoire</option><option>Bénin</option><option>Togo</option>
+                    <option value="Cameroun">Cameroun</option>
+                    {["Sénégal", "Côte d'Ivoire", "Bénin", "Togo", "Gabon"].map((c) => <option key={c} value={c}>{c} — bientôt</option>)}
                   </Select>
                 </Field>
-                <Field label="Ville (résidence) *"><input value={data.city} onChange={(e) => set("city", e.target.value)} className={inputCls} /></Field>
+                <Field label="Ville (résidence) *">
+                  <Select title="Ville de résidence" value={data.city} onChange={(e) => set("city", e.target.value)} className={inputCls} disabled={data.country !== "Cameroun"}>
+                    <option value="">{data.country === "Cameroun" ? "Sélectionner" : "Choisissez d'abord le Cameroun"}</option>
+                    {allCities.map((c) => <option key={c} value={c}>{isOpenCity(c) ? c : `${c} — bientôt`}</option>)}
+                  </Select>
+                </Field>
               </div>
+              {data.country && data.country !== "Cameroun" && <SoonNote place={data.country} />}
+              {data.city && !isOpenCity(data.city) && <SoonNote place={data.city} />}
               <Field label="Langue préférée">
-                <Select value={data.language} onChange={(e) => set("language", e.target.value)} className={inputCls}>
+                <Select title="Langue préférée" value={data.language} onChange={(e) => { set("language", e.target.value); setSellerLang(e.target.value === "en" ? "en" : "fr"); }} className={inputCls}>
                   <option value="fr">Français</option><option value="en">English</option>
                 </Select>
               </Field>
               <NavBtns back={back} next={() => {
                 if (data.categories.length === 0) return toast.error("Sélectionnez au moins une catégorie");
+                if (!data.gender) return toast.error("Sélectionnez votre genre");
+                if (!data.birthDate) return toast.error("Indiquez votre date de naissance complète");
+                { const age = (Date.now() - new Date(data.birthDate).getTime()) / (365.25 * 864e5); if (age < 18) return toast.error("Vous devez avoir au moins 18 ans pour ouvrir une boutique"); }
                 if (!data.country || !data.city) return toast.error("Pays et ville requis");
+                if (data.country !== "Cameroun" || !isOpenCity(data.city)) return toast.error("Pour le moment, Amashia accepte uniquement les vendeurs de Yaoundé et de Douala");
                 next();
               }} />
             </div>
@@ -362,54 +416,59 @@ function Page() {
             <div className="space-y-5 animate-fade-up">
               <h2 className="text-2xl font-extrabold flex items-center gap-2"><MapPin className="text-primary" /> Localisation de la boutique</h2>
 
-              {/* Share location en haut */}
-              <div className="bg-background border border-border rounded-xl p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-primary/15 grid place-items-center"><MapPin className="text-primary" size={18} /></div>
-                    <div>
-                      <p className="font-semibold text-sm">Partager ma localisation en temps réel</p>
-                      <p className="text-xs text-muted-foreground">Permet aux clients de vous trouver facilement</p>
-                    </div>
-                  </div>
-                  <button onClick={() => set("shareLocation", !data.shareLocation)} className={`w-12 h-7 rounded-full transition relative ${data.shareLocation ? "bg-primary" : "bg-secondary"}`}>
-                    <span className={`absolute top-1 w-5 h-5 rounded-full bg-white transition-all ${data.shareLocation ? "left-6" : "left-1"}`} />
-                  </button>
-                </div>
-                {data.shareLocation && data.latitude && data.longitude && (
-                  <div className="text-xs bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 rounded-lg p-3 flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                    Position acquise : {data.latitude.toFixed(5)}, {data.longitude.toFixed(5)}
-                  </div>
-                )}
-                {data.shareLocation && !data.latitude && (
-                  <div className="text-xs flex items-center gap-2 text-muted-foreground"><Loader2 className="animate-spin" size={14} /> Acquisition de votre position…</div>
-                )}
-              </div>
-
               <Field label="Région *">
-                <Select value={data.region} onChange={(e) => { set("region", e.target.value); set("shopCity", ""); set("neighborhood", ""); }} className={inputCls} disabled={!data.country}>
-                  <option value="">{data.country ? "Sélectionner une région" : "Sélectionnez d'abord un pays (étape 2)"}</option>
-                  {regions.map((r) => <option key={r}>{r}</option>)}
+                <Select title="Région" value={data.region} onChange={(e) => { set("region", e.target.value); set("shopCity", ""); set("neighborhood", ""); }} className={inputCls} disabled={!loc}>
+                  <option value="">{loc ? "Sélectionner une région" : "Chargement…"}</option>
+                  {regions.map((r) => <option key={r} value={r}>{(loc?.citiesByRegion[r] ?? []).some(isOpenCity) ? r : `${r} — bientôt`}</option>)}
                 </Select>
               </Field>
 
               <Field label="Ville *">
-                <Select value={data.shopCity} onChange={(e) => { set("shopCity", e.target.value); set("neighborhood", ""); }} className={inputCls} disabled={!data.region}>
+                <Select title="Ville de la boutique" value={data.shopCity} onChange={(e) => { set("shopCity", e.target.value); set("neighborhood", ""); }} className={inputCls} disabled={!data.region}>
                   <option value="">{data.region ? "Sélectionner une ville" : "Choisissez d'abord une région"}</option>
-                  {cities.map((c) => <option key={c}>{c}</option>)}
+                  {cities.map((c) => <option key={c} value={c}>{isOpenCity(c) ? c : `${c} — bientôt`}</option>)}
+                </Select>
+              </Field>
+              {data.region && !cities.some(isOpenCity) && <SoonNote place={`la région ${data.region}`} />}
+              {data.shopCity && !isOpenCity(data.shopCity) && <SoonNote place={data.shopCity} />}
+
+              <Field label="Quartier *">
+                <Select title={data.shopCity ? `Quartier · ${data.shopCity}` : "Quartier"} value={data.neighborhood} onChange={(e) => set("neighborhood", e.target.value)} className={inputCls} disabled={!data.shopCity || !isOpenCity(data.shopCity)}>
+                  <option value="">{data.shopCity ? `Sélectionner un quartier (${quartiers.length})` : "Choisissez d'abord une ville"}</option>
+                  {quartiers.map((q) => <option key={q} value={q}>{q}</option>)}
                 </Select>
               </Field>
 
-              <Field label="Quartier *">
-                <Select value={data.neighborhood} onChange={(e) => set("neighborhood", e.target.value)} className={inputCls} disabled={!data.shopCity}>
-                  <option value="">{data.shopCity ? "Sélectionner un quartier" : "Choisissez d'abord une ville"}</option>
-                  {quartiers.map((q) => <option key={q}>{q}</option>)}
-                </Select>
-              </Field>
+              {/* Position GPS de la boutique (lieu de récupération des colis) */}
+              <div className="overflow-hidden rounded-2xl border border-border bg-background">
+                <div className="flex items-start gap-3 p-4">
+                  <span className={`grid h-11 w-11 shrink-0 place-items-center rounded-xl ${data.shareLocation ? "bg-primary text-black" : "bg-primary/15 text-primary"}`}><LocateFixed size={20} /></span>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-semibold">Position GPS de récupération</p>
+                    <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">Le livreur Amashia viendra récupérer vos colis à cette position exacte.</p>
+                  </div>
+                </div>
+                {data.shareLocation && data.latitude && data.longitude && (
+                  <div className="mx-4 mb-3 flex items-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-3 text-xs text-emerald-400">
+                    <span className="h-2 w-2 shrink-0 animate-pulse rounded-full bg-emerald-400" />
+                    <span className="min-w-0">Position enregistrée : <span className="tabular-nums">{data.latitude.toFixed(5)}, {data.longitude.toFixed(5)}</span></span>
+                  </div>
+                )}
+                {data.shareLocation && !data.latitude && (
+                  <div className="mx-4 mb-3 flex items-center gap-2 text-xs text-muted-foreground"><Loader2 className="animate-spin" size={14} /> Recherche de votre position…</div>
+                )}
+                <button type="button" onClick={() => (data.shareLocation ? set("shareLocation", false) : setLocInfoOpen(true))}
+                  className="flex w-full items-center justify-between gap-3 border-t border-border bg-card/60 px-4 py-3 text-left text-sm font-semibold">
+                  <span>{data.shareLocation ? "Partage de la position activé" : "Partager ma position"}</span>
+                  <span role="switch" aria-checked={data.shareLocation} className={`relative h-7 w-12 shrink-0 rounded-full transition-colors ${data.shareLocation ? "bg-primary" : "bg-secondary"}`}>
+                    <span className={`absolute top-1 h-5 w-5 rounded-full bg-white shadow transition-all ${data.shareLocation ? "left-6" : "left-1"}`} />
+                  </span>
+                </button>
+              </div>
 
               <NavBtns back={back} next={() => {
                 if (!data.region || !data.shopCity || !data.neighborhood) return toast.error("Région, ville et quartier requis");
+                if (!isOpenCity(data.shopCity)) return toast.error("Pour le moment, Amashia accepte uniquement les boutiques de Yaoundé et de Douala");
                 next();
               }} />
             </div>
@@ -465,6 +524,14 @@ function Page() {
             </div>
           )}
         </SignupShell>
+        {hint && hintOpen && (
+          <ExistingAccountModal hint={hint} email={data.email.trim()} phone={cmDigits(data.phone)} password={data.password}
+            onClose={() => { dismissed.current.add(hint.key); setHintOpen(false); }}
+            onLogged={() => navigate({ to: "/dashboard", replace: true })} />
+        )}
+        {locInfoOpen && (
+          <LocationInfoModal onCancel={() => setLocInfoOpen(false)} onConfirm={() => { setLocInfoOpen(false); set("shareLocation", true); }} />
+        )}
     </AuthSplit>
   );
 }
@@ -506,20 +573,20 @@ function DocUpload({ label, file, onFile }: { label: string; file?: DocFile; onF
     reader.readAsDataURL(f);
   }
   return (
-    <div>
+    <div className="min-w-0">
       <label className="block text-sm font-medium mb-2">{label}</label>
       {file ? (
-        <div className="bg-background border border-border rounded-xl p-3 flex items-center gap-3">
+        <div className="flex w-full min-w-0 max-w-full items-center gap-3 overflow-hidden rounded-xl border border-border bg-background p-3">
           {file.dataUrl.startsWith("data:image") ? (
-            <img src={file.dataUrl} alt={file.name} className="w-14 h-14 rounded-lg object-cover" />
+            <img src={file.dataUrl} alt="" className="block h-16 w-16 min-w-16 max-w-16 shrink-0 rounded-lg bg-white object-cover" />
           ) : (
-            <div className="w-14 h-14 rounded-lg bg-secondary grid place-items-center"><FileText size={20} /></div>
+            <div className="grid h-16 w-16 shrink-0 place-items-center rounded-lg bg-secondary"><FileText size={20} /></div>
           )}
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold truncate">{file.name}</p>
             <p className="text-xs text-emerald-400">✓ Prêt à être téléversé</p>
           </div>
-          <button onClick={() => onFile(undefined)} className="w-8 h-8 grid place-items-center rounded-lg hover:bg-destructive/20 text-destructive"><X size={14} /></button>
+          <button type="button" onClick={() => onFile(undefined)} aria-label="Retirer" className="w-8 h-8 shrink-0 grid place-items-center rounded-lg hover:bg-destructive/20 text-destructive"><X size={14} /></button>
         </div>
       ) : (
         <div className="grid grid-cols-2 gap-2">
@@ -533,6 +600,106 @@ function DocUpload({ label, file, onFile }: { label: string; file?: DocFile; onF
       )}
       <input ref={galleryRef} type="file" accept="image/*,application/pdf" hidden onChange={(e) => handle(e.target.files?.[0])} />
       <input ref={cameraRef} type="file" accept="image/*" capture="environment" hidden onChange={(e) => handle(e.target.files?.[0])} />
+    </div>
+  );
+}
+
+const dateCls = "w-full bg-background border border-border rounded-xl px-2.5 py-3 text-sm focus:outline-none focus:border-primary sm:px-3";
+const MONTHS = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
+
+/** Date de naissance en trois menus Amashia : jour, mois, année. */
+function BirthDate({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const [y0, m0, d0] = value ? value.split("-") : ["", "", ""];
+  const [parts, setParts] = useState({ d: d0 ? String(Number(d0)) : "", m: m0 ? String(Number(m0)) : "", y: y0 || "" });
+  const thisYear = new Date().getFullYear();
+  const years = Array.from({ length: 80 }, (_, i) => String(thisYear - 18 - i));
+  const daysIn = parts.m && parts.y ? new Date(Number(parts.y), Number(parts.m), 0).getDate() : 31;
+  const update = (p: typeof parts) => {
+    if (p.d && Number(p.d) > (p.m && p.y ? new Date(Number(p.y), Number(p.m), 0).getDate() : 31)) p = { ...p, d: "" };
+    setParts(p);
+    onChange(p.d && p.m && p.y ? `${p.y}-${p.m.padStart(2, "0")}-${p.d.padStart(2, "0")}` : "");
+  };
+  return (
+    <div className="grid grid-cols-[0.85fr_1.5fr_1.1fr] gap-1.5 sm:gap-2">
+      <Select title="Jour de naissance" value={parts.d} onChange={(e) => update({ ...parts, d: e.target.value })} className={dateCls}>
+        <option value="">Jour</option>
+        {Array.from({ length: daysIn }, (_, i) => String(i + 1)).map((d) => <option key={d} value={d}>{d}</option>)}
+      </Select>
+      <Select title="Mois de naissance" value={parts.m} onChange={(e) => update({ ...parts, m: e.target.value })} className={dateCls}>
+        <option value="">Mois</option>
+        {MONTHS.map((m, i) => <option key={m} value={String(i + 1)}>{m}</option>)}
+      </Select>
+      <Select title="Année de naissance" value={parts.y} onChange={(e) => update({ ...parts, y: e.target.value })} className={dateCls}>
+        <option value="">Année</option>
+        {years.map((y) => <option key={y} value={y}>{y}</option>)}
+      </Select>
+    </div>
+  );
+}
+
+function SoonNote({ place }: { place: string }) {
+  return (
+    <div className="flex items-start gap-3 rounded-xl border border-primary/30 bg-primary/10 p-3.5 text-sm">
+      <Clock size={18} className="mt-0.5 shrink-0 text-primary" />
+      <p><b>Amashia arrive bientôt {/^(la|le|les) /i.test(place) ? "dans" : "à"} {place} !</b><br /><span className="text-muted-foreground">Pour le moment, nous accueillons uniquement les vendeurs de <b className="text-foreground">Yaoundé</b> et de <b className="text-foreground">Douala</b>.</span></p>
+    </div>
+  );
+}
+
+/** Compte déjà existant : nom du titulaire + connexion directe. */
+function ExistingAccountModal({ hint, email, phone, password, onClose, onLogged }: { hint: AccountHint; email: string; phone: string; password: string; onClose: () => void; onLogged: () => void }) {
+  const [pwd, setPwd] = useState(password);
+  const [busy, setBusy] = useState(false);
+  const initials = (hint.name || "A").split(/\s+/).map((w) => w[0]).join("").slice(0, 2).toUpperCase();
+  async function login() {
+    if (!pwd) return toast.error("Entrez votre mot de passe");
+    setBusy(true);
+    const err = hint.via === "phone" ? await signInSeller({ phone, password: pwd }) : await signInSeller({ email, password: pwd });
+    setBusy(false);
+    if (err) return toast.error(err);
+    toast.success(`Bon retour ${hint.name?.split(" ")[0] ?? ""} !`);
+    onLogged();
+  }
+  return (
+    <div className="fixed inset-0 z-[200] flex items-end justify-center bg-black/60 backdrop-blur-sm sm:items-center sm:p-4" onClick={onClose}>
+      <div className="app-select-sheet w-full max-w-md rounded-t-3xl border border-border bg-card p-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] shadow-2xl sm:rounded-3xl" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center gap-4">
+          <span className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-primary text-lg font-extrabold text-black">{initials}</span>
+          <div className="min-w-0">
+            <p className="text-xs text-muted-foreground">Vous avez déjà un compte vendeur</p>
+            <p className="truncate text-xl font-extrabold">Bonjour {hint.name || ""} 👋</p>
+          </div>
+        </div>
+        <p className="mt-4 text-sm text-muted-foreground">Un compte Amashia Seller existe déjà avec {hint.via === "phone" ? "ce numéro de téléphone" : "cette adresse e-mail"}. Connectez-vous directement :</p>
+        <div className="mt-4"><PasswordInput value={pwd} onChange={(e) => setPwd(e.target.value)} placeholder="Votre mot de passe" className={inputCls} onKeyDown={(e) => { if (e.key === "Enter") void login(); }} /></div>
+        <button onClick={() => void login()} disabled={busy} className="mt-3 flex h-12 w-full items-center justify-center gap-2 rounded-full bg-primary font-bold text-black disabled:opacity-60">{busy ? <Loader2 size={16} className="animate-spin" /> : null}Me connecter</button>
+        <div className="mt-3 flex items-center justify-between text-xs">
+          <a href="/connexion" className="font-semibold text-primary hover:underline">Mot de passe oublié ?</a>
+          <button onClick={onClose} className="text-muted-foreground hover:text-foreground">Ce n'est pas moi</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/** Avant de partager la position : explication du lieu de récupération des colis. */
+function LocationInfoModal({ onCancel, onConfirm }: { onCancel: () => void; onConfirm: () => void }) {
+  return (
+    <div className="fixed inset-0 z-[200] flex items-end justify-center bg-black/60 backdrop-blur-sm sm:items-center sm:p-4" onClick={onCancel}>
+      <div className="app-select-sheet w-full max-w-md rounded-t-3xl border border-border bg-card p-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] shadow-2xl sm:rounded-3xl" onClick={(e) => e.stopPropagation()}>
+        <span className="grid h-14 w-14 place-items-center rounded-2xl bg-primary/15 text-primary"><MapPin size={26} /></span>
+        <h3 className="mt-4 text-xl font-extrabold">Où sont vos produits ?</h3>
+        <p className="mt-2 text-sm text-muted-foreground">Votre position GPS sera l'adresse où <b className="text-foreground">le livreur Amashia viendra récupérer vos colis</b>.</p>
+        <div className="mt-4 grid gap-2">
+          <p className="flex items-center gap-3 rounded-xl bg-secondary/60 p-3 text-sm"><Store size={18} className="shrink-0 text-primary" /><span>Soyez dans votre <b>boutique</b>…</span></p>
+          <p className="flex items-center gap-3 rounded-xl bg-secondary/60 p-3 text-sm"><Home size={18} className="shrink-0 text-primary" /><span>… ou <b>chez vous</b>, si vos produits y sont stockés.</span></p>
+        </div>
+        <p className="mt-3 text-xs text-muted-foreground">Si vous n'êtes pas sur place maintenant, choisissez « Plus tard » : vous pourrez l'enregistrer depuis votre espace vendeur.</p>
+        <div className="mt-5 grid grid-cols-2 gap-2">
+          <button onClick={onCancel} className="h-12 rounded-full bg-secondary font-semibold">Plus tard</button>
+          <button onClick={onConfirm} className="h-12 rounded-full bg-primary font-bold text-black">J'y suis, partager</button>
+        </div>
+      </div>
     </div>
   );
 }

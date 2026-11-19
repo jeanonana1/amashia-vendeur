@@ -11,6 +11,7 @@ import { money } from "@/lib/sellerStats";
 import { PhoneInput } from "@/components/seller/PhoneInput";
 import { cmDigits, cmPhoneError, formatCm, toE164 } from "@/lib/phone";
 import { TableScroll } from "@/components/seller/ui/SpecTable";
+import { preferredLang, setSellerLang, type SellerLang } from "@/lib/sellerLang";
 import { Select } from "@/components/ui/app-select";
 
 export const Route = createFileRoute("/dashboard/parametres")({
@@ -49,7 +50,7 @@ const PAYMENT_METHODS = ["Orange Money", "MTN Mobile Money", "Virement bancaire"
 
 type Profile = {
   first_name: string; last_name: string; phone: string; avatar_url: string | null; niu: string;
-  payment_method: string; notif_prefs: Record<string, boolean>; dashboard_period: number;
+  payment_method: string; notif_prefs: Record<string, boolean>; dashboard_period: number; language?: string | null;
 };
 
 const inputCls = "w-full bg-background border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary";
@@ -68,7 +69,7 @@ function ParametresPage() {
       if (!user) return;
       setUid(user.id);
       setEmail(user.email ?? "");
-      const { data } = await db.from("seller_profiles").select("first_name, last_name, phone, avatar_url, niu, payment_method, notif_prefs, dashboard_period").eq("id", user.id).maybeSingle();
+      const { data } = await db.from("seller_profiles").select("first_name, last_name, phone, avatar_url, niu, payment_method, notif_prefs, dashboard_period, language").eq("id", user.id).maybeSingle();
       setP({
         first_name: data?.first_name ?? "", last_name: data?.last_name ?? "", phone: data?.phone ?? "", avatar_url: data?.avatar_url ?? null,
         niu: data?.niu ?? "", payment_method: data?.payment_method ?? "", notif_prefs: data?.notif_prefs ?? {}, dashboard_period: data?.dashboard_period ?? 1,
@@ -257,6 +258,7 @@ function SecurityTab({ email }: { email: string }) {
 
 function PrefsTab({ p, save }: { p: Profile; save: SaveFn }) {
   const [sound, setSound] = useState(soundEnabled());
+  const [lang, setLang] = useState<SellerLang>(() => preferredLang());
   return (
     <div className="space-y-6">
       <h3 className="font-bold text-lg">Préférences</h3>
@@ -265,6 +267,15 @@ function PrefsTab({ p, save }: { p: Profile; save: SaveFn }) {
         <div className="flex flex-wrap gap-2">
           {PERIODS.map((x) => (
             <button key={x.v} onClick={() => void save({ dashboard_period: x.v }, `Aperçu : ${x.l} par défaut`)} className={`rounded-full px-4 py-2 text-sm ${p.dashboard_period === x.v ? "bg-primary font-semibold text-black" : "bg-secondary text-muted-foreground"}`}>{x.l}</button>
+          ))}
+        </div>
+      </div>
+      <div className="border-t border-border pt-5">
+        <p className="mb-1 text-sm font-semibold">Langue du site</p>
+        <p className="mb-3 text-xs text-muted-foreground">En anglais, toutes les pages de votre espace sont traduites automatiquement.</p>
+        <div className="grid max-w-sm grid-cols-2 gap-2">
+          {([["fr", "🇫🇷 Français"], ["en", "🇬🇧 English"]] as const).map(([v, l]) => (
+            <button key={v} translate="no" onClick={() => { setLang(v); setSellerLang(v); void save({ language: v }, v === "en" ? "Language: English" : "Langue : français"); }} className={`rounded-xl border py-2.5 text-sm font-semibold ${lang === v ? "border-primary bg-primary/15 text-primary" : "border-border hover:border-primary/50"}`}>{l}</button>
           ))}
         </div>
       </div>

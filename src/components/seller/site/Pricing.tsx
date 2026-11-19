@@ -15,9 +15,9 @@ export function PricingTeaser() {
           <Reveal variant="left">
             <SectionHeading center={false} eyebrow="Tarifs" title={<>Vous ne payez <span className="text-gradient">que quand vous vendez</span></>}
               text="Pas d'abonnement, pas de frais d'inscription. Une commission par catégorie, prélevée seulement sur les commandes livrées." />
-            <div className="mt-8 flex items-baseline gap-3">
-              <span className="tabular text-6xl font-extrabold">{min == null ? "—" : min === max ? <><CountUp to={min} /> %</> : <><CountUp to={min} />–<CountUp to={max ?? 0} /> %</>}</span>
-              <span className="text-muted-foreground">de commission selon la catégorie</span>
+            <div className="mt-8">
+              <p className="tabular whitespace-nowrap text-5xl font-extrabold leading-none sm:text-6xl">{min == null ? "—" : min === max ? <><CountUp to={min} />&nbsp;%</> : <><CountUp to={min} />–<CountUp to={max ?? 0} />&nbsp;%</>}</p>
+              <p className="mt-2 text-muted-foreground">de commission selon la catégorie</p>
             </div>
             <ul className="mt-8 space-y-3 text-[15px]">
               {["Boutique et fiches produits illimitées", "Encaissement et livraison gérés par Amashia", "Assistant IA, analytique, promotions inclus", "Versement de votre solde par Amashia"].map((t, i) => (

@@ -1,3 +1,4 @@
+import { LANG_BOOT_SCRIPT, applySellerLang } from "@/lib/sellerLang";
 import { isStaleChunk, reloadForNewVersion } from "@/lib/staleReload";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
@@ -110,6 +111,7 @@ function RootShell({ children }: { children: React.ReactNode }) {
     <html lang="fr">
       <head>
         <HeadContent />
+        <script dangerouslySetInnerHTML={{ __html: LANG_BOOT_SCRIPT }} />
       </head>
       <body>
         {children}
@@ -123,6 +125,8 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   // un petit son accompagne chaque réussite (enregistrement, publication…) ou erreur
   useEffect(() => { installToastSounds(toast as never); }, []);
+  // langue du vendeur (ou du téléphone) : en anglais, tout le site est traduit automatiquement
+  useEffect(() => { void applySellerLang(); }, []);
 
   return (
     <QueryClientProvider client={queryClient}>

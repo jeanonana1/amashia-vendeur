@@ -1,3 +1,5 @@
+import { LANG_KEY, preferredLang, setSellerLang } from "@/lib/sellerLang";
+import { LangToggle } from "@/components/seller/LangToggle";
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { playSound, setSoundEnabled, soundEnabled } from "@/lib/sound";
 import { useEffect, useState, ReactNode } from "react";
@@ -80,8 +82,13 @@ export function DashboardLayout({ title, subtitle, actions, children }: { title:
       if (!mounted) return;
       if (!user) { navigate({ to: "/connexion", replace: true }); return; }
       await ensureSellerProfile(user);
-      const { data } = await (supabase as any).from("seller_profiles").select("first_name, avatar_url").eq("id", user.id).maybeSingle();
+      const { data } = await (supabase as any).from("seller_profiles").select("first_name, avatar_url, language").eq("id", user.id).maybeSingle();
       if (data?.first_name) setName(data.first_name);
+      // langue choisie par le vendeur (inscription / paramètres) : appliquée sur un nouvel appareil
+      try {
+        const lg = (data as { language?: string | null } | null)?.language;
+        if ((lg === "en" || lg === "fr") && !localStorage.getItem(LANG_KEY) && lg !== preferredLang()) setSellerLang(lg);
+      } catch { /* stockage indisponible */ }
       setAvatar((data as { avatar_url?: string | null } | null)?.avatar_url ?? null);
       setAuthReady(true);
     })();
@@ -149,6 +156,7 @@ export function DashboardLayout({ title, subtitle, actions, children }: { title:
             {sound ? <><VolumeX size={15} /> Couper les sons</> : <><Volume2 size={15} /> Activer les sons</>}
           </button>
         </div>
+        <div className="mb-2 flex items-center justify-between gap-2 rounded-xl px-2 py-1 text-xs font-semibold text-muted-foreground">Langue / Language <LangToggle /></div>
         <div className="flex items-center gap-3 rounded-xl px-2 py-2">
           {avatar ? <img src={avatar} alt="" className="h-9 w-9 rounded-full object-cover" /> : <div className="grid h-9 w-9 place-items-center rounded-full bg-primary text-sm font-bold text-black">{name[0]}</div>}
           <div className="min-w-0 flex-1">
@@ -197,6 +205,7 @@ export function DashboardLayout({ title, subtitle, actions, children }: { title:
                   <p className="tabular text-sm font-bold">{balanceStats ? money(balanceStats.balance) : "…"}</p>
                 </div>
               </div>
+              <LangToggle className="hidden sm:inline-flex" />
               <button onClick={toggle} className={`${iconBtn} hidden sm:grid`} aria-label="Thème">{theme === "dark" ? <Sun size={17} /> : <Moon size={17} />}</button>
               <button onClick={toggleSound} className={`${iconBtn} hidden sm:grid`} title={sound ? "Couper les sons" : "Activer les sons"} aria-label={sound ? "Couper les sons" : "Activer les sons"}>{sound ? <Volume2 size={17} /> : <VolumeX size={17} />}</button>
               <Link to="/dashboard/notifications" className={`${iconBtn} relative`} title="Notifications" aria-label="Notifications">

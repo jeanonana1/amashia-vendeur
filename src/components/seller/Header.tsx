@@ -2,6 +2,7 @@ import { Link, useLocation } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Sun, Moon, Menu, X, ArrowRight } from "lucide-react";
 import { useTheme } from "@/components/theme-provider";
+import { LangToggle } from "@/components/seller/LangToggle";
 import { SellerLogo } from "@/components/seller/SellerLogo";
 
 const links = [
@@ -34,6 +35,7 @@ export function Header() {
           ))}
         </nav>
         <div className="flex items-center gap-2">
+          <LangToggle />
           <button onClick={toggle} className="hidden h-9 w-9 place-items-center rounded-full text-muted-foreground transition hover:bg-secondary hover:text-foreground sm:grid" aria-label="Changer de thème">
             {theme === "dark" ? <Sun size={17} /> : <Moon size={17} />}
           </button>

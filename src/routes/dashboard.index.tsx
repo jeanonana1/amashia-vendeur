@@ -149,7 +149,13 @@ function DashboardOverview() {
               ))}
             </div>
           </div>
-          {stats ? <Chart stats={stats} /> : <div className="h-64 animate-pulse rounded-xl bg-secondary/40" />}
+          {stats ? (
+            <>
+              {/* mobile : graphique plus large que l'écran, défilable de gauche à droite */}
+              <div className="-mx-1 overflow-x-auto px-1 pb-1 pt-5 [scrollbar-width:thin]"><div className="min-w-[640px] sm:min-w-0"><Chart stats={stats} /></div></div>
+              <p className="mt-1 text-right text-[10px] text-muted-foreground sm:hidden">Faites glisser pour voir toute la période →</p>
+            </>
+          ) : <div className="h-64 animate-pulse rounded-xl bg-secondary/40" />}
         </div>
         {stats ? <Conversions stats={stats} period={period.sub} /> : <div className="h-[380px] animate-pulse rounded-2xl border border-border bg-card" />}
       </div>
@@ -168,7 +174,34 @@ function DashboardOverview() {
         ) : orders.length === 0 ? (
           <p className="py-8 text-center text-sm text-muted-foreground">Aucune commande pour le moment. Vos ventes sur Amashia apparaîtront ici.</p>
         ) : (
-          <div className="overflow-x-auto">
+          <>
+          {/* Mobile : une carte par commande, textes coupés proprement */}
+          <ul className="grid grid-cols-[minmax(0,1fr)] gap-2 sm:hidden">
+            {orders.map((o) => {
+              const st = STATUS[o.status] ?? STATUS.pending;
+              return (
+                <li key={o.id}>
+                  <button type="button" onClick={() => setOpenOrder(o)} className="flex w-full items-center gap-3 rounded-xl border border-border/70 p-2.5 text-left transition active:bg-secondary/40">
+                    <div className="aspect-square h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-white">
+                      {o.product_image ? <img {...imgProps(o.product_image, { width: 64 })} loading="lazy" alt="" className="h-full w-full object-cover" /> : <div className="h-full w-full bg-secondary" />}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="truncate text-sm font-semibold">{o.product_title}</p>
+                        <p className="shrink-0 text-sm font-bold">{money(Number(o.amount))}</p>
+                      </div>
+                      <p className="truncate text-xs text-muted-foreground">{o.order_number} · {o.customer_name}</p>
+                      <div className="mt-1 flex items-center justify-between gap-2">
+                        <span className={`truncate rounded-full px-2 py-0.5 text-[10px] font-semibold ${st.cls}`}>{st.label}</span>
+                        <span className="shrink-0 text-[10px] text-muted-foreground">{dateTime(o.created_at)}</span>
+                      </div>
+                    </div>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+          <div className="hidden overflow-x-auto sm:block">
             <table className="w-full min-w-[640px] text-sm">
               <thead>
                 <tr className="border-b border-border text-[11px] uppercase text-muted-foreground">
@@ -187,11 +220,11 @@ function DashboardOverview() {
                     <tr key={o.id} onClick={() => setOpenOrder(o)} className="cursor-pointer border-b border-border/50 transition hover:bg-secondary/30" title="Voir le détail de la commande">
                       <td className="py-4 font-semibold">
                         <span className="flex items-center gap-2">
-                          {o.product_image && <img {...imgProps(o.product_image, { width: 64 })} loading="lazy" alt="" className="h-8 w-8 rounded-md object-cover" />}
+                          {o.product_image && <img {...imgProps(o.product_image, { width: 64 })} loading="lazy" alt="" className="h-10 w-10 shrink-0 rounded-md bg-white object-cover" />}
                           {o.order_number}
                         </span>
                       </td>
-                      <td>{o.customer_name}</td>
+                      <td className="max-w-[160px]"><span className="block truncate">{o.customer_name}</span></td>
                       <td className="max-w-[220px] text-muted-foreground">
                         <span className="line-clamp-1">{o.product_title}</span>
                         {(o.options || o.color) && <span className="block text-[11px]">{[o.color?.replace(/\s*#[0-9a-f]{3,8}$/i, ""), o.options].filter(Boolean).join(" · ")}</span>}
@@ -205,6 +238,7 @@ function DashboardOverview() {
               </tbody>
             </table>
           </div>
+          </>
         )}
       </div>
       {openOrder && <OrderDetailModal line={openOrder} onClose={() => setOpenOrder(null)} />}

@@ -140,6 +140,15 @@ export function DashboardLayout({ title, subtitle, children }: { title: string; 
         ))}
       </nav>
       <div className="border-t border-border p-3">
+        {/* Mobile : thème et sons accessibles depuis le menu */}
+        <div className="mb-2 grid grid-cols-2 gap-2 lg:hidden">
+          <button onClick={toggle} className="flex h-10 items-center justify-center gap-2 rounded-xl border border-border bg-secondary text-xs font-semibold">
+            {theme === "dark" ? <><Sun size={15} /> Mode clair</> : <><Moon size={15} /> Mode sombre</>}
+          </button>
+          <button onClick={toggleSound} className="flex h-10 items-center justify-center gap-2 rounded-xl border border-border bg-secondary text-xs font-semibold">
+            {sound ? <><VolumeX size={15} /> Couper les sons</> : <><Volume2 size={15} /> Activer les sons</>}
+          </button>
+        </div>
         <div className="flex items-center gap-3 rounded-xl px-2 py-2">
           {avatar ? <img src={avatar} alt="" className="h-9 w-9 rounded-full object-cover" /> : <div className="grid h-9 w-9 place-items-center rounded-full bg-primary text-sm font-bold text-black">{name[0]}</div>}
           <div className="min-w-0 flex-1">
@@ -171,7 +180,7 @@ export function DashboardLayout({ title, subtitle, children }: { title: string; 
         </>
       )}
 
-      <main className="min-w-0 flex-1 overflow-x-hidden">
+      <main className="min-w-0 flex-1 overflow-x-clip">
         {/* Barre du haut */}
         <header className="sticky top-0 z-30 border-b border-border bg-background">
           <div className="mx-auto flex h-16 max-w-[1440px] items-center gap-3 px-4 sm:px-6 lg:px-8">

@@ -1,4 +1,5 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
+import { imgProps } from "@/lib/img";
 import { useEffect, useState } from "react";
 import { BadgeCheck, Percent, Wallet, Clock, ShoppingBag, Info, ArrowRight } from "lucide-react";
 import { DashboardLayout } from "@/components/seller/dashboard/DashboardLayout";
@@ -78,14 +79,30 @@ function CommissionsPage() {
           <div className="rounded-2xl border border-border bg-card">
             <div className="border-b border-border p-5"><h2 className="font-bold">Détail par vente</h2></div>
             {d.items.length === 0 ? <p className="p-5 text-sm text-muted-foreground">Aucune vente pour le moment.</p> : (
-              <div className="overflow-x-auto">
+              <>
+              <ul className="divide-y divide-border sm:hidden">
+                {d.items.map((it, i) => (
+                  <li key={i} className="flex items-center gap-3 p-3">
+                    {it.image ? <img {...imgProps(it.image, { width: 64 })} loading="lazy" alt="" className="aspect-square h-14 w-14 shrink-0 rounded-lg border border-border bg-white object-cover" /> : <div className="h-14 w-14 shrink-0 rounded-lg bg-secondary" />}
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="truncate text-sm font-medium">{it.qty} × {it.title}</p>
+                        <p className="shrink-0 text-sm font-bold">{money(n(it.net))}</p>
+                      </div>
+                      <p className="truncate text-[11px] text-muted-foreground">{it.order_number} · {dateTime(it.created_at)}</p>
+                      <p className="truncate text-[11px] text-muted-foreground">{money(n(it.gross))} − {money(n(it.commission))} ({n(it.pct)} %) · {STATUS[it.status] ?? it.status}</p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+              <div className="hidden overflow-x-auto sm:block">
                 <table className="w-full text-sm">
                   <thead className="text-left text-xs text-muted-foreground"><tr className="border-b border-border">
                     <th className="p-3">Vente</th><th className="p-3">Catégorie</th><th className="p-3 text-right">Prix de vente</th><th className="p-3 text-right">Commission</th><th className="p-3 text-right">Vous recevez</th><th className="p-3">Statut</th>
                   </tr></thead>
                   <tbody>{d.items.map((it, i) => (
                     <tr key={i} className="border-b border-border last:border-0">
-                      <td className="p-3"><div className="flex items-center gap-3">{it.image ? <img src={it.image} alt="" className="h-10 w-10 rounded-lg border border-border object-cover" /> : <div className="h-10 w-10 rounded-lg bg-secondary" />}<div className="min-w-0"><p className="line-clamp-1 font-medium">{it.qty} × {it.title}</p><p className="text-xs text-muted-foreground">{it.order_number} · {dateTime(it.created_at)}</p></div></div></td>
+                      <td className="p-3"><div className="flex items-center gap-3">{it.image ? <img {...imgProps(it.image, { width: 64 })} loading="lazy" alt="" className="h-10 w-10 shrink-0 rounded-lg border border-border bg-white object-cover" /> : <div className="h-10 w-10 rounded-lg bg-secondary" />}<div className="min-w-0"><p className="line-clamp-1 font-medium">{it.qty} × {it.title}</p><p className="text-xs text-muted-foreground">{it.order_number} · {dateTime(it.created_at)}</p></div></div></td>
                       <td className="p-3 text-xs">{it.category}</td>
                       <td className="p-3 text-right">{money(n(it.gross))}</td>
                       <td className="p-3 text-right text-muted-foreground">− {money(n(it.commission))} <span className="text-[11px]">({n(it.pct)} %)</span></td>
@@ -95,6 +112,7 @@ function CommissionsPage() {
                   ))}</tbody>
                 </table>
               </div>
+              </>
             )}
           </div>
         </div>

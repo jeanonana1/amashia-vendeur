@@ -12,6 +12,7 @@ import { compressImage } from "@/lib/imageCompress";
 import { AiSeoModal } from "@/components/seller/dashboard/AiSeoModal";
 import { AiImageModal } from "@/components/seller/dashboard/AiImageModal";
 import { PriceTipModal, charmPrice } from "@/components/seller/dashboard/PriceTipModal";
+import { detectSubcategory } from "@/lib/autoCategory";
 import { useTaxonomy } from "@/lib/categories";
 
 type ProductSearch = { id?: string };
@@ -194,6 +195,9 @@ function AddProductPage() {
   const vfileRef = useRef<HTMLInputElement>(null);
 
   const [step, setStep] = useState(0);
+  // sous-catégorie détectée depuis le titre (tant que le vendeur ne la choisit pas lui-même)
+  const catManual = useRef(false);
+  const [catAuto, setCatAuto] = useState(false);
   const [type, setType] = useState<ProductType>("simple");
   const [form, setForm] = useState({ name: "", category: "", price: "", compare_at_price: "", purchase_price: "", stock: "", description: "", sku: "", status: "active" });
   const [images, setImages] = useState<{ file?: File; preview: string; existing?: boolean }[]>([]);
@@ -257,7 +261,7 @@ function AddProductPage() {
         if (p) {
           setType(((p as any).product_type || "simple") as ProductType);
           setForm({
-            name: p.name || "", category: p.category || "", price: String(p.price ?? ""),
+            name: p.name || "", category: (catManual.current = !!p.category, p.category || ""), price: String(p.price ?? ""),
             compare_at_price: String((p as any).compare_at_price ?? ""),
             purchase_price: String((p as any).purchase_price ?? ""), stock: String(p.stock ?? ""),
             description: p.description || "", sku: p.sku || "", status: p.status === "draft" ? "active" : (p.status || "active"),
@@ -280,7 +284,7 @@ function AddProductPage() {
         try {
           const saved = JSON.parse(localStorage.getItem(DRAFT_KEY()) || "null");
           if (saved?.form) {
-            setForm((f) => ({ ...f, ...saved.form }));
+            setForm((f) => ({ ...f, ...saved.form })); if (saved.form?.category) catManual.current = true;
             if (saved.type) setType(saved.type);
             if (Array.isArray(saved.attrs)) setAttrs(saved.attrs);
             if (Array.isArray(saved.specs)) setSpecs(saved.specs);
@@ -381,6 +385,21 @@ function AddProductPage() {
     try { localStorage.setItem(STEP_KEY(id), String(step)); } catch { /* ignore */ }
   }, [step, editId, dbDraftId]);
 
+
+  // chaque étape commence en haut de la page
+  const firstStepRender = useRef(true);
+  useEffect(() => { if (firstStepRender.current) { firstStepRender.current = false; return; } window.scrollTo({ top: 0, behavior: "smooth" }); }, [step]);
+
+  // Détection automatique de la sous-catégorie à partir du titre
+  useEffect(() => {
+    if (catManual.current || !form.name.trim()) return;
+    const t = window.setTimeout(() => {
+      const g = detectSubcategory(form.name, SITE_CATEGORIES);
+      if (g && g.sub !== form.category) { setForm((f) => ({ ...f, category: g.sub })); setCatAuto(true); }
+    }, 350);
+    return () => window.clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form.name, SITE_CATEGORIES.length]);
 
   // Specs presets when category changes
   function suggestSpecs(silent = false) {
@@ -661,8 +680,8 @@ function AddProductPage() {
                 <RichTextEditor value={form.description} onChange={(v) => set("description", v)} placeholder="Décrivez votre produit... utilisez la barre pour formater, ajouter des listes, titres, etc." />
               </div>
               <div className="grid md:grid-cols-2 gap-4">
-                <div><label className="block text-sm mb-2">Catégorie *</label>
-                  <select value={form.category} onChange={(e) => set("category", e.target.value)} className={`${inp} ${!form.category ? "text-muted-foreground" : ""}`}>
+                <div><label className="block text-sm mb-2">Sous-catégorie *</label>
+                  <select value={form.category} onChange={(e) => { catManual.current = true; setCatAuto(false); set("category", e.target.value); }} className={`${inp} ${!form.category ? "text-muted-foreground" : ""} ${catAuto ? "border-primary ring-2 ring-primary/25" : ""}`}>
                     <option value="">Choisir la catégorie du produit</option>
                     {SITE_CATEGORY_GROUPS.map((g) => (
                       <optgroup key={g.group} label={`Rubrique ${g.group}`}>
@@ -671,6 +690,7 @@ function AddProductPage() {
                     ))}
                     {form.category && !SITE_CATEGORIES.includes(form.category) && <option value={form.category}>{form.category}</option>}
                   </select>
+                  {catAuto && form.category && <p className="mt-1.5 inline-flex items-center gap-1.5 rounded-full bg-primary/12 px-2.5 py-1 text-[11px] font-semibold text-primary">✨ Sous-catégorie détectée d'après le titre — modifiable</p>}
                   {form.category
                     ? <p className="mt-1 text-[11px] text-muted-foreground">Publié sur Amashia dans : <b className="text-foreground">{SITE_CATEGORY_GROUPS.find((g) => g.categories.includes(form.category))?.group ?? "—"} › {form.category}</b></p>
                     : <p className="mt-1 text-[11px] text-muted-foreground">Le produit apparaîtra sur Amashia dans la rubrique correspondant à cette catégorie.</p>}
@@ -1092,12 +1112,15 @@ function AddProductPage() {
             </div>
           )}
 
-          <div className="flex justify-between">
-            <button disabled={step === 0} onClick={() => setStep(step - 1)} className="px-5 py-2.5 rounded-full bg-secondary text-sm font-semibold disabled:opacity-40 flex items-center gap-2"><ArrowLeft size={14} /> Précédent</button>
-            {step < STEPS.length - 1 && (
-              <button disabled={!canNext()} onClick={() => setStep(step + 1)} className="px-5 py-2.5 rounded-full bg-gradient-primary text-black text-sm font-semibold disabled:opacity-40 flex items-center gap-2">Suivant <ArrowRight size={14} /></button>
-            )}
+          {/* Mobile : barre d'actions épinglée en bas ; ordinateur : sous le formulaire */}
+          <div className="fixed inset-x-0 bottom-0 z-40 flex items-center justify-between gap-3 border-t border-border bg-background px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] shadow-[0_-8px_30px_-12px_rgba(0,0,0,0.5)] lg:static lg:z-auto lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none">
+            <button disabled={step === 0} onClick={() => setStep(step - 1)} className="h-11 px-4 rounded-full bg-secondary text-sm font-semibold disabled:opacity-40 flex items-center gap-2 lg:h-auto lg:px-5 lg:py-2.5"><ArrowLeft size={15} /> Précédent</button>
+            <span className="text-xs font-semibold text-muted-foreground lg:hidden">Étape {step + 1}/{STEPS.length}</span>
+            {step < STEPS.length - 1 ? (
+              <button disabled={!canNext()} onClick={() => setStep(step + 1)} className="h-11 px-5 rounded-full bg-primary text-black text-sm font-bold disabled:opacity-40 flex items-center gap-2 lg:h-auto lg:py-2.5">Suivant <ArrowRight size={15} /></button>
+            ) : <span className="w-[104px] lg:hidden" />}
           </div>
+          <div className="h-20 lg:hidden" />
         </div>
 
         {/* Live preview */}

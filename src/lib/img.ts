@@ -23,11 +23,11 @@ function pick(width: number) {
 /** Adresse de l'image à la largeur voulue (en pixels réels). */
 export function imgUrl(src: string, width: number): string {
   if (!canOptimize(src)) return src;
-  return `/_vercel/image?url=${encodeURIComponent(src)}&w=${pick(width)}&q=75`;
+  return `/_vercel/image?url=${encodeURIComponent(src)}&w=${pick(width)}&q=90`;
 }
 
 /** Attribut srcSet : le navigateur choisit la bonne taille selon l'écran. */
-export function imgSrcSet(src: string, maxWidth = 1080): string | undefined {
+export function imgSrcSet(src: string, maxWidth = 1600): string | undefined {
   if (!canOptimize(src)) return undefined;
   return IMAGE_WIDTHS.filter((w) => w >= 64 && w <= maxWidth)
     .map((w) => `${imgUrl(src, w)} ${w}w`)
@@ -39,7 +39,8 @@ export function imgProps(src: string, opts: { width?: number; sizes?: string } =
   const width = opts.width ?? 640;
   return {
     src: imgUrl(src, width),
-    srcSet: imgSrcSet(src, Math.max(256, pick(width * 2))),
+    // jusqu'à 3× la taille affichée : nette sur les écrans haute densité (téléphones, Mac)
+    srcSet: imgSrcSet(src, Math.max(384, pick(width * 3))),
     sizes: canOptimize(src) ? opts.sizes ?? `${width}px` : undefined,
   };
 }

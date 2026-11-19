@@ -104,7 +104,31 @@ function ClientsPage() {
         )}
 
         {list.length > 0 && (
-          <div className="overflow-x-auto">
+          <>
+          <ul className="grid grid-cols-[minmax(0,1fr)] gap-2 sm:hidden">
+            {list.map((c) => {
+              const seg = segment(c);
+              return (
+                <li key={c.id}>
+                  <button type="button" onClick={() => setSelected(c)} className="flex w-full items-center gap-3 rounded-xl border border-border/70 p-3 text-left transition active:bg-secondary/40">
+                    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-primary/15 text-xs font-bold text-primary">{initials(c.name)}</span>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="truncate text-sm font-semibold">{c.name}</p>
+                        <p className="shrink-0 text-sm font-bold">{money(c.spent)}</p>
+                      </div>
+                      <p className="flex min-w-0 items-center gap-1 text-xs text-muted-foreground"><MapPin size={11} className="shrink-0" /><span className="truncate">{c.area || "—"}</span><span className="shrink-0">· {c.orders} cmd</span></p>
+                      <div className="mt-1 flex items-center justify-between gap-2">
+                        <span className={`truncate rounded-full px-2 py-0.5 text-[10px] font-semibold ${seg.cls}`}>{seg.label}</span>
+                        <span className="shrink-0 text-[10px] text-muted-foreground">{dateTime(c.last_order)}</span>
+                      </div>
+                    </div>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+          <div className="hidden overflow-x-auto sm:block">
             <table className="w-full min-w-[640px] text-sm">
               <thead>
                 <tr className="border-b border-border text-[11px] uppercase text-muted-foreground">
@@ -124,7 +148,7 @@ function ClientsPage() {
                         <div className="flex items-center gap-3">
                           <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-primary/15 text-xs font-bold text-primary">{initials(c.name)}</span>
                           <div className="min-w-0">
-                            <p className="truncate font-semibold">{c.name}</p>
+                            <p className="max-w-[200px] truncate font-semibold">{c.name}</p>
                             <p className="flex items-center gap-1 text-xs text-muted-foreground"><MapPin size={11} /> {c.area || "—"}</p>
                           </div>
                         </div>
@@ -139,6 +163,7 @@ function ClientsPage() {
               </tbody>
             </table>
           </div>
+          </>
         )}
       </div>
 

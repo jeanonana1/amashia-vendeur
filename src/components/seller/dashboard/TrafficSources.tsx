@@ -62,7 +62,7 @@ export function TrafficSources({ days, period }: { days: number; period: string 
         <AdsCard title="TikTok Ads" color="#25F4EE" badge="TikTok" r={tiktok} period={period} loading={!data} />
       </div>
 
-      <div className="rounded-2xl border border-border bg-card p-6">
+      <div className="rounded-2xl border border-border bg-card p-4 sm:p-6">
         <div className="mb-4">
           <h3 className="font-bold">Sources de trafic</h3>
           <p className="text-xs text-muted-foreground">D'où viennent vos visiteurs et lesquels achètent · {period}</p>
@@ -72,7 +72,7 @@ export function TrafficSources({ days, period }: { days: number; period: string 
         ) : rows.length === 0 ? (
           <p className="py-8 text-center text-sm text-muted-foreground">Aucune visite sur cette période.</p>
         ) : (
-          <div className="overflow-x-auto">
+          <div className="-mx-1 overflow-x-auto px-1 [scrollbar-width:thin]">
             <table className="w-full min-w-[640px] text-sm">
               <thead>
                 <tr className="text-left text-xs text-muted-foreground">

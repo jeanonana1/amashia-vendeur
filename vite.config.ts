@@ -16,7 +16,7 @@ const nitroConfig = {
     config: {
       images: {
         sizes: [64, 128, 256, 384, 640, 828, 1080, 1600],
-        qualities: [75],
+        qualities: [75, 90],
         formats: ["image/avif", "image/webp"],
         minimumCacheTTL: 2678400,
         domains: ["oawobzuyjkcnmaorqfmh.supabase.co"],

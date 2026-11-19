@@ -134,7 +134,12 @@ function AnalytiquePage() {
             <span className="flex items-center gap-1.5"><span className="h-0.5 w-3 bg-sky-400" /> Visites</span>
           </div>
         </div>
-        {data ? <SalesChart data={data} /> : <div className="h-64 animate-pulse rounded-xl bg-secondary/40" />}
+        {data ? (
+          <>
+            <div className="-mx-1 overflow-x-auto px-1 pb-1 [scrollbar-width:thin]"><div className="min-w-[640px] sm:min-w-0"><SalesChart data={data} /></div></div>
+            <p className="mt-1 text-right text-[10px] text-muted-foreground sm:hidden">Faites glisser pour voir toute la période →</p>
+          </>
+        ) : <div className="h-64 animate-pulse rounded-xl bg-secondary/40" />}
       </div>
 
       <div className="mb-6 grid grid-cols-1 gap-5 lg:grid-cols-2">
@@ -152,10 +157,25 @@ function AnalytiquePage() {
         </div>
       </div>
 
-      <div className="rounded-2xl border border-border bg-card p-6">
+      <div className="rounded-2xl border border-border bg-card p-4 sm:p-6">
         <h3 className="mb-4 font-bold">Top produits</h3>
         {data && data.top_products.length > 0 ? (
-          <div className="overflow-x-auto">
+          <>
+          <ul className="grid grid-cols-[minmax(0,1fr)] gap-2 sm:hidden">
+            {data.top_products.map((p, i) => (
+              <li key={i} className="flex items-center gap-3 rounded-xl border border-border/70 p-2.5">
+                <div className="aspect-square h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-white">{p.image && <img {...imgProps(p.image, { width: 64 })} loading="lazy" alt="" className="h-full w-full object-cover" />}</div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="truncate text-sm font-semibold">{p.title}</p>
+                    <p className="shrink-0 text-sm font-bold">{money(p.revenue)}</p>
+                  </div>
+                  <p className="truncate text-[11px] text-muted-foreground">{num(p.views)} vues · {num(p.carts)} paniers · {num(p.items)} vendus · {p.views ? `${Math.min(100, (p.items / p.views) * 100).toFixed(1).replace(".", ",")} %` : "—"}</p>
+                </div>
+              </li>
+            ))}
+          </ul>
+          <div className="hidden overflow-x-auto sm:block">
             <table className="w-full min-w-[620px] text-sm">
               <thead>
                 <tr className="border-b border-border text-[11px] uppercase text-muted-foreground">
@@ -186,6 +206,7 @@ function AnalytiquePage() {
               </tbody>
             </table>
           </div>
+          </>
         ) : <Empty text="Vos produits en ligne apparaîtront ici avec leurs statistiques." />}
       </div>
     </DashboardLayout>

@@ -102,29 +102,29 @@ function CommandesPage() {
         {orders.length === 0 ? (
           <p className="py-10 text-center text-sm text-muted-foreground">Les commandes passées par les clients sur Amashia apparaîtront ici.</p>
         ) : (
-          <div className="grid gap-3">
+          <div className="grid grid-cols-[minmax(0,1fr)] gap-3">
             {orders.map((order) => (
               <article
                 key={order.id}
                 onClick={() => setOpenOrder(order)}
-                className="flex cursor-pointer flex-col gap-3 rounded-lg border border-border p-3 transition hover:border-primary/50 hover:bg-secondary/20 md:flex-row md:items-center md:p-4"
+                className="flex min-w-0 cursor-pointer flex-col gap-3 rounded-lg border border-border p-3 transition hover:border-primary/50 hover:bg-secondary/20 md:flex-row md:items-center md:p-4"
               >
                 <div className="flex min-w-0 flex-1 gap-3">
                   <div className="h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-white">
                     {order.product_image ? <img {...imgProps(order.product_image, { width: 64 })} loading="lazy" alt="" className="h-full w-full object-cover" /> : <div className="grid h-full w-full place-items-center bg-secondary"><ShoppingBag size={18} className="text-muted-foreground" /></div>}
                   </div>
-                  <div className="min-w-0">
+                  <div className="min-w-0 flex-1">
                     <p className="flex flex-wrap items-center gap-2 font-bold">
                       {order.order_number}
                       {isNew(order) && <span className="new-order-badge rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-black">Nouveau</span>}
                     </p>
                     <p className="line-clamp-1 text-sm font-medium">{order.product_title}</p>
-                    {(order.color || order.options) && <p className="text-xs text-primary">{[order.color ? `Couleur : ${colorName(order.color)}` : "", order.options ?? ""].filter(Boolean).join(" · ")}</p>}
-                    <p className="text-xs text-muted-foreground">{order.customer_name}{order.delivery_area ? ` (${order.delivery_area})` : ""} · {order.quantity} article{order.quantity > 1 ? "s" : ""}</p>
+                    {(order.color || order.options) && <p className="truncate text-xs text-primary">{[order.color ? `Couleur : ${colorName(order.color)}` : "", order.options ?? ""].filter(Boolean).join(" · ")}</p>}
+                    <p className="truncate text-xs text-muted-foreground">{order.customer_name}{order.delivery_area ? ` (${order.delivery_area})` : ""} · {order.quantity} article{order.quantity > 1 ? "s" : ""}</p>
                     <p className="text-xs text-muted-foreground">{dateTime(order.created_at)}</p>
                   </div>
                 </div>
-                <div className="flex items-center justify-between gap-3 md:justify-end" onClick={(e) => e.stopPropagation()}>
+                <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border/60 pt-3 md:border-0 md:pt-0 md:justify-end" onClick={(e) => e.stopPropagation()}>
                   <p className="font-bold text-primary">{money(order.amount)}</p>
                   <OrderStatusTrack status={order.status} compact />
                 </div>
@@ -135,8 +135,8 @@ function CommandesPage() {
       </section>
 
       <section className="rounded-xl border border-border bg-card p-4 sm:p-6">
-        <div className="mb-5 flex flex-wrap items-center justify-between gap-3"><div><h2 className="font-bold">Fiches publiées</h2><p className="text-xs text-muted-foreground">Chaque lien ouvre la fiche réellement achetable.</p></div><div className="relative"><Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={15} /><input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Rechercher une fiche" className="rounded-lg border border-border bg-background py-2 pl-9 pr-3 text-sm" /></div></div>
-        {loading ? <p className="py-10 text-center text-sm text-muted-foreground">Chargement…</p> : rows.length === 0 ? <p className="py-10 text-center text-sm text-muted-foreground">Aucune fiche publiée pour le moment.</p> : <div className="grid gap-3">{rows.map(({ listing, count, amount }) => <article key={listing.id} className="grid gap-3 rounded-lg border border-border p-3 sm:grid-cols-[52px_1fr_auto] sm:items-center"><div className="h-13 w-13 overflow-hidden rounded-md bg-secondary">{listing.images?.[0] && <img src={listing.images[0]} alt="" className="h-full w-full object-cover" />}</div><div className="min-w-0"><h3 className="truncate font-semibold">{listing.title}</h3><div className="mt-1 flex flex-wrap items-center gap-2 text-xs"><span className={`rounded-full px-2 py-0.5 font-semibold ${statusClass[listing.status]}`}>{labels[listing.status]}</span><span className="text-muted-foreground">{count} commande{count === 1 ? "" : "s"}</span><span className="font-semibold text-primary">{money(amount)}</span></div></div><Button asChild variant="outline" size="sm"><a href={marketplaceProductUrl(listing.id)} target="_blank" rel="noreferrer"><ExternalLink /> Voir la fiche</a></Button></article>)}</div>}
+        <div className="mb-5 flex flex-wrap items-center justify-between gap-3"><div><h2 className="font-bold">Fiches publiées</h2><p className="text-xs text-muted-foreground">Chaque lien ouvre la fiche réellement achetable.</p></div><div className="relative"><Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={15} /><input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Rechercher une fiche" className="w-full rounded-lg border border-border bg-background py-2 pl-9 pr-3 text-sm" /></div></div>
+        {loading ? <p className="py-10 text-center text-sm text-muted-foreground">Chargement…</p> : rows.length === 0 ? <p className="py-10 text-center text-sm text-muted-foreground">Aucune fiche publiée pour le moment.</p> : <div className="grid grid-cols-[minmax(0,1fr)] gap-3">{rows.map(({ listing, count, amount }) => <article key={listing.id} className="flex flex-wrap items-center gap-3 rounded-lg border border-border p-3 sm:flex-nowrap"><div className="aspect-square h-14 w-14 shrink-0 overflow-hidden rounded-md bg-white">{listing.images?.[0] && <img {...imgProps(listing.images[0], { width: 64 })} loading="lazy" alt="" className="h-full w-full object-cover" />}</div><div className="min-w-0 flex-1"><h3 className="truncate font-semibold">{listing.title}</h3><div className="mt-1 flex flex-wrap items-center gap-2 text-xs"><span className={`rounded-full px-2 py-0.5 font-semibold ${statusClass[listing.status]}`}>{labels[listing.status]}</span><span className="text-muted-foreground">{count} commande{count === 1 ? "" : "s"}</span><span className="font-semibold text-primary">{money(amount)}</span></div></div><Button asChild variant="outline" size="sm" className="w-full sm:w-auto"><a href={marketplaceProductUrl(listing.id)} target="_blank" rel="noreferrer"><ExternalLink /> Voir la fiche</a></Button></article>)}</div>}
       </section>
 
       {openOrder && <OrderDetailModal line={openOrder} onClose={() => setOpenOrder(null)} onChanged={() => void load()} />}

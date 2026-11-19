@@ -83,12 +83,12 @@ function LivraisonPage() {
         ) : shown.length === 0 ? (
           <div className="flex flex-col items-center gap-2 py-10 text-center text-sm text-muted-foreground"><Inbox size={28} />Aucune commande à cette étape.</div>
         ) : (
-          <div className="space-y-3">
+          <div className="grid grid-cols-[minmax(0,1fr)] gap-3">
             {shown.map((o) => (
               <button key={o.order_id} onClick={() => setOpen(o.first)} className="w-full text-left border border-border rounded-2xl p-4 flex flex-col gap-3 sm:flex-row sm:items-center hover:border-primary/50 transition">
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2 mb-1">
-                    <span className="font-bold">#{o.order_number}</span>
+                    <span className="truncate font-bold">#{o.order_number}</span>
                     <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${ORDER_STATUS[o.status]?.cls ?? ""}`}>{ORDER_STATUS[o.status]?.label ?? o.status}</span>
                   </div>
                   <p className="text-sm text-muted-foreground flex items-center gap-1.5 min-w-0"><MapPin size={12} className="shrink-0" /><span className="truncate">{o.customer} — {o.area || "Adresse non précisée"}</span></p>

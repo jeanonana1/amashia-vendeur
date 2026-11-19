@@ -1,5 +1,6 @@
 import { ShieldCheck, Lock, BadgeCheck, Headphones } from "lucide-react";
 import { Container, SectionHeading } from "@/components/seller/site/ui";
+import { Reveal } from "@/components/seller/site/motion";
 
 /** Confiance : ce qu'Amashia garantit aux vendeurs et à leurs clients. */
 export function Trust() {
@@ -13,15 +14,15 @@ export function Trust() {
     <section className="relative py-24 md:py-32">
       <Container>
         <div className="grid gap-12 lg:grid-cols-[1fr_1.2fr] lg:items-center">
-          <SectionHeading center={false} eyebrow="Confiance" title={<>Concentrez-vous sur vos produits. <span className="text-gradient">On sécurise le reste.</span></>}
-            text="Amashia gère l'encaissement, la livraison et le service client : vous gardez le temps de faire grandir votre boutique." />
+          <Reveal variant="left"><SectionHeading center={false} eyebrow="Confiance" title={<>Concentrez-vous sur vos produits. <span className="text-gradient">On sécurise le reste.</span></>}
+            text="Amashia gère l'encaissement, la livraison et le service client : vous gardez le temps de faire grandir votre boutique." /></Reveal>
           <div className="grid gap-4 sm:grid-cols-2">
-            {items.map((x) => (
-              <div key={x.t} className="rounded-[1.4rem] border border-border bg-card p-6 shadow-card">
-                <x.icon className="text-primary" size={22} />
+            {items.map((x, i) => (
+              <Reveal key={x.t} variant={i % 2 ? "right" : "up"} delay={i * 120} className="group rounded-[1.4rem] border border-border bg-card p-6 shadow-card transition-colors hover:border-primary/40">
+                <span className="halo grid h-11 w-11 place-items-center rounded-xl bg-primary/12 text-primary" style={{ animationDelay: `${i * 0.6}s` }}><x.icon size={22} /></span>
                 <p className="mt-4 font-bold">{x.t}</p>
                 <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{x.d}</p>
-              </div>
+              </Reveal>
             ))}
           </div>
         </div>

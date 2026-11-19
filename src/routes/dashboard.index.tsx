@@ -202,7 +202,7 @@ function DashboardOverview() {
             })}
           </ul>
           <div className="hidden overflow-x-auto sm:block">
-            <table className="w-full min-w-[640px] text-sm">
+            <table className="amx-table min-w-[640px] text-sm">
               <thead>
                 <tr className="border-b border-border text-[11px] uppercase text-muted-foreground">
                   <th className="py-3 text-left font-semibold">Commande</th>

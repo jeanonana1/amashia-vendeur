@@ -26,7 +26,7 @@ export function SectionHeading({ eyebrow, title, text, center = true }: { eyebro
   );
 }
 
-export function PrimaryCta({ to = "/inscription", children = "Ouvrir ma boutique", className = "" }: { to?: string; children?: ReactNode; className?: string }) {
+export function PrimaryCta({ to = "/inscription", children = "Créer ma boutique", className = "" }: { to?: string; children?: ReactNode; className?: string }) {
   return (
     <Link to={to as never} className={`group inline-flex h-12 items-center justify-center gap-2 rounded-full bg-primary px-6 text-[15px] font-bold text-black shadow-[0_10px_40px_-12px_var(--glow)] transition hover:bg-[#ff7a1f] ${className}`}>
       {children}

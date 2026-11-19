@@ -31,7 +31,7 @@ function left(iso: string) {
   return d >= 1 ? `${d} j ${h % 24} h restants` : `${h} h ${Math.floor((ms % 3_600_000) / 60_000)} min restantes`;
 }
 
-export function FlashSales() {
+export function FlashSales({ openSignal = 0 }: { openSignal?: number }) {
   const [list, setList] = useState<Flash[] | null>(null);
   const [products, setProducts] = useState<MyProduct[]>([]);
   const [form, setForm] = useState<{ productId: string; kind: "percent" | "fixed"; value: string; start: string; end: string } | null>(null);
@@ -55,6 +55,13 @@ export function FlashSales() {
     const now = new Date(); const end = new Date(now.getTime() + 24 * 3_600_000);
     setForm({ productId: products[0]?.id ?? "", kind: "percent", value: "20", start: localInput(now), end: localInput(end) });
   }
+  // bouton « Nouvelle vente flash » de l'en-tête de la page
+  useEffect(() => {
+    if (!openSignal) return;
+    if (!products.length) { toast.info("Publiez d'abord un produit sur Amashia pour créer une vente flash."); return; }
+    openNew();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [openSignal]);
 
   const product = products.find((p) => p.id === form?.productId);
   const value = Number(form?.value) || 0;
@@ -101,7 +108,7 @@ export function FlashSales() {
           <h3 className="font-bold">Mes ventes flash</h3>
           <p className="text-xs text-muted-foreground">Un prix réduit pendant une durée limitée, avec un compte à rebours sur la page du produit.</p>
         </div>
-        <button onClick={openNew} disabled={!products.length} className="flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-black disabled:opacity-50"><Plus size={14} /> Nouvelle vente flash</button>
+        <button onClick={openNew} disabled={!products.length} className="hidden sm:flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-black disabled:opacity-50"><Plus size={14} /> Nouvelle vente flash</button>
       </div>
       {list === null ? (
         <div className="h-28 animate-pulse rounded-xl bg-secondary/40" />

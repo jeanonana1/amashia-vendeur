@@ -10,6 +10,7 @@ import { soundEnabled, setSoundEnabled } from "@/lib/sound";
 import { money } from "@/lib/sellerStats";
 import { PhoneInput } from "@/components/seller/PhoneInput";
 import { cmDigits, cmPhoneError, formatCm, toE164 } from "@/lib/phone";
+import { TableScroll } from "@/components/seller/ui/SpecTable";
 import { Select } from "@/components/ui/app-select";
 
 export const Route = createFileRoute("/dashboard/parametres")({
@@ -87,17 +88,19 @@ function ParametresPage() {
 
   return (
     <DashboardLayout title="Paramètres" subtitle="Votre compte, vos préférences et votre sécurité">
-      <div className="grid lg:grid-cols-4 gap-6">
-        <aside className="bg-card border border-border rounded-2xl p-3 space-y-1 h-fit">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-4">
+        <aside className="h-fit min-w-0 rounded-2xl border border-border bg-card p-2 lg:space-y-1 lg:p-3">
+          <div className="flex gap-1 overflow-x-auto [scrollbar-width:none] lg:block lg:space-y-1">
           {TABS.map((t) => (
-            <button key={t.id} onClick={() => setTab(t.id)} className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition ${tab === t.id ? "bg-primary/15 text-primary font-semibold" : "text-muted-foreground hover:bg-secondary"}`}>
+            <button key={t.id} onClick={() => setTab(t.id)} className={`flex shrink-0 items-center gap-2 whitespace-nowrap rounded-xl px-3 py-2.5 text-sm transition lg:w-full lg:gap-3 ${tab === t.id ? "bg-primary/15 text-primary font-semibold" : "text-muted-foreground hover:bg-secondary"}`}>
               <t.icon size={16} /> {t.label}
             </button>
           ))}
-          <p className="px-3 pt-3 text-[11px] text-muted-foreground">Ces informations sont privées : elles ne sont jamais affichées sur le site client.</p>
+          </div>
+          <p className="hidden px-3 pt-3 text-[11px] text-muted-foreground lg:block">Ces informations sont privées : elles ne sont jamais affichées sur le site client.</p>
         </aside>
 
-        <div className="lg:col-span-3 bg-card border border-border rounded-2xl p-6">
+        <div className="min-w-0 rounded-2xl border border-border bg-card p-4 sm:p-6 lg:col-span-3">
           {!p ? (
             <div className="grid h-40 place-items-center"><Loader2 className="animate-spin text-muted-foreground" /></div>
           ) : (
@@ -275,16 +278,17 @@ function PrefsTab({ p, save }: { p: Profile; save: SaveFn }) {
 }
 
 function BillingTab({ uid, p, save }: { uid: string; p: Profile; save: SaveFn }) {
-  const [f, setF] = useState({ payment_method: p.payment_method || PAYMENT_METHODS[0], niu: p.niu });
-  const [withdrawals, setWithdrawals] = useState<{ id: string; amount: number; method: string | null; status: string; created_at: string }[] | null>(null);
+  const [f, setF] = useState({ payment_method: p.payment_method || PAYMENT_METHODS[0], niu: p.niu ?? "" });
+  const [withdrawals, setWithdrawals] = useState<{ id: string; amount: number; method: unknown; status: string; created_at: string }[] | null>(null);
   useEffect(() => {
     void db.from("seller_withdrawals").select("id, amount, method, status, created_at").eq("user_id", uid).order("created_at", { ascending: false }).limit(20)
       .then(({ data }: { data: any[] | null }) => setWithdrawals(data ?? []));
   }, [uid]);
   const STATUS: Record<string, string> = { pending: "En cours", paid: "Payé", rejected: "Refusé", cancelled: "Annulé" };
+  const STATUS_CLS: Record<string, string> = { pending: "bg-amber-500/15 text-amber-400", paid: "bg-emerald-500/15 text-emerald-400", rejected: "bg-red-500/15 text-red-400", cancelled: "bg-secondary text-muted-foreground" };
   return (
     <div className="space-y-6">
-      <form onSubmit={(e) => { e.preventDefault(); void save({ payment_method: f.payment_method, niu: f.niu.trim() }, "Informations de paiement enregistrées"); }} className="space-y-4">
+      <form onSubmit={(e) => { e.preventDefault(); void save({ payment_method: f.payment_method, niu: (f.niu ?? "").trim() }, "Informations de paiement enregistrées"); }} className="space-y-4">
         <h3 className="font-bold text-lg">Paiements & facturation</h3>
         <div className="grid md:grid-cols-2 gap-4">
           <label className="block"><span className="block text-sm mb-2">Moyen de paiement préféré pour vos retraits</span>
@@ -299,14 +303,21 @@ function BillingTab({ uid, p, save }: { uid: string; p: Profile; save: SaveFn })
         {withdrawals === null ? <div className="h-16 animate-pulse rounded-xl bg-secondary/40" /> : withdrawals.length === 0 ? (
           <p className="text-sm text-muted-foreground">Aucun retrait pour le moment.</p>
         ) : (
-          <div className="divide-y divide-border rounded-xl border border-border">
-            {withdrawals.map((w) => (
-              <div key={w.id} className="flex items-center justify-between gap-3 p-3 text-sm">
-                <div><p className="font-semibold">{money(Number(w.amount))}</p><p className="text-xs text-muted-foreground">{new Date(w.created_at).toLocaleDateString("fr-FR")} · {w.method || "—"}</p></div>
-                <span className="rounded-full bg-secondary px-2.5 py-1 text-xs">{STATUS[w.status] ?? w.status}</span>
-              </div>
-            ))}
-          </div>
+          <TableScroll minWidth={440} className="max-h-[420px] overflow-y-auto">
+            <table className="amx-table text-sm">
+              <thead><tr><th>Date</th><th>Vers</th><th className="text-right">Montant</th><th className="text-right">Statut</th></tr></thead>
+              <tbody>
+                {withdrawals.map((w) => (
+                  <tr key={w.id}>
+                    <td className="whitespace-nowrap text-muted-foreground">{new Date(w.created_at).toLocaleDateString("fr-FR")}</td>
+                    <td className="max-w-[180px] truncate">{methodLabel(w.method)}</td>
+                    <td className="whitespace-nowrap text-right font-semibold tabular-nums">{money(Number(w.amount))}</td>
+                    <td className="text-right"><span className={`whitespace-nowrap rounded-full px-2.5 py-1 text-[11px] font-semibold ${STATUS_CLS[w.status] ?? "bg-secondary"}`}>{STATUS[w.status] ?? w.status}</span></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </TableScroll>
         )}
       </div>
     </div>
@@ -343,9 +354,18 @@ function HelpTab() {
       {list.length > 0 && (
         <div className="border-t border-border pt-5">
           <p className="mb-3 font-semibold">Mes demandes</p>
-          <div className="divide-y divide-border rounded-xl border border-border">
-            {list.map((r) => <div key={r.id} className="flex items-center justify-between gap-3 p-3 text-sm"><div><p className="font-medium">{r.subject}</p><p className="text-xs text-muted-foreground">{new Date(r.created_at).toLocaleDateString("fr-FR")}</p></div><span className="rounded-full bg-secondary px-2.5 py-1 text-xs">{STATUS[r.status] ?? r.status}</span></div>)}
-          </div>
+          <TableScroll minWidth={360} className="max-h-[360px] overflow-y-auto">
+            <table className="amx-table text-sm">
+              <thead><tr><th>Sujet</th><th>Date</th><th className="text-right">Statut</th></tr></thead>
+              <tbody>{list.map((r) => (
+                <tr key={r.id}>
+                  <td className="max-w-[220px] truncate font-medium">{r.subject}</td>
+                  <td className="whitespace-nowrap text-muted-foreground">{new Date(r.created_at).toLocaleDateString("fr-FR")}</td>
+                  <td className="text-right"><span className="whitespace-nowrap rounded-full bg-secondary px-2.5 py-1 text-[11px]">{STATUS[r.status] ?? r.status}</span></td>
+                </tr>
+              ))}</tbody>
+            </table>
+          </TableScroll>
         </div>
       )}
     </div>
@@ -358,4 +378,14 @@ function Toggle({ on, onChange }: { on: boolean; onChange: (v: boolean) => void 
       <span className={`absolute top-1 w-5 h-5 rounded-full bg-white transition-all ${on ? "left-6" : "left-1"}`} />
     </button>
   );
+}
+
+/** Le moyen de retrait est enregistré comme un objet (type, numéro…) : on l'affiche en texte. */
+function methodLabel(m: unknown): string {
+  if (!m) return "—";
+  if (typeof m === "string") return m;
+  const o = m as { kind?: string; label?: string; account_number?: string; bank_name?: string };
+  const kinds: Record<string, string> = { orange_money: "Orange Money", mtn_momo: "MTN MoMo", bank: "Virement bancaire" };
+  const num = o.account_number ? ` · •••• ${String(o.account_number).slice(-4)}` : "";
+  return `${o.label || kinds[o.kind ?? ""] || o.bank_name || "Compte"}${num}`;
 }

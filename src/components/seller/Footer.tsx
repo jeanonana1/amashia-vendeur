@@ -6,7 +6,7 @@ const CLIENT = "https://amashia-client.vercel.app";
 export function Footer() {
   const cols = [
     { title: "Produit", links: [
-      { label: "Fonctionnalités", to: "/fonctionnalites" }, { label: "Comment ça marche", to: "/comment-ca-marche" }, { label: "Tarifs et commissions", to: "/tarification" }, { label: "Ouvrir ma boutique", to: "/inscription" },
+      { label: "Fonctionnalités", to: "/fonctionnalites" }, { label: "Comment ça marche", to: "/comment-ca-marche" }, { label: "Tarifs et commissions", to: "/tarification" }, { label: "Créer ma boutique", to: "/inscription" },
     ] },
     { title: "Vendeurs", links: [
       { label: "Se connecter", to: "/connexion" }, { label: "Tableau de bord", to: "/dashboard" },

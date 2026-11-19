@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Calculator } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { SpecTable } from "@/components/seller/ui/SpecTable";
 import { Select } from "@/components/ui/app-select";
 
 export type Rate = { slug: string; name: string; rate: number };
@@ -41,13 +42,11 @@ export function CommissionCalculator({ rates }: { rates: Rate[] | null }) {
           </Select>
         </label>
       </div>
-      <div className="mt-6 space-y-3 rounded-2xl bg-[var(--surface-2)] p-5">
-        <div className="flex flex-wrap justify-between gap-x-3 gap-y-0.5 text-sm"><span className="text-muted-foreground">Prix payé par le client</span><span className="tabular whitespace-nowrap font-semibold">{fcfa(p)}</span></div>
-        <div className="flex flex-wrap justify-between gap-x-3 gap-y-0.5 text-sm"><span className="text-muted-foreground">Commission Amashia ({rate} %)</span><span className="tabular whitespace-nowrap font-semibold">− {fcfa(fee)}</span></div>
-        <div className="flex flex-col gap-1 border-t border-border pt-3 sm:flex-row sm:items-end sm:justify-between">
-          <span className="font-semibold">Vous recevez</span>
-          <span className="tabular whitespace-nowrap text-[1.9rem] font-extrabold leading-none text-primary sm:text-3xl">{Math.round(p - fee).toLocaleString("fr-FR")}<sup className="ml-1 align-super text-xs font-bold">FCFA</sup></span>
-        </div>
+      <div className="mt-6">
+        <SpecTable ops minWidth={280} rows={[
+          { label: "Prix payé par le client", op: "+", value: fcfa(p) },
+          { label: `Commission Amashia (${rate} %)`, op: "−", value: fcfa(fee) },
+        ]} total={{ label: "Vous recevez", value: <span className="text-lg sm:text-xl">{Math.round(p - fee).toLocaleString("fr-FR")}<sup className="ml-1 text-[10px] font-bold">FCFA</sup></span> }} />
       </div>
       <p className="mt-3 text-xs text-muted-foreground">Taux réels de la catégorie, appliqués uniquement aux commandes livrées. Les frais de livraison sont payés par le client.</p>
     </div>

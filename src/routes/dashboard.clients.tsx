@@ -4,6 +4,7 @@ import { DashboardLayout } from "@/components/seller/dashboard/DashboardLayout";
 import { Search, X, MapPin, ShoppingBag, Wallet, Calendar, Users, Repeat } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { dateTime, money, num } from "@/lib/sellerStats";
+import { SpecTable } from "@/components/seller/ui/SpecTable";
 import { Select } from "@/components/ui/app-select";
 
 export const Route = createFileRoute("/dashboard/clients")({
@@ -130,7 +131,7 @@ function ClientsPage() {
             })}
           </ul>
           <div className="hidden overflow-x-auto sm:block">
-            <table className="w-full min-w-[640px] text-sm">
+            <table className="amx-table min-w-[640px] text-sm">
               <thead>
                 <tr className="border-b border-border text-[11px] uppercase text-muted-foreground">
                   <th className="py-3 text-left font-semibold">Client</th>
@@ -181,12 +182,12 @@ function ClientsPage() {
               </div>
               <button onClick={() => setSelected(null)} className="grid h-8 w-8 shrink-0 place-items-center rounded-full hover:bg-secondary" aria-label="Fermer"><X size={16} /></button>
             </div>
-            <div className="grid grid-cols-2 gap-3 text-sm">
-              <Detail icon={ShoppingBag} label="Commandes" value={String(selected.orders)} />
-              <Detail icon={Wallet} label="Total dépensé" value={money(selected.spent)} />
-              <Detail icon={Calendar} label="Premier achat" value={dateTime(selected.first_order)} />
-              <Detail icon={Calendar} label="Dernier achat" value={dateTime(selected.last_order)} />
-            </div>
+            <SpecTable head={["Information", "Détail"]} minWidth={260} rows={[
+              { label: "Commandes", value: String(selected.orders) },
+              { label: "Total dépensé", value: <Val v={money(selected.spent)} /> },
+              { label: "Premier achat", value: dateTime(selected.first_order) },
+              { label: "Dernier achat", value: dateTime(selected.last_order) },
+            ]} />
             <div className="mt-4">
               <p className="mb-2 text-xs font-semibold text-muted-foreground">Toutes ses commandes ({selected.order_list?.length ?? 0})</p>
               <div className="max-h-64 space-y-2 overflow-y-auto pr-1">
@@ -227,14 +228,6 @@ function Kpi({ icon: Icon, label, value }: { icon: typeof Users; label: string; 
   );
 }
 
-function Detail({ icon: Icon, label, value }: { icon: typeof Users; label: string; value: string }) {
-  return (
-    <div className="min-w-0 rounded-xl bg-secondary/40 p-3">
-      <p className="flex items-center gap-1.5 text-[11px] text-muted-foreground"><Icon size={12} className="shrink-0" /> {label}</p>
-      <p className="mt-0.5 break-words text-sm font-semibold tabular-nums"><Val v={value} /></p>
-    </div>
-  );
-}
 
 /** Montant : la devise est affichée plus petite pour que le chiffre tienne dans sa case. */
 function Val({ v }: { v: string }) {

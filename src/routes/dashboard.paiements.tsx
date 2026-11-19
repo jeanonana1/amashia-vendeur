@@ -9,6 +9,7 @@ import { dateTime, money, useSellerStats } from "@/lib/sellerStats";
 import { PhoneInput } from "@/components/seller/PhoneInput";
 import { cmDigits, cmPhoneError, formatCm, toE164 } from "@/lib/phone";
 import { Select } from "@/components/ui/app-select";
+import { BalanceCard, primaryBtn, ghostBtn } from "@/components/seller/ui/BalanceCard";
 
 export const Route = createFileRoute("/dashboard/paiements")({
   head: () => ({ meta: [{ title: "Paiements — Amashia Seller" }, { name: "description", content: "Paiements : votre espace vendeur Amashia pour gérer votre activité." }, { property: "og:title", content: "Paiements — Amashia Seller" }, { property: "og:description", content: "Paiements : votre espace vendeur Amashia pour gérer votre activité." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
@@ -85,48 +86,24 @@ function PaiementsPage() {
 
   return (
     <DashboardLayout title="Paiements" subtitle="Votre solde, vos moyens de retrait et l'historique de vos gains">
-      {/* Solde disponible */}
-      <section className="relative mb-6 overflow-hidden rounded-[1.5rem] border border-border bg-card shadow-card">
-        <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-primary/20 blur-3xl" />
-        <div className="pointer-events-none absolute inset-0 bg-grid opacity-40" />
-        <div className="relative grid grid-cols-[minmax(0,1fr)] gap-6 p-5 sm:p-7 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)] lg:items-center">
-          <div className="min-w-0">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="grid h-9 w-9 place-items-center rounded-xl bg-primary text-black"><Wallet size={18} /></span>
-              <span className="text-sm font-semibold text-muted-foreground">Solde disponible</span>
-              <span className="ml-auto rounded-full border border-border bg-background/60 px-2.5 py-1 text-[10px] font-semibold text-muted-foreground">Retrait dès 1 000 FCFA</span>
-            </div>
-            <p className="mt-4 flex items-start gap-1 font-extrabold tabular-nums leading-none tracking-tight">
-              <span className="text-[2.6rem] sm:text-5xl">{stats ? Math.round(balance).toLocaleString("fr-FR") : "…"}</span>
-              <span className="mt-1 text-xs font-bold text-primary sm:text-sm">FCFA</span>
-            </p>
-            <p className="mt-2 text-xs text-muted-foreground">Ventes livrées, moins les retraits demandés ou déjà payés.</p>
-            <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:items-center">
-              <button
-                onClick={() => (methods.length ? setOpenWithdraw(true) : (toast.info("Ajoutez d'abord un moyen de retrait."), setOpenMethod(true)))}
-                disabled={!stats || balance < 1000}
-                className="flex h-12 items-center justify-center gap-2 rounded-full bg-primary px-6 text-sm font-bold text-black shadow-[0_10px_30px_-10px_var(--primary)] transition hover:brightness-95 disabled:opacity-50 disabled:shadow-none"
-              >
-                <ArrowDownToLine size={16} /> Retirer mon argent
-              </button>
-              <Link to="/dashboard/commissions" className="flex h-12 items-center justify-center gap-1.5 rounded-full border border-border px-5 text-sm font-semibold hover:border-primary hover:text-primary">
-                Détail des commissions <ArrowUpRight size={14} />
-              </Link>
-            </div>
-            {stats && balance < 1000 && <p className="mt-2 text-[11px] text-muted-foreground">Il vous manque {money(1000 - balance)} pour pouvoir retirer.</p>}
-          </div>
+      <BalanceCard
+        amount={balance}
+        loading={!stats}
+        chip="Retrait dès 1 000 FCFA"
+        subtitle="Ventes livrées, moins les retraits demandés ou déjà payés."
+        actions={<>
+          <button onClick={() => (methods.length ? setOpenWithdraw(true) : (toast.info("Ajoutez d'abord un moyen de retrait."), setOpenMethod(true)))} disabled={!stats || balance < 1000} className={primaryBtn}><ArrowDownToLine size={16} /> Retirer mon argent</button>
+          <Link to="/dashboard/commissions" className={ghostBtn}>Détail des commissions <ArrowUpRight size={14} /></Link>
+        </>}
+        footer={stats && balance < 1000 ? <p className="mt-2 text-[11px] text-muted-foreground">Il vous manque {money(1000 - balance)} pour pouvoir retirer.</p> : null}
+        lines={[
+          { icon: Clock, tone: "text-amber-400 bg-amber-500/12", label: "En attente de livraison", hint: "Ventes pas encore livrées (après commission)", value: stats?.pending_balance ?? 0 },
+          { icon: ArrowDownToLine, tone: "text-sky-400 bg-sky-500/12", label: "Retraits en cours", hint: "En cours de traitement par Amashia", value: pendingOut },
+          { icon: CheckCircle2, tone: "text-emerald-400 bg-emerald-500/12", label: "Déjà versé", hint: "Retraits payés sur votre compte", value: paidOut },
+        ]}
+        note="Ce solde vous appartient entièrement : la commission Amashia a déjà été prélevée sur chaque vente."
+      />
 
-          <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-px overflow-hidden rounded-2xl border border-border bg-border">
-            <BalanceRow icon={Clock} tone="text-amber-400 bg-amber-500/12" label="En attente de livraison" hint="Ventes pas encore livrées (après commission)" value={stats?.pending_balance ?? 0} />
-            <BalanceRow icon={ArrowDownToLine} tone="text-sky-400 bg-sky-500/12" label="Retraits en cours" hint="En cours de traitement par Amashia" value={pendingOut} />
-            <BalanceRow icon={CheckCircle2} tone="text-emerald-400 bg-emerald-500/12" label="Déjà versé" hint="Retraits payés sur votre compte" value={paidOut} />
-          </div>
-        </div>
-        <p className="relative flex items-start gap-2 border-t border-border bg-background/40 px-5 py-3 text-[11px] text-muted-foreground sm:px-7">
-          <BadgeCheck size={14} className="mt-px shrink-0 text-primary" />
-          Ce solde vous appartient entièrement : la commission Amashia a déjà été prélevée sur chaque vente.
-        </p>
-      </section>
 
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
         <div className="min-w-0 rounded-2xl border border-border bg-card p-4 sm:p-6 lg:col-span-2">
@@ -233,18 +210,6 @@ function TxList({ txs }: { txs: { id: string; credit: boolean; desc: string; amo
   );
 }
 
-function BalanceRow({ icon: Icon, tone, label, hint, value }: { icon: typeof Clock; tone: string; label: string; hint: string; value: number }) {
-  return (
-    <div className="flex items-center gap-3 bg-card px-4 py-3.5">
-      <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-xl ${tone}`}><Icon size={16} /></span>
-      <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-semibold">{label}</p>
-        <p className="truncate text-[11px] text-muted-foreground">{hint}</p>
-      </div>
-      <p className="shrink-0 whitespace-nowrap text-right font-extrabold tabular-nums">{Math.round(value).toLocaleString("fr-FR")}<span className="ml-0.5 align-super text-[9px] text-muted-foreground">FCFA</span></p>
-    </div>
-  );
-}
 
 
 function Modal({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {

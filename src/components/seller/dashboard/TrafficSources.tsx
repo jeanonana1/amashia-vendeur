@@ -103,7 +103,7 @@ export function TrafficSources({ days, period }: { days: number; period: string 
             })}
           </ul>
           <div className="hidden overflow-x-auto sm:block">
-            <table className="w-full min-w-[640px] text-sm">
+            <table className="amx-table min-w-[640px] text-sm">
               <thead>
                 <tr className="text-left text-xs text-muted-foreground">
                   <th className="pb-3 font-medium">Source</th>

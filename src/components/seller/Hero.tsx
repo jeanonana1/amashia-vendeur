@@ -1,4 +1,5 @@
-import { Bike, Bell, Sparkles, Smartphone, ShieldCheck, Truck, Wallet, BadgeCheck, Star } from "lucide-react";
+import { Bike, Bell, Sparkles, Smartphone, ShieldCheck, Truck, Wallet, BadgeCheck } from "lucide-react";
+import { useEffect, useState } from "react";
 import { Backdrop, Container, Eyebrow, GhostCta, PrimaryCta } from "@/components/seller/site/ui";
 
 /** Page d'accueil — en-tête : promesse + maquette animée de l'espace vendeur. */
@@ -17,7 +18,7 @@ export function Hero() {
             Publiez vos produits en quelques minutes, recevez vos commandes en temps réel. Le paiement et la livraison sont gérés par Amashia, de votre boutique jusqu'au client.
           </p>
           <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <PrimaryCta className="w-full sm:w-auto">Ouvrir ma boutique gratuitement</PrimaryCta>
+            <PrimaryCta className="w-full sm:w-auto">Créer ma boutique gratuitement</PrimaryCta>
             <GhostCta to="/comment-ca-marche" className="w-full sm:w-auto">Voir comment ça marche</GhostCta>
           </div>
           <ul className="mx-auto mt-8 flex max-w-2xl flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-muted-foreground">
@@ -33,17 +34,12 @@ export function Hero() {
   );
 }
 
-/** Maquette (illustration) de l'espace vendeur, animée. */
+/** Maquette (illustration) de l'espace vendeur : le graphique des ventes s'anime en boucle. */
 function ProductMock() {
-  const bars = [38, 52, 44, 61, 57, 74, 69, 88, 80, 96, 90, 100];
   return (
     <div className="relative mx-auto mt-16 max-w-5xl animate-rise" style={{ animationDelay: "0.15s" }}>
-      <div className="glow-orb animate-breathe absolute -inset-x-10 -top-10 bottom-0 -z-10 opacity-80" />
+      <div className="glow-orb absolute -inset-x-10 -top-10 bottom-0 -z-10 opacity-70" />
       <div className="ring-gradient relative overflow-hidden rounded-[1.6rem] border border-border bg-card shadow-card">
-        {/* reflet qui balaie la maquette */}
-        <div aria-hidden className="pointer-events-none absolute inset-0 z-10 overflow-hidden">
-          <div className="animate-shimmer absolute inset-y-0 -left-1/3 w-1/3 bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" style={{ animationDelay: "1.5s", animationDuration: "5s" }} />
-        </div>
         {/* barre de fenêtre */}
         <div className="flex items-center gap-2 border-b border-border px-4 py-3">
           <span className="h-3 w-3 rounded-full bg-[#ff5f57]" /><span className="h-3 w-3 rounded-full bg-[#febc2e]" /><span className="h-3 w-3 rounded-full bg-[#28c840]" />
@@ -55,42 +51,107 @@ function ProductMock() {
               <div key={n} className={`mb-1 rounded-lg px-3 py-2 text-xs animate-rise ${i === 0 ? "bg-primary/12 font-semibold text-primary" : "text-muted-foreground"}`} style={{ animationDelay: `${0.3 + i * 0.06}s` }}>{n}</div>
             ))}
           </aside>
-          <div className="p-4 sm:p-6">
-            <div className="flex items-center justify-between">
-              <div className="text-left">
-                <p className="text-[11px] text-muted-foreground">Bonjour 👋</p>
-                <p className="text-base font-bold sm:text-lg">Votre boutique aujourd'hui</p>
-              </div>
-              <span className="flex items-center gap-1.5 rounded-full bg-emerald-500/12 px-2.5 py-1 text-[11px] font-semibold text-emerald-500"><span className="relative flex h-2 w-2"><span className="animate-ping-soft absolute inline-flex h-full w-full rounded-full bg-emerald-500" /><span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" /></span>En direct</span>
-            </div>
-            <div className="mt-4 grid grid-cols-3 gap-2 sm:gap-3">
-              {[{ l: "Ventes", w: "72%", c: "bg-primary" }, { l: "Commandes", w: "58%", c: "bg-emerald-500" }, { l: "Visiteurs", w: "84%", c: "bg-sky-400" }].map((k, i) => (
-                <div key={k.l} className="rounded-xl border border-border bg-[var(--surface-2)] p-3 text-left">
-                  <p className="text-[10px] text-muted-foreground sm:text-[11px]">{k.l}</p>
-                  <div className="mt-2.5 h-2 w-full overflow-hidden rounded-full bg-secondary"><div className={`animate-width h-2 rounded-full ${k.c}`} style={{ width: k.w, animationDelay: `${0.6 + i * 0.15}s` }} /></div>
-                </div>
-              ))}
-            </div>
-            <div className="mt-3 rounded-xl border border-border bg-[var(--surface-2)] p-3 sm:p-4">
-              <div className="flex items-end gap-1.5 sm:gap-2" style={{ height: 120 }}>
-                {bars.map((h, i) => (
-                  <div key={i} className="animate-bar flex-1 rounded-t-md bg-gradient-to-t from-primary/25 to-primary" style={{ height: `${h}%`, opacity: 0.45 + i * 0.045, animationDelay: `${0.5 + i * 0.07}s` }}>
-                    <div className="animate-breathe h-full w-full rounded-t-md" style={{ animationDelay: `${i * 0.25}s` }} />
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
+          <LiveChart />
         </div>
       </div>
 
-      {/* bulles flottantes : apparition « pop », puis flottement continu */}
+      {/* bulles flottantes */}
       <FloatCard className="-left-1 -top-6 sm:left-[-2.5rem] sm:top-24" delay={0.9} dur={5} icon={<Bell size={16} />} tone="bg-primary text-black" title="Nouvelle commande" text="Sonnerie dans votre espace" />
-      <FloatCard className="right-1 top-36 sm:right-[-2.5rem] sm:top-44" delay={1.3} dur={6} icon={<Bike size={16} />} tone="bg-sky-500 text-white" title="Livreur Prime en route" text="Récupération chez vous" />
+      <FloatCard className="hidden sm:flex sm:right-[-2.5rem] sm:top-40" delay={1.3} dur={6} icon={<Bike size={16} />} tone="bg-sky-500 text-white" title="Livreur Prime en route" text="Récupération chez vous" />
       <FloatCard className="bottom-[-1.5rem] left-1/2 -translate-x-1/2 sm:left-[16%] sm:translate-x-0" delay={1.7} dur={5.5} icon={<Wallet size={16} />} tone="bg-emerald-500 text-white" title="Commande livrée" text="Le montant passe dans votre solde" />
-      <FloatCard className="hidden lg:flex -right-14 bottom-16" delay={2.1} dur={6.5} icon={<Star size={16} />} tone="bg-amber-400 text-black" title="Nouvel avis ★★★★★" text="Laissé par un acheteur vérifié" />
-      <FloatCard className="hidden lg:flex -left-16 bottom-24" delay={2.5} dur={7} icon={<Smartphone size={16} />} tone="bg-[#ffcc00] text-black" title="Paiement Mobile Money" text="Encaissé par Amashia" />
-      <p className="mt-20 text-center text-[11px] text-muted-foreground sm:mt-16">Illustration de l'espace vendeur</p>
+      <p className="mt-24 text-center text-[11px] text-muted-foreground sm:mt-16">Illustration de l'espace vendeur (exemple)</p>
+    </div>
+  );
+}
+
+/* Trois séries d'exemple : le graphique « bascule » de l'une à l'autre à chaque cycle. */
+const SERIES = [
+  { label: "Cette semaine", days: ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"], h: [34, 52, 46, 68, 61, 88, 79] },
+  { label: "Semaine dernière", days: ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"], h: [28, 41, 57, 50, 72, 66, 94] },
+  { label: "Il y a 2 semaines", days: ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"], h: [45, 39, 63, 58, 77, 92, 84] },
+];
+const PER_POINT = 2500; // 1 % de hauteur = 2 500 FCFA (exemple)
+const fmt = (n: number) => Math.round(n).toLocaleString("fr-FR");
+
+function LiveChart() {
+  const [set, setSet] = useState(0);
+  const [step, setStep] = useState(0); // nombre de barres déjà montées
+  const n = SERIES[0].h.length;
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) { setStep(n); return; }
+    const t = window.setInterval(() => {
+      setStep((s) => {
+        if (s >= n + 5) { setSet((k) => (k + 1) % SERIES.length); return 0; }
+        return s + 1;
+      });
+    }, 650);
+    return () => window.clearInterval(t);
+  }, [n]);
+  const serie = SERIES[set];
+  const reached = serie.h.slice(0, Math.min(step, n));
+  const total = reached.reduce((a, b) => a + b, 0) * PER_POINT;
+  const orders = reached.reduce((a, b) => a + Math.round(b / 9), 0);
+  const visitors = reached.reduce((a, b) => a + b * 6, 0);
+  const done = step >= n;
+  const maxI = serie.h.indexOf(Math.max(...serie.h));
+  const bubbleI = done ? maxI : step - 1;
+  // tracé de la courbe qui relie le sommet des barres atteintes
+  const pts = reached.map((h, i) => `${((i + 0.5) / n) * 100},${100 - h}`).join(" ");
+
+  return (
+    <div className="p-4 sm:p-6">
+      <div className="flex items-center justify-between gap-2">
+        <div className="min-w-0 text-left">
+          <p className="text-[11px] text-muted-foreground">Bonjour 👋</p>
+          <p className="truncate text-base font-bold sm:text-lg">Vos ventes · <span key={set} className="tick-flip inline-block text-primary">{serie.label}</span></p>
+        </div>
+        <span className="flex shrink-0 items-center gap-1.5 rounded-full bg-emerald-500/12 px-2.5 py-1 text-[11px] font-semibold text-emerald-500"><span className="relative flex h-2 w-2"><span className="animate-ping-soft absolute inline-flex h-full w-full rounded-full bg-emerald-500" /><span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" /></span>En direct</span>
+      </div>
+
+      <div className="mt-4 grid grid-cols-3 gap-2 sm:gap-3">
+        {[
+          { l: "Ventes", v: total >= 1e6 ? `${(total / 1e6).toFixed(2).replace(".", ",")} M` : fmt(total), unit: "FCFA", c: "text-primary" },
+          { l: "Commandes", v: fmt(orders), unit: "", c: "text-emerald-500" },
+          { l: "Visiteurs", v: fmt(visitors), unit: "", c: "text-sky-400" },
+        ].map((k) => (
+          <div key={k.l} className="min-w-0 rounded-xl border border-border bg-[var(--surface-2)] p-2.5 text-left sm:p-3">
+            <p className="text-[10px] text-muted-foreground sm:text-[11px]">{k.l}</p>
+            <p className={`hero-num mt-1 truncate text-sm font-extrabold tabular-nums sm:text-lg ${k.c}`}>{k.v}{k.unit && <span className="ml-0.5 align-super text-[8px] sm:text-[9px]">{k.unit}</span>}</p>
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-3 rounded-xl border border-border bg-[var(--surface-2)] px-3 pb-2 pt-10 sm:px-4 sm:pt-12">
+        <div className="relative" style={{ height: 150 }}>
+          {/* graduations */}
+          {[25, 50, 75].map((g) => <div key={g} className="absolute inset-x-0 border-t border-dashed border-border/70" style={{ bottom: `${g}%` }} />)}
+          <div className="absolute inset-0 flex items-end gap-1.5 sm:gap-2.5">
+            {serie.h.map((h, i) => {
+              const up = i < step;
+              const isBubble = i === bubbleI && step > 0;
+              return (
+                <div key={i} className="relative flex h-full flex-1 items-end">
+                  <div className={`hero-bar w-full rounded-t-md ${up ? (done && i === maxI ? "bg-primary" : "bg-gradient-to-t from-primary/30 to-primary/85") : "bg-primary/10"}`} style={{ height: up ? `${h}%` : "3%" }} />
+                  {isBubble && (
+                    <div key={`${set}-${i}-${done}`} className="hero-bubble pointer-events-none absolute left-1/2 z-10 whitespace-nowrap rounded-lg bg-foreground px-1.5 py-1 text-[9px] font-bold text-background shadow-lg sm:px-2 sm:text-[11px]" style={{ bottom: `calc(${h}% + 8px)` }}>
+                      {done ? "🏆 " : "+"}{fmt(h * PER_POINT)} <span className="text-[8px] opacity-70 sm:text-[9px]">FCFA</span>
+                      <span className="absolute left-1/2 top-full -translate-x-1/2 border-x-4 border-t-4 border-x-transparent border-t-foreground" />
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+          {/* courbe des visites */}
+          <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="pointer-events-none absolute inset-0 h-full w-full overflow-visible">
+            {reached.length > 1 && <polyline points={pts} fill="none" stroke="oklch(0.75 0.13 230)" strokeWidth="1.6" vectorEffect="non-scaling-stroke" strokeLinejoin="round" strokeLinecap="round" />}
+            {reached.map((h, i) => <circle key={i} cx={((i + 0.5) / n) * 100} cy={100 - h} r="1.4" fill="oklch(0.75 0.13 230)" vectorEffect="non-scaling-stroke" />)}
+          </svg>
+        </div>
+        <div className="mt-2 flex gap-1.5 text-center text-[9px] text-muted-foreground sm:gap-2.5 sm:text-[10px]">
+          {serie.days.map((d, i) => <span key={d} className={`flex-1 ${i < step ? "text-foreground" : ""}`}>{d}</span>)}
+        </div>
+      </div>
     </div>
   );
 }

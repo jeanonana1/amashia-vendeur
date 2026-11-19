@@ -13,6 +13,7 @@ import { compressImage } from "@/lib/imageCompress";
 import { AiSeoModal } from "@/components/seller/dashboard/AiSeoModal";
 import { AiImageModal } from "@/components/seller/dashboard/AiImageModal";
 import { PriceTipModal, charmPrice } from "@/components/seller/dashboard/PriceTipModal";
+import { SpecTable } from "@/components/seller/ui/SpecTable";
 import { detectSubcategory } from "@/lib/autoCategory";
 import { useTaxonomy } from "@/lib/categories";
 import { Select } from "@/components/ui/app-select";
@@ -402,20 +403,38 @@ function AddProductPage() {
   }, [form.category, SITE_CATEGORY_GROUPS.length]);
   const subOptions = SITE_CATEGORY_GROUPS.find((g) => g.group === parentCat)?.categories ?? [];
 
-  // Détection automatique de la sous-catégorie : uniquement parmi les sous-catégories
-  // de la catégorie choisie (telles qu'elles existent dans la base), d'après le titre
+  // Détection automatique, d'après le titre et uniquement avec les catégories / sous-catégories de la base :
+  // 1) si le vendeur n'a pas choisi la catégorie, on la détecte (avec sa sous-catégorie) ;
+  // 2) s'il l'a choisie, on cherche la sous-catégorie seulement dans cette catégorie.
+  const parentManual = useRef(false);
+  const [parentAuto, setParentAuto] = useState(false);
   const [catNoMatch, setCatNoMatch] = useState(false);
   useEffect(() => {
-    if (catManual.current || !parentCat || !subOptions.length) return;
+    if (catManual.current || !SITE_CATEGORY_GROUPS.length) return;
     const t = window.setTimeout(() => {
-      const g = form.name.trim() ? detectSubcategory(form.name, subOptions) : null;
+      const title = form.name.trim();
+      if (!parentManual.current) {
+        if (!title) return;
+        const g = detectSubcategory(title, SITE_CATEGORIES);
+        const grp = g ? SITE_CATEGORY_GROUPS.find((x) => x.categories.includes(g.sub)) : undefined;
+        setCatNoMatch(!g);
+        if (g && grp) {
+          if (grp.group !== parentCat) setParentCat(grp.group);
+          setParentAuto(true);
+          if (g.sub !== form.category) setForm((f) => ({ ...f, category: g.sub }));
+          setCatAuto(true);
+        }
+        return;
+      }
+      if (!parentCat || !subOptions.length) return;
+      const g = title ? detectSubcategory(title, subOptions) : null;
       const sub = g?.sub ?? (subOptions.length === 1 ? subOptions[0] : "");
-      setCatNoMatch(!sub && !!form.name.trim());
+      setCatNoMatch(!sub && !!title);
       if (sub && sub !== form.category) { setForm((f) => ({ ...f, category: sub })); setCatAuto(true); }
     }, 300);
     return () => window.clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [form.name, parentCat, subOptions.length]);
+  }, [form.name, parentCat, subOptions.length, SITE_CATEGORY_GROUPS.length]);
 
   // Specs presets when category changes
   function suggestSpecs(silent = false) {
@@ -698,14 +717,16 @@ function AddProductPage() {
               <div className="grid md:grid-cols-2 gap-4">
                 <div><label className="block text-sm mb-2">Catégorie *</label>
                   <Select value={parentCat} title="Catégorie du produit" onChange={(e) => {
-                    const v = e.target.value; setParentCat(v); catManual.current = false; setCatAuto(false); setCatNoMatch(false);
+                    const v = e.target.value; setParentCat(v); parentManual.current = !!v; setParentAuto(false); catManual.current = false; setCatAuto(false); setCatNoMatch(false);
                     const subs = SITE_CATEGORY_GROUPS.find((g) => g.group === v)?.categories ?? [];
                     if (!subs.includes(form.category)) set("category", "");
-                  }} className={inp}>
+                  }} className={`${inp} ${parentAuto ? "border-primary ring-2 ring-primary/25" : ""}`}>
                     <option value="">Choisir la catégorie</option>
                     {SITE_CATEGORY_GROUPS.map((g) => <option key={g.group} value={g.group}>{g.group}</option>)}
                   </Select>
-                  <p className="mt-1 text-[11px] text-muted-foreground">La sous-catégorie est ensuite détectée d'après le titre du produit.</p>
+                  {parentAuto && parentCat
+                    ? <p className="mt-1.5 inline-flex items-center gap-1.5 rounded-full bg-primary/12 px-2.5 py-1 text-[11px] font-semibold text-primary">✨ Catégorie détectée d'après le titre — modifiable</p>
+                    : <p className="mt-1 text-[11px] text-muted-foreground">Pas sûr ? Écrivez le titre du produit : la catégorie et la sous-catégorie sont détectées automatiquement.</p>}
                 </div>
                 <div><label className="block text-sm mb-2">Sous-catégorie *</label>
                   <Select value={form.category} title={parentCat ? `Sous-catégorie · ${parentCat}` : "Sous-catégorie"} disabled={!parentCat} onChange={(e) => { catManual.current = true; setCatAuto(false); set("category", e.target.value); }} className={`${inp} ${catAuto ? "border-primary ring-2 ring-primary/25" : ""}`}>
@@ -714,7 +735,7 @@ function AddProductPage() {
                     {form.category && !subOptions.includes(form.category) && <option value={form.category}>{form.category}</option>}
                   </Select>
                   {catAuto && form.category && <p className="mt-1.5 inline-flex items-center gap-1.5 rounded-full bg-primary/12 px-2.5 py-1 text-[11px] font-semibold text-primary">✨ Détectée d'après le titre — modifiable</p>}
-                  {!form.category && catNoMatch && <p className="mt-1 text-[11px] text-amber-400">Aucune sous-catégorie de « {parentCat} » ne correspond au titre : choisissez-la dans la liste.</p>}
+                  {!form.category && catNoMatch && <p className="mt-1 text-[11px] text-amber-400">{parentCat ? `Aucune sous-catégorie de « ${parentCat} » ne correspond au titre : choisissez-la dans la liste.` : "Titre non reconnu : choisissez la catégorie dans la liste."}</p>}
                   {form.category && <p className="mt-1 text-[11px] text-muted-foreground">Publié sur Amashia dans : <b className="text-foreground">{parentCat || "—"} › {form.category}</b></p>}
                 </div>
                 <div className="md:col-span-2"><label className="block text-sm mb-2">SKU</label><input value={form.sku} onChange={(e) => set("sku", e.target.value)} className={inp} /></div>
@@ -1181,10 +1202,11 @@ function AddProductPage() {
           {priceNum > 0 && costNum > 0 && (
             <div className="bg-card border border-border rounded-2xl p-4">
               <p className="text-xs font-semibold mb-2 flex items-center gap-1"><TrendingUp size={12} /> Analytique bénéfices</p>
-              <div className="space-y-1 text-xs">
-                <div className="flex justify-between"><span className="text-muted-foreground">Bénéfice unitaire</span><span className="font-bold text-emerald-400">{fmtFCFA(profit)} FCFA</span></div>
-                <div className="flex justify-between"><span className="text-muted-foreground">Marge</span><span className="font-bold">{margin}%</span></div>
-              </div>
+              <SpecTable ops minWidth={240} rows={[
+                { label: "Prix de vente", op: "+", value: `${fmtFCFA(priceNum)} FCFA` },
+                { label: "Coût d'achat", op: "−", value: `${fmtFCFA(costNum)} FCFA` },
+                { label: "Marge", value: `${margin} %` },
+              ]} total={{ label: "Bénéfice unitaire", value: `${fmtFCFA(profit)} FCFA` }} />
             </div>
           )}
         </div>

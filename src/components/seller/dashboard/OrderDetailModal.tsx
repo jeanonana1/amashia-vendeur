@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { imgProps } from "@/lib/img";
+import { SpecTable } from "@/components/seller/ui/SpecTable";
 import { X, MapPin, CreditCard, Clock, User, Package, Lock, Check } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { dateTime, money } from "@/lib/sellerStats";
@@ -97,11 +98,13 @@ export function OrderDetailModal({ line, onClose, onChanged }: { line: SellerOrd
           <button onClick={onClose} className="grid h-8 w-8 place-items-center rounded-full hover:bg-secondary" aria-label="Fermer"><X size={16} /></button>
         </div>
 
-        <div className="grid gap-3 p-5 text-sm sm:grid-cols-2">
-          <Info icon={Clock} label="Passée le" value={dateTime(line.created_at)} />
-          <Info icon={User} label="Client" value={line.customer_name} />
-          <Info icon={MapPin} label="Livraison" value={line.delivery_area || "Non précisée"} />
-          <Info icon={CreditCard} label="Paiement" value={line.payment_method} />
+        <div className="p-5">
+          <SpecTable head={["Information", "Détail"]} minWidth={280} rows={[
+            { label: <span className="inline-flex items-center gap-1.5"><Clock size={13} className="text-primary" /> Passée le</span>, value: <span className="whitespace-normal">{dateTime(line.created_at)}</span> },
+            { label: <span className="inline-flex items-center gap-1.5"><User size={13} className="text-primary" /> Client</span>, value: <span className="block max-w-[200px] truncate">{line.customer_name}</span> },
+            { label: <span className="inline-flex items-center gap-1.5"><MapPin size={13} className="text-primary" /> Livraison</span>, value: <span className="block max-w-[200px] truncate">{line.delivery_area || "Non précisée"}</span> },
+            { label: <span className="inline-flex items-center gap-1.5"><CreditCard size={13} className="text-primary" /> Paiement</span>, value: line.payment_method },
+          ]} />
         </div>
 
         <div className="space-y-3 px-5 pb-2">
@@ -124,9 +127,13 @@ export function OrderDetailModal({ line, onClose, onChanged }: { line: SellerOrd
           })}
         </div>
 
-        <div className="flex items-center justify-between border-t border-border p-5">
-          <span className="text-sm text-muted-foreground">Total pour votre boutique</span>
-          <span className="text-lg font-extrabold text-primary">{money(total)}</span>
+        <div className="border-t border-border p-5">
+          <p className="mb-2 text-sm font-bold">Montant pour votre boutique</p>
+          <SpecTable ops head={["Élément", "Montant"]} minWidth={300} rows={lines.flatMap((l) => [
+            { label: <span className="block max-w-[220px] truncate">{l.quantity} × {l.product_title}</span>, op: "+" as const, value: money(Number(l.quantity) * Number(l.unit_price)) },
+            ...(Number(l.discount) > 0 ? [{ label: `Coupon ${l.coupon_code ?? ""}`.trim(), op: "−" as const, value: money(Number(l.discount)) }] : []),
+            ...(l.status === "cancelled" ? [{ label: "Article annulé (non compté)", op: "−" as const, value: money(Number(l.amount)) }] : []),
+          ])} total={{ label: "Total pour votre boutique", value: money(total) }} />
         </div>
         <p className="px-5 pb-5 text-[11px] text-muted-foreground">
           Le statut de la commande est géré par Amashia et se met à jour ici automatiquement. Les coordonnées du client ne sont pas communiquées : la livraison est organisée par Amashia.
@@ -136,14 +143,3 @@ export function OrderDetailModal({ line, onClose, onChanged }: { line: SellerOrd
   );
 }
 
-function Info({ icon: Icon, label, value }: { icon: typeof Clock; label: string; value: string }) {
-  return (
-    <div className="flex items-start gap-2.5 rounded-xl bg-secondary/40 p-3">
-      <Icon size={15} className="mt-0.5 shrink-0 text-primary" />
-      <div className="min-w-0">
-        <p className="text-[11px] text-muted-foreground">{label}</p>
-        <p className="break-words font-medium">{value}</p>
-      </div>
-    </div>
-  );
-}

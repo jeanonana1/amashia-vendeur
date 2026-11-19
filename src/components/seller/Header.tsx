@@ -39,7 +39,7 @@ export function Header() {
           </button>
           <Link to="/connexion" className="hidden rounded-full px-4 py-2 text-sm font-semibold text-muted-foreground transition hover:text-foreground sm:inline-flex">Se connecter</Link>
           <Link to="/inscription" className="hidden h-10 items-center gap-1.5 rounded-full bg-primary px-4 text-sm font-bold text-black transition hover:bg-[#ff7a1f] sm:inline-flex">
-            Ouvrir ma boutique <ArrowRight size={15} />
+            Créer ma boutique <ArrowRight size={15} />
           </Link>
           <button onClick={() => setOpen((v) => !v)} className="grid h-10 w-10 place-items-center rounded-full bg-secondary md:hidden" aria-label="Menu">
             {open ? <X size={18} /> : <Menu size={18} />}
@@ -51,7 +51,7 @@ export function Header() {
           {links.map((l) => <Link key={l.to} to={l.to} className="block rounded-xl px-4 py-3 text-[15px] font-semibold hover:bg-secondary">{l.label}</Link>)}
           <div className="mt-2 grid grid-cols-2 gap-2 border-t border-border pt-3">
             <Link to="/connexion" className="grid h-11 place-items-center rounded-full border border-border text-sm font-semibold">Se connecter</Link>
-            <Link to="/inscription" className="grid h-11 place-items-center rounded-full bg-primary text-sm font-bold text-black">Ouvrir ma boutique</Link>
+            <Link to="/inscription" className="grid h-11 place-items-center rounded-full bg-primary text-sm font-bold text-black">Créer ma boutique</Link>
           </div>
           <button onClick={toggle} className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl py-2.5 text-sm text-muted-foreground">
             {theme === "dark" ? <><Sun size={15} /> Mode clair</> : <><Moon size={15} /> Mode sombre</>}

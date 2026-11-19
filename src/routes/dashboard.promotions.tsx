@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { askConfirm } from "@/lib/dialog";
 import { useEffect, useMemo, useState } from "react";
 import { DashboardLayout } from "@/components/seller/dashboard/DashboardLayout";
-import { Tag, Plus, Calendar, X, Trash2, Ticket, Wallet, ShoppingBag, Pencil, Store, Copy } from "lucide-react";
+import { Tag, Plus, Calendar, X, Trash2, Ticket, Wallet, ShoppingBag, Pencil, Store, Copy, Zap } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { money } from "@/lib/sellerStats";
@@ -43,6 +43,7 @@ const fmtDiscount = (c: { kind: string; value: number }) => (c.kind === "percent
 const fmtDate = (iso: string) => new Date(iso).toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric" });
 
 function PromotionsPage() {
+  const [flashSignal, setFlashSignal] = useState(0);
   const [tab, setTab] = useState<"coupons" | "flash">("coupons");
   const [coupons, setCoupons] = useState<Coupon[] | null>(null);
   const [products, setProducts] = useState<MyProduct[]>([]);
@@ -143,14 +144,18 @@ function PromotionsPage() {
   const input = "w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm";
 
   return (
-    <DashboardLayout title="Promotions" subtitle="Coupons de réduction et ventes flash">
+    <DashboardLayout title="Promotions" subtitle="Coupons de réduction et ventes flash" actions={
+      tab === "flash"
+        ? <button onClick={() => setFlashSignal((n) => n + 1)} className="flex h-10 items-center gap-1.5 rounded-full bg-primary px-4 text-sm font-bold text-black shadow-[0_8px_24px_-10px_var(--primary)] sm:h-11 sm:px-5"><Zap size={16} /><span className="hidden min-[400px]:inline">Nouvelle vente flash</span><span className="min-[400px]:hidden">Créer</span></button>
+        : <button onClick={() => setForm(emptyForm())} className="flex h-10 items-center gap-1.5 rounded-full bg-primary px-4 text-sm font-bold text-black shadow-[0_8px_24px_-10px_var(--primary)] sm:h-11 sm:px-5"><Plus size={16} /><span className="hidden min-[400px]:inline">Créer un coupon</span><span className="min-[400px]:hidden">Créer</span></button>
+    }>
       {/* deux types de promotion : coupons et ventes flash */}
       <div className="mb-5 inline-flex rounded-full bg-secondary p-1 text-sm">
         {([["coupons", "Coupons"], ["flash", "⚡ Ventes flash"]] as const).map(([k, l]) => (
           <button key={k} onClick={() => setTab(k)} className={`rounded-full px-5 py-2 font-semibold ${tab === k ? "bg-primary text-black" : "text-muted-foreground"}`}>{l}</button>
         ))}
       </div>
-      {tab === "flash" ? <FlashSales /> : (
+      {tab === "flash" ? <FlashSales openSignal={flashSignal} /> : (
       <>
       <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-4">
         {[
@@ -176,7 +181,7 @@ function PromotionsPage() {
             <h3 className="font-bold">Mes coupons</h3>
             <p className="text-xs text-muted-foreground">Chaque coupon s'affiche sur la page du produit concerné. Le client l'applique d'un clic ou saisit le code au paiement.</p>
           </div>
-          <button onClick={() => setForm(emptyForm())} className="flex items-center gap-2 rounded-full bg-gradient-primary px-5 py-2.5 text-sm font-semibold text-black"><Plus size={14} /> Créer un coupon</button>
+          <button onClick={() => setForm(emptyForm())} className="hidden sm:flex items-center gap-2 rounded-full bg-gradient-primary px-5 py-2.5 text-sm font-semibold text-black"><Plus size={14} /> Créer un coupon</button>
         </div>
 
         {coupons === null ? (

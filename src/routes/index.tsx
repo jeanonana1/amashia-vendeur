@@ -8,6 +8,7 @@ import { PricingTeaser } from "@/components/seller/site/Pricing";
 import { Trust } from "@/components/seller/site/Trust";
 import { Faq } from "@/components/seller/site/Faq";
 import { Footer } from "@/components/seller/Footer";
+import { SectionDivider } from "@/components/seller/site/motion";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -29,11 +30,17 @@ function Index() {
       <Header />
       <main>
         <Hero />
+        <SectionDivider index={1} label="Fonctionnalités" />
         <Features />
+        <SectionDivider index={2} label="Comment ça marche" />
         <HowItWorks />
+        <SectionDivider index={3} label="Confiance" />
         <Trust />
+        <SectionDivider index={4} label="Tarifs" />
         <PricingTeaser />
+        <SectionDivider index={5} label="Questions" />
         <Faq />
+        <SectionDivider index={6} label="Lancez-vous" />
         <FinalCTA />
       </main>
       <Footer />

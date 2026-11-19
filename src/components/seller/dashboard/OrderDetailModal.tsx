@@ -1,7 +1,9 @@
+import { toast } from "sonner";
 import { useEffect, useState } from "react";
 import { imgProps } from "@/lib/img";
 import { SpecTable } from "@/components/seller/ui/SpecTable";
-import { X, MapPin, CreditCard, Clock, User, Package, Lock, Check } from "lucide-react";
+import { Barcode, printLabels } from "@/components/seller/Barcode";
+import { X, MapPin, CreditCard, Clock, User, Package, Lock, Check, Printer } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { dateTime, money } from "@/lib/sellerStats";
 
@@ -24,9 +26,10 @@ export interface SellerOrderLine {
   payment_method: string;
   status: string;
   created_at: string;
+  sku?: string | null;
 }
 
-export const ORDER_FIELDS = "id,order_id,order_number,customer_name,delivery_area,product_title,product_image,color,options,quantity,unit_price,amount,discount,coupon_code,payment_method,status,created_at";
+export const ORDER_FIELDS = "id,order_id,order_number,customer_name,delivery_area,product_title,product_image,color,options,quantity,unit_price,amount,discount,coupon_code,payment_method,status,created_at,sku";
 
 export const ORDER_STATUS: Record<string, { label: string; cls: string }> = {
   pending: { label: "Commande reçue", cls: "bg-amber-500/15 text-amber-400" },
@@ -108,7 +111,13 @@ export function OrderDetailModal({ line, onClose, onChanged }: { line: SellerOrd
         </div>
 
         <div className="space-y-3 px-5 pb-2">
-          <p className="flex items-center gap-2 text-sm font-bold"><Package size={15} className="text-primary" /> Article{lines.length > 1 ? "s" : ""} de votre boutique</p>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <p className="flex items-center gap-2 text-sm font-bold"><Package size={15} className="text-primary" /> Article{lines.length > 1 ? "s" : ""} de votre boutique</p>
+            {lines.some((l) => l.sku && l.status !== "cancelled") && (
+              <button type="button" onClick={() => { if (!printLabels(lines.filter((l) => l.sku && l.status !== "cancelled").map((l) => ({ sku: l.sku!, title: l.product_title, qty: l.quantity })), line.order_number)) toast.error("Autorisez les fenêtres pour imprimer les étiquettes"); }}
+                className="flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-semibold hover:border-primary hover:text-primary"><Printer size={13} /> Imprimer les étiquettes</button>
+            )}
+          </div>
           {lines.map((l) => {
             const st = ORDER_STATUS[l.status] ?? ORDER_STATUS.pending;
             return (
@@ -121,6 +130,12 @@ export function OrderDetailModal({ line, onClose, onChanged }: { line: SellerOrd
                   {(l.color || l.options) && <p className="text-xs text-primary">{[l.color ? `Couleur : ${colorName(l.color)}` : "", l.options ?? ""].filter(Boolean).join(" · ")}</p>}
                   <p className="mt-0.5 text-xs text-muted-foreground">{l.quantity} × {money(Number(l.unit_price))}{Number(l.discount) > 0 && <> − coupon {l.coupon_code} {money(Number(l.discount))}</>} = <b className="text-foreground">{money(Number(l.amount))}</b></p>
                   <div className="mt-2"><OrderStatusTrack status={l.status} /></div>
+                  {l.sku && (
+                    <div className="mt-2 flex items-center gap-2 rounded-lg bg-white p-1.5">
+                      <Barcode code={l.sku} className="h-12 w-36 shrink-0" />
+                      <p className="text-[10px] leading-snug text-neutral-600">Le livreur scanne ce code-barres avant d'emporter le produit.</p>
+                    </div>
+                  )}
                 </div>
               </div>
             );

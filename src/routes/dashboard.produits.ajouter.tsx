@@ -14,6 +14,7 @@ import { AiSeoModal } from "@/components/seller/dashboard/AiSeoModal";
 import { AiImageModal } from "@/components/seller/dashboard/AiImageModal";
 import { PriceTipModal, charmPrice } from "@/components/seller/dashboard/PriceTipModal";
 import { SpecTable } from "@/components/seller/ui/SpecTable";
+import { Barcode } from "@/components/seller/Barcode";
 import { detectSubcategory } from "@/lib/autoCategory";
 import { useTaxonomy } from "@/lib/categories";
 import { Select } from "@/components/ui/app-select";
@@ -342,7 +343,7 @@ function AddProductPage() {
           purchase_price: form.purchase_price ? Math.max(0, Number(form.purchase_price)) : null,
           stock: Math.max(0, parseInt(form.stock || "0", 10) || 0),
           description: form.description || null,
-          sku: form.sku || null,
+          // SKU : généré et figé par la base, jamais envoyé par le formulaire
           product_type: type,
           images: existingImages,
           attributes: attrs as any,
@@ -359,7 +360,8 @@ function AddProductPage() {
           await supabase.from("seller_products").update(payload).eq("id", draftIdRef.current);
         } else {
           draftInsertRef.current = (async () => {
-            const { data: created } = await supabase.from("seller_products").insert(payload).select("id").maybeSingle();
+            const { data: created } = await supabase.from("seller_products").insert(payload).select("id, sku").maybeSingle();
+            if (created?.sku) setForm((f) => ({ ...f, sku: created.sku as string }));
             if (created?.id) {
               draftIdRef.current = created.id;
               setDbDraftId(created.id);
@@ -595,7 +597,7 @@ function AddProductPage() {
         user_id: user.id, name: form.name, description: form.description || null,
         price: priceNum, compare_at_price: form.compare_at_price ? Number(form.compare_at_price) : null,
         purchase_price: costNum, stock: Number(form.stock || 0),
-        category: form.category || null, sku: form.sku || null,
+        category: form.category || null,
         // « Publier sur Amashia » met le produit en ligne directement
         status: asDraft ? "draft" : "active", images: urls,
         product_type: type, attributes: attrs, specifications: specs.filter((s) => s.name && s.value),
@@ -738,7 +740,14 @@ function AddProductPage() {
                   {!form.category && catNoMatch && <p className="mt-1 text-[11px] text-amber-400">{parentCat ? `Aucune sous-catégorie de « ${parentCat} » ne correspond au titre : choisissez-la dans la liste.` : "Titre non reconnu : choisissez la catégorie dans la liste."}</p>}
                   {form.category && <p className="mt-1 text-[11px] text-muted-foreground">Publié sur Amashia dans : <b className="text-foreground">{parentCat || "—"} › {form.category}</b></p>}
                 </div>
-                <div className="md:col-span-2"><label className="block text-sm mb-2">SKU</label><input value={form.sku} onChange={(e) => set("sku", e.target.value)} className={inp} /></div>
+                <div className="md:col-span-2">
+                  <p className="mb-2 text-sm">SKU (code-barres) <span className="text-xs text-muted-foreground">— généré automatiquement</span></p>
+                  {/* non modifiable : le livreur scanne ce code chez vous pour vérifier qu'il récupère le bon produit */}
+                  <div aria-readonly="true" className="pointer-events-none flex select-none items-center gap-4 rounded-xl border border-dashed border-border bg-secondary/40 p-3">
+                    {form.sku ? <Barcode code={form.sku} className="h-16 w-44 shrink-0 rounded bg-white p-1" /> : <div className="grid h-16 w-44 shrink-0 place-items-center rounded bg-white/5 text-[11px] text-muted-foreground">En cours de création…</div>}
+                    <p className="text-xs text-muted-foreground">{form.sku ? <>Le livreur Amashia scanne ce code-barres chez vous avant d'emporter le colis : collez l'étiquette (Commandes › détail) sur l'emballage.</> : <>Le code-barres est créé automatiquement dès le premier enregistrement du produit.</>}</p>
+                  </div>
+                </div>
               </div>
             </div>
           )}

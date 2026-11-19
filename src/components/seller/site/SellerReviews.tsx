@@ -7,7 +7,7 @@ import { imgProps } from "@/lib/img";
  * Section « Ils vendent sur Amashia » (maquette Claude Design « section-avis »).
  * Uniquement de vrais avis : ceux que les vendeurs laissent depuis leur espace (Paramètres › Mon avis).
  */
-type Review = { name: string; city: string; category: string; rating: number; text: string; at: string; img: string | null };
+type Review = { name: string; shop?: string; logo?: string | null; city: string; category: string; rating: number; text: string; at: string; img: string | null };
 type Data = { total: number; avg: number | null; dist: Record<string, number>; items: Review[] };
 
 /** Photo d'illustration par catégorie (public/avis/<catégorie>.webp), utilisée quand la boutique n'a pas de photo. */
@@ -19,7 +19,8 @@ const CAT_IMG: Record<string, string> = {
 const catImg = (c: string) => { const k = CAT_IMG[c.trim().toLowerCase()]; return k ? `/avis/${k}.webp` : null; };
 
 const AV: [string, string][] = [["oklch(0.68 0.19 42)", "#fff"], ["oklch(0.89 0.18 95)", "#161512"], ["#e9e6df", "#161512"], ["#161512", "#fff"]];
-const initials = (n: string) => n.split(/\s+/).filter(Boolean).map((x) => x[0]).join("").slice(0, 2).toUpperCase();
+/** Initiale du prénom (Jean → J) quand la boutique n'a pas de logo */
+const initials = (n: string) => (n.trim()[0] ?? "A").toUpperCase();
 const fmt1 = (v: number) => v.toFixed(1).replace(".", ",");
 
 function ago(iso: string) {
@@ -54,8 +55,9 @@ export function SellerReviews() {
               <p className="avis__note-legal">Avis laissés par des vendeurs Amashia vérifiés, depuis leur espace vendeur.</p>
             )}
           </div>
-          {data && (empty ? <EmptyDeck /> : <Deck items={data.items} />)}
-          {!data && <div className="avis-deck" />}
+          <DeckEntrance ready={!!data}>
+            {data ? (empty ? <EmptyDeck /> : <Deck items={data.items} />) : <LoadingDeck />}
+          </DeckEntrance>
         </div>
       </div>
     </section>
@@ -122,8 +124,9 @@ function Deck({ items }: { items: Review[] }) {
         return (
           <article key={i} className={`avis-card ${single ? "avis-card--still" : ""}`} style={{ animationDelay: `${-4 * i}s` }} aria-hidden={i >= items.length || undefined}>
             <div className="avis-card__media">
+              {/* grande photo : l'image de la catégorie du vendeur */}
               {r.img
-                ? <img {...imgProps(r.img, { width: 640 })} alt={`Boutique de ${r.name}${r.category ? `, vendeur ${r.category.toLowerCase()}` : ""}${r.city ? ` à ${r.city}` : ""}`} loading="lazy" width={800} height={600} />
+                ? <img {...imgProps(r.img, { width: 640 })} alt={`Catégorie ${r.category}`} loading="lazy" width={800} height={600} />
                 : catImg(r.category) && <img src={catImg(r.category)!} alt="" loading="lazy" width={800} height={600} onError={(e) => { e.currentTarget.style.display = "none"; }} />}
               {r.category && <span className="avis-card__cat">{r.category.toUpperCase()}</span>}
             </div>
@@ -131,8 +134,14 @@ function Deck({ items }: { items: Review[] }) {
               <span className="avis-card__stars" aria-label={`${r.rating} sur 5`}>{"★".repeat(r.rating)}<span className="off">{"★".repeat(5 - r.rating)}</span></span>
               <p className="avis-card__text">« {r.text} »</p>
               <div className="avis-card__who">
-                <div className="avis-card__av" style={{ background: bg, color: fg }}>{initials(r.name)}</div>
-                <div className="min-w-0"><div className="avis-card__name" translate="no">{r.name} <span>✓</span></div><div className="avis-card__city">{[r.city, ago(r.at)].filter(Boolean).join(" · ")}</div></div>
+                {r.logo
+                  ? <img {...imgProps(r.logo, { width: 64 })} alt={r.shop || r.name} className="avis-card__av object-cover" loading="lazy" />
+                  : <div className="avis-card__av" style={{ background: bg, color: fg }}>{initials(r.name)}</div>}
+                <div className="min-w-0">
+                  <div className="avis-card__name" translate="no">{r.name} <span>✓</span></div>
+                  {r.shop && <div className="avis-card__city font-semibold !text-[#2a2722]" translate="no">{r.shop}</div>}
+                  <div className="avis-card__city">{[r.city, ago(r.at)].filter(Boolean).join(" · ")}</div>
+                </div>
               </div>
             </div>
           </article>
@@ -163,6 +172,34 @@ function EmptyDeck() {
             </div>
           </div>
         </article>
+      ))}
+    </div>
+  );
+}
+
+/** Les avis « se chargent » : cartes squelettes qui scintillent, puis la pile arrive en glissant et se déploie. */
+function DeckEntrance({ ready, children }: { ready: boolean; children: React.ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [seen, setSeen] = useState(false);
+  useEffect(() => {
+    const el = ref.current; if (!el) return;
+    const io = new IntersectionObserver((en) => { if (en[0].isIntersecting) { setSeen(true); io.disconnect(); } }, { threshold: 0.25 });
+    io.observe(el); return () => io.disconnect();
+  }, []);
+  return <div ref={ref} className={`avis-entrance ${seen && ready ? "is-in" : ""}`}>{children}</div>;
+}
+
+function LoadingDeck() {
+  return (
+    <div className="avis-deck" aria-label="Chargement des avis">
+      {[2, 1, 0].map((i) => (
+        <div key={i} className="avis-card avis-card--still avis-skeleton" style={{ transform: `translate(${i * 9}%, ${-i * 3}%) scale(${1 - i * 0.06}) rotate(${i * 2.5}deg)`, zIndex: 5 - i, opacity: 1 - i * 0.25 }}>
+          <div className="avis-card__media" />
+          <div className="avis-card__body">
+            <span className="h-3 w-24 rounded-full bg-[#ece8e0]" /><span className="h-3 w-full rounded-full bg-[#ece8e0]" /><span className="h-3 w-4/5 rounded-full bg-[#ece8e0]" />
+            <div className="mt-auto flex items-center gap-2.5"><span className="h-[34px] w-[34px] rounded-full bg-[#ece8e0]" /><span className="h-3 w-28 rounded-full bg-[#ece8e0]" /></div>
+          </div>
+        </div>
       ))}
     </div>
   );

@@ -1,3 +1,4 @@
+import { ReviewPrompt } from "@/components/seller/dashboard/ReviewPrompt";
 import { LANG_KEY, preferredLang, setSellerLang } from "@/lib/sellerLang";
 import { LangToggle } from "@/components/seller/LangToggle";
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
@@ -67,6 +68,7 @@ export function DashboardLayout({ title, subtitle, actions, children }: { title:
     return () => window.removeEventListener("amashia-profile", onProfile);
   }, []);
   const [authReady, setAuthReady] = useState(false);
+  const [uid, setUid] = useState<string | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   // Close drawer on route change
@@ -90,6 +92,7 @@ export function DashboardLayout({ title, subtitle, actions, children }: { title:
         if ((lg === "en" || lg === "fr") && !localStorage.getItem(LANG_KEY) && lg !== preferredLang()) setSellerLang(lg);
       } catch { /* stockage indisponible */ }
       setAvatar((data as { avatar_url?: string | null } | null)?.avatar_url ?? null);
+      setUid(user.id);
       setAuthReady(true);
     })();
     return () => { mounted = false; };
@@ -229,6 +232,7 @@ export function DashboardLayout({ title, subtitle, actions, children }: { title:
             {actions && <div className="shrink-0">{actions}</div>}
           </div>
           {children}
+          {uid && <ReviewPrompt uid={uid} />}
         </div>
       </main>
     </div>

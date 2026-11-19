@@ -426,3 +426,16 @@ html.light[data-tr="wait"]::after { background: #fff; color: #0b1f3a; }
   .avis-card__media { flex-basis: 46%; }
   .avis-card__text { font-size: 13.5px; }
 }
+/* Avis : chargement (scintillement) puis arrivée de la pile, étoiles et textes qui apparaissent */
+.avis-entrance { width: 100%; max-width: 600px; justify-self: center; }
+.avis-entrance > .avis-deck { opacity: 0; transform: translateY(40px) rotate(-4deg) scale(.94); transition: opacity .9s cubic-bezier(.16,1,.3,1), transform 1.1s cubic-bezier(.34,1.4,.64,1); }
+.avis-entrance.is-in > .avis-deck, .avis-entrance > .avis-deck[aria-label] { opacity: 1; transform: none; }
+.avis-entrance.is-in .avis-card__stars { animation: avis-stars .7s cubic-bezier(.34,1.56,.64,1) .5s both; }
+.avis-entrance.is-in .avis-card__text, .avis-entrance.is-in .avis-card__who { animation: avis-up .7s cubic-bezier(.16,1,.3,1) .7s both; }
+@keyframes avis-stars { from { opacity: 0; letter-spacing: -6px; } to { opacity: 1; letter-spacing: 1.5px; } }
+@keyframes avis-up { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+.avis-skeleton .avis-card__media, .avis-skeleton .avis-card__body > span, .avis-skeleton .avis-card__body span span { position: relative; overflow: hidden; }
+.avis-skeleton .avis-card__media::after { content: ""; position: absolute; inset: 0; background: linear-gradient(100deg, transparent 20%, rgba(255,255,255,.55) 50%, transparent 80%); animation: avis-shimmer 1.4s ease-in-out infinite; }
+@keyframes avis-shimmer { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
+.avis-entrance .avis-deck { max-width: none; }
+@media (prefers-reduced-motion: reduce) { .avis-entrance > .avis-deck { opacity: 1; transform: none; transition: none; } .avis-entrance .avis-card__stars, .avis-entrance .avis-card__text, .avis-entrance .avis-card__who { animation: none; } }

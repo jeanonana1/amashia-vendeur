@@ -1,7 +1,8 @@
+import { askConfirm } from "@/lib/dialog";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { DashboardLayout } from "@/components/seller/dashboard/DashboardLayout";
-import { User, Bell, Lock, SlidersHorizontal, CreditCard, HelpCircle, Loader2, Camera, LogOut, ShieldCheck, Send } from "lucide-react";
+import { User, Bell, Lock, SlidersHorizontal, CreditCard, HelpCircle, Loader2, Camera, LogOut, ShieldCheck, Send, Star } from "lucide-react";
 import { toast } from "sonner";
 import { PasswordInput } from "@/components/ui/password-input";
 import { supabase } from "@/integrations/supabase/client";
@@ -30,6 +31,7 @@ const TABS = [
   { id: "securite", label: "Sécurité", icon: Lock },
   { id: "preferences", label: "Préférences", icon: SlidersHorizontal },
   { id: "facturation", label: "Paiements & facturation", icon: CreditCard },
+  { id: "avis", label: "Mon avis sur Amashia", icon: Star },
   { id: "aide", label: "Aide", icon: HelpCircle },
 ] as const;
 
@@ -111,6 +113,7 @@ function ParametresPage() {
               {tab === "securite" && <SecurityTab email={email} />}
               {tab === "preferences" && <PrefsTab p={p} save={save} />}
               {tab === "facturation" && uid && <BillingTab uid={uid} p={p} save={save} />}
+              {tab === "avis" && uid && <PlatformReviewTab uid={uid} />}
               {tab === "aide" && <HelpTab />}
             </>
           )}
@@ -399,4 +402,65 @@ function methodLabel(m: unknown): string {
   const kinds: Record<string, string> = { orange_money: "Orange Money", mtn_momo: "MTN MoMo", bank: "Virement bancaire" };
   const num = o.account_number ? ` · •••• ${String(o.account_number).slice(-4)}` : "";
   return `${o.label || kinds[o.kind ?? ""] || o.bank_name || "Compte"}${num}`;
+}
+
+/** Avis du vendeur sur Amashia : affiché (prénom + initiale, ville, catégorie, photo de boutique) sur la page d'accueil vendeur. */
+function PlatformReviewTab({ uid }: { uid: string }) {
+  const [rating, setRating] = useState(0);
+  const [body, setBody] = useState("");
+  const [existing, setExisting] = useState<{ is_published: boolean; updated_at: string } | null | undefined>(undefined);
+  const [busy, setBusy] = useState(false);
+  useEffect(() => {
+    void db.from("seller_platform_reviews").select("rating, body, is_published, updated_at").eq("seller_id", uid).maybeSingle()
+      .then(({ data }: { data: { rating: number; body: string; is_published: boolean; updated_at: string } | null }) => {
+        if (data) { setRating(data.rating); setBody(data.body); }
+        setExisting(data ?? null);
+      });
+  }, [uid]);
+  const len = body.trim().length;
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!rating) return toast.error("Choisissez une note de 1 à 5 étoiles");
+    if (len < 15) return toast.error("Votre avis doit faire au moins 15 caractères");
+    setBusy(true);
+    const { data, error } = await db.from("seller_platform_reviews").upsert({ seller_id: uid, rating, body: body.trim() }, { onConflict: "seller_id" }).select("is_published, updated_at").maybeSingle();
+    setBusy(false);
+    if (error) return toast.error("Enregistrement impossible. Réessayez.");
+    setExisting(data);
+    toast.success(existing ? "Votre avis a été mis à jour" : "Merci ! Votre avis est publié sur la page d'accueil Amashia Seller");
+  }
+  async function remove() {
+    if (!(await askConfirm({ title: "Retirer votre avis ?", message: "Il ne sera plus affiché sur la page d'accueil.", danger: true }))) return;
+    const { error } = await db.from("seller_platform_reviews").delete().eq("seller_id", uid);
+    if (error) return toast.error("Suppression impossible.");
+    setExisting(null); setRating(0); setBody("");
+    toast.success("Avis retiré");
+  }
+  if (existing === undefined) return <div className="h-40 animate-pulse rounded-xl bg-secondary/40" />;
+  return (
+    <form onSubmit={submit} className="space-y-5">
+      <div>
+        <h3 className="text-lg font-bold">Mon avis sur Amashia</h3>
+        <p className="mt-1 text-sm text-muted-foreground">Racontez en quelques mots votre expérience de vendeur. Votre avis apparaît sur la page d'accueil Amashia Seller avec votre prénom et l'initiale de votre nom, votre ville, votre catégorie et la photo de votre boutique. Ni votre téléphone ni votre e-mail ne sont affichés.</p>
+      </div>
+      <div>
+        <p className="mb-2 text-sm font-semibold">Votre note</p>
+        <div className="flex gap-1.5" role="radiogroup" aria-label="Note sur 5">
+          {[1, 2, 3, 4, 5].map((n) => (
+            <button key={n} type="button" role="radio" aria-checked={rating === n} onClick={() => setRating(n)} className={`grid h-11 w-11 place-items-center rounded-xl border text-xl transition ${n <= rating ? "border-primary bg-primary/15 text-primary" : "border-border text-muted-foreground hover:border-primary/50"}`}>★</button>
+          ))}
+        </div>
+      </div>
+      <label className="block">
+        <span className="mb-2 block text-sm font-semibold">Votre avis</span>
+        <textarea value={body} onChange={(e) => setBody(e.target.value.slice(0, 240))} rows={4} placeholder="Ex. : Je publie mes produits le soir, je prépare les colis le matin, Amashia s'occupe de la livraison et du paiement." className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm focus:border-primary focus:outline-none" />
+        <span className={`mt-1 block text-right text-[11px] ${len < 15 ? "text-muted-foreground" : "text-emerald-400"}`}>{len}/240 · 15 caractères minimum</span>
+      </label>
+      {existing && <p className="text-xs text-muted-foreground">{existing.is_published ? "✓ Publié sur la page d'accueil" : "En attente de validation par Amashia"} · mis à jour le {new Date(existing.updated_at).toLocaleDateString("fr-FR")}</p>}
+      <div className="flex flex-wrap gap-2">
+        <button type="submit" disabled={busy} className={`${btn} cta-sweep`}>{busy ? "Enregistrement…" : existing ? "Mettre à jour mon avis" : "Publier mon avis"}</button>
+        {existing && <button type="button" onClick={() => void remove()} className="rounded-full border border-border px-5 py-3 text-sm font-semibold text-muted-foreground hover:border-red-400 hover:text-red-400">Retirer mon avis</button>}
+      </div>
+    </form>
+  );
 }

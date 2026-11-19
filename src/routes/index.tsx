@@ -6,6 +6,7 @@ import { HowItWorks } from "@/components/seller/HowItWorks";
 import { FinalCTA } from "@/components/seller/FinalCTA";
 import { PricingTeaser } from "@/components/seller/site/Pricing";
 import { Trust } from "@/components/seller/site/Trust";
+import { SellerReviews } from "@/components/seller/site/SellerReviews";
 import { Faq } from "@/components/seller/site/Faq";
 import { Footer } from "@/components/seller/Footer";
 import { SectionDivider } from "@/components/seller/site/motion";
@@ -36,11 +37,13 @@ function Index() {
         <HowItWorks />
         <SectionDivider index={3} label="Confiance" />
         <Trust />
-        <SectionDivider index={4} label="Tarifs" />
+        <SectionDivider index={4} label="Avis vendeurs" />
+        <SellerReviews />
+        <SectionDivider index={5} label="Tarifs" />
         <PricingTeaser />
-        <SectionDivider index={5} label="Questions" />
+        <SectionDivider index={6} label="Questions" />
         <Faq />
-        <SectionDivider index={6} label="Lancez-vous" />
+        <SectionDivider index={7} label="Lancez-vous" />
         <FinalCTA />
       </main>
       <Footer />

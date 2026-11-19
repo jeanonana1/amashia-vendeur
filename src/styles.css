@@ -365,3 +365,64 @@ html.light[data-tr="wait"]::after { background: #fff; color: #0b1f3a; }
 @keyframes pay-plus { 0%, 55% { opacity: 0; transform: translateY(6px) scale(.8); } 65% { opacity: 1; transform: none; } 90% { opacity: 1; } 100% { opacity: 0; transform: translateY(-6px); } }
 .pay-plus { animation: pay-plus 3s ease-out both; }
 @media (prefers-reduced-motion: reduce) { .pay-coin, .pay-plus { animation: none; opacity: 0; } }
+
+/* ——— Section « Avis vendeurs » (maquette Claude Design « section-avis ») ——— */
+.avis-panel { --ink:#161512; --paper:#f3f1ec; --muted:#7a766c; --muted2:#b3ada2; --line:#e3dfd6;
+  --orange:oklch(0.68 0.19 42); --orange-ink:oklch(0.62 0.19 42); --yellow:oklch(0.89 0.18 95);
+  background: var(--paper); color: var(--ink); font-family: 'Geist', system-ui, sans-serif; }
+.avis__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); gap: clamp(28px, 4vw, 60px); align-items: start; }
+.avis__left { display: flex; flex-direction: column; gap: 26px; max-width: 440px; min-width: 0; }
+.avis__eyebrow { font-family: 'Geist Mono', monospace; font-size: 12px; color: var(--muted); }
+.avis__title { margin: 0; font-size: clamp(40px, 5vw, 68px); letter-spacing: -0.05em; font-weight: 600; line-height: .95; color: var(--ink); }
+.avis__title em { font-style: normal; font-family: 'Gloock', serif; font-weight: 400; letter-spacing: -0.035em; color: var(--orange-ink); }
+.avis__note-legal { margin: 0; font-size: 12px; color: #9a958a; }
+.avis-panel .score { background: var(--ink); color: var(--paper); border-radius: 28px; padding: 26px; display: flex; flex-direction: column; gap: 18px; }
+.avis-panel .score__top { display: flex; align-items: flex-end; gap: 16px; }
+.avis-panel .score__avg { font-size: 76px; font-weight: 600; letter-spacing: -0.05em; line-height: .8; font-variant-numeric: tabular-nums; }
+.avis-panel .score__meta { display: flex; flex-direction: column; gap: 6px; padding-bottom: 4px; min-width: 0; }
+.avis-panel .score__stars { color: var(--yellow); font-size: 20px; letter-spacing: 2px; }
+.avis-panel .score__stars .off { color: #3a3730; }
+.avis-panel .score__count { font-size: 13px; color: var(--muted2); }
+.avis-panel .score__rows { display: flex; flex-direction: column; gap: 7px; }
+.avis-panel .score__row { display: flex; align-items: center; gap: 10px; font-size: 12px; color: var(--muted2); }
+.avis-panel .score__row .lbl { width: 22px; white-space: nowrap; }
+.avis-panel .score__row .num { width: 22px; text-align: right; font-variant-numeric: tabular-nums; }
+.avis-panel .score__bar { flex: 1; height: 6px; border-radius: 3px; background: #2f2c26; overflow: hidden; }
+.avis-panel .score__bar i { display: block; height: 100%; width: 0; background: var(--yellow); border-radius: 3px; }
+.avis-deck { position: relative; width: 100%; max-width: 600px; justify-self: center; aspect-ratio: 1 / 1.12; }
+.avis-card { position: absolute; left: 4%; top: 12%; width: 66%; height: 84%; border-radius: 28px; overflow: hidden; background: #fff; border: 1px solid var(--line);
+  box-shadow: 0 40px 70px -35px rgba(0,0,0,.45); display: flex; flex-direction: column;
+  animation: deck10 40s cubic-bezier(.65,0,.35,1) infinite both; transform-origin: 50% 100%; }
+.avis-card--still { animation: none; left: 17%; }
+.avis-card__media { position: relative; flex: 0 0 52%; background: #e9e6df; }
+.avis-card__media img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.avis-card__cat { position: absolute; left: 12px; top: 12px; z-index: 1; font-size: 12px; font-weight: 600; background: #fff; color: var(--ink); padding: 6px 11px; border-radius: 999px; }
+.avis-card__body { flex: 1; min-height: 0; padding: 16px 18px; display: flex; flex-direction: column; gap: 8px; }
+.avis-card__stars { color: var(--orange-ink); font-size: 15px; letter-spacing: 1.5px; }
+.avis-card__stars .off { color: #d9d5cc; }
+.avis-card__text { margin: 0; font-size: 14px; line-height: 1.45; color: #2a2722; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.avis-card__who { display: flex; align-items: center; gap: 10px; margin-top: 2px; min-width: 0; }
+.avis-card__av { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; font-size: 12px; font-weight: 600; flex-shrink: 0; }
+.avis-card__name { font-size: 14px; font-weight: 600; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.avis-card__name span { color: var(--orange-ink); }
+.avis-card__city { font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* 10 cartes, 40 s, une nouvelle carte devant toutes les 4 s (delay = -4s × index) */
+@keyframes deck10 {
+  0%, 7.5% { transform: none; opacity: 1; z-index: 5; }
+  9.5% { transform: translate(-75%, 8%) scale(.92) rotate(-12deg); opacity: 0; z-index: 5; }
+  10%, 65% { transform: translate(42%, -14%) scale(.74) rotate(10deg); opacity: 0; z-index: 1; }
+  70%, 77.5% { transform: translate(32%, -10.5%) scale(.8) rotate(7.5deg); opacity: .55; z-index: 2; }
+  80%, 87.5% { transform: translate(21%, -7%) scale(.87) rotate(5deg); opacity: .8; z-index: 3; }
+  90%, 97.5% { transform: translate(10.5%, -3.5%) scale(.93) rotate(2.5deg); opacity: 1; z-index: 4; }
+  100% { transform: none; opacity: 1; z-index: 5; }
+}
+/* la carte qui part vers la gauche ne doit pas élargir la page */
+.avis-panel { overflow: hidden; }
+@media (prefers-reduced-motion: reduce) { .avis-card { animation: none; } .avis-card:not(:first-child) { display: none; } }
+/* écrans étroits : pile plus haute pour que l'avis tienne sur 3 lignes entières */
+@media (max-width: 560px) {
+  .avis-deck { aspect-ratio: 1 / 1.38; }
+  .avis-card { width: 74%; top: 10%; height: 86%; }
+  .avis-card__media { flex-basis: 46%; }
+  .avis-card__text { font-size: 13.5px; }
+}

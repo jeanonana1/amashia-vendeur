@@ -7,7 +7,7 @@ import { imgProps } from "@/lib/img";
  * Section « Ils vendent sur Amashia » (maquette Claude Design « section-avis »).
  * Uniquement de vrais avis : ceux que les vendeurs laissent depuis leur espace (Paramètres › Mon avis).
  */
-type Review = { name: string; shop?: string; logo?: string | null; city: string; category: string; rating: number; text: string; at: string; img: string | null };
+type Review = { name: string; collected?: boolean; shop?: string; logo?: string | null; city: string; category: string; rating: number; text: string; at: string; img: string | null };
 type Data = { total: number; avg: number | null; dist: Record<string, number>; items: Review[] };
 
 /** Photo d'illustration par catégorie (public/avis/<catégorie>.webp), utilisée quand la boutique n'a pas de photo. */
@@ -52,7 +52,7 @@ export function SellerReviews() {
                 <Link to="/inscription" className="font-semibold text-[var(--orange-ink)] underline-offset-2 hover:underline">Ouvrez votre boutique</Link> et partagez le vôtre.
               </p>
             ) : (
-              <p className="avis__note-legal">Avis laissés par des vendeurs Amashia vérifiés, depuis leur espace vendeur.</p>
+              <p className="avis__note-legal">Avis de vendeurs Amashia vérifiés, laissés depuis leur espace vendeur ou recueillis par l'équipe Amashia avec leur accord.</p>
             )}
           </div>
           <DeckEntrance ready={!!data}>
@@ -140,7 +140,7 @@ function Deck({ items }: { items: Review[] }) {
                 <div className="min-w-0">
                   <div className="avis-card__name" translate="no">{r.name} <span>✓</span></div>
                   {r.shop && <div className="avis-card__city font-semibold !text-[#2a2722]" translate="no">{r.shop}</div>}
-                  <div className="avis-card__city">{[r.city, ago(r.at)].filter(Boolean).join(" · ")}</div>
+                  <div className="avis-card__city">{[r.city, ago(r.at), r.collected ? "recueilli par Amashia" : ""].filter(Boolean).join(" · ")}</div>
                 </div>
               </div>
             </div>

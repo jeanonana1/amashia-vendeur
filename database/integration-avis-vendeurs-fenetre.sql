@@ -22,7 +22,7 @@ returns jsonb language sql stable security definer set search_path = public as $
         'name', trim(initcap(coalesce(p.first_name, 'Vendeur')) || case when coalesce(p.last_name, '') <> '' then ' ' || upper(left(p.last_name, 1)) || '.' else '' end),
         'shop', coalesce(p.shop_name, ''),
         'logo', nullif(p.shop_logo_url, ''),
-        'city', initcap(coalesce(p.city, '')), 'category', coalesce(p.category, ''), 'rating', p.rating, 'text', p.body, 'at', p.created_at,
+        'city', initcap(coalesce(p.city, '')), 'category', coalesce(p.category, ''), 'rating', p.rating, 'text', p.body, 'at', p.created_at, 'collected', p.source = 'admin',
         'img', coalesce(
           (select nullif(c.image_url, '') from public.categories c where lower(c.name) = lower(p.category) limit 1),
           (select nullif(s.image_url, '') from public.subcategories s where lower(s.name) = lower(p.category) limit 1),

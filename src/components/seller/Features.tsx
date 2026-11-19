@@ -1,4 +1,4 @@
-import { Sparkles, Bell, Bike, Wallet, BarChart3, Zap, Megaphone, RotateCcw, Star, Check } from "lucide-react";
+import { Sparkles, Bell, Bike, Wallet, BarChart3, Zap, Megaphone, RotateCcw, Star, Check, Banknote, Smartphone, CreditCard, Lock, User } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Container, SectionHeading } from "@/components/seller/site/ui";
 import { Reveal } from "@/components/seller/site/motion";
@@ -41,7 +41,9 @@ export function Features() {
               </div>
             </div>
           </Tile>
-          <Tile className="md:col-span-2" icon={<Wallet size={18} />} title="Encaissement sécurisé" text="Paiement à la livraison, Orange Money, MTN MoMo ou carte : Amashia encaisse, vous suivez votre solde en direct." />
+          <Tile className="md:col-span-2" icon={<Wallet size={18} />} title="Encaissement sécurisé" text="Paiement à la livraison, Orange Money, MTN MoMo ou carte : Amashia encaisse, vous suivez votre solde en direct.">
+            <PaymentFlow />
+          </Tile>
           <Tile className="md:col-span-2" icon={<BarChart3 size={18} />} title="Analytique claire" text="Ventes, visiteurs en direct, taux de conversion et sources de trafic (Facebook, TikTok…).">
             <Reveal variant="up" className="mt-6"><div className="flex h-16 items-end gap-1.5">{[30, 45, 38, 60, 52, 75, 90].map((h, i) => <div key={i} className="grow-y flex-1 rounded-t bg-primary/70" style={{ height: `${h}%`, transitionDelay: `${300 + i * 90}ms` }} />)}</div></Reveal>
           </Tile>
@@ -160,4 +162,71 @@ function AiWriter() {
 
 function Caret() {
   return <span className="ml-0.5 inline-block h-[1em] w-[2px] translate-y-[2px] animate-pulse bg-primary align-baseline" />;
+}
+
+/* Encaissement : un moyen de paiement s'allume, l'argent passe par Amashia (sécurisé) et arrive dans le solde. */
+const PAY_METHODS = [
+  { l: "À la livraison", icon: Banknote, tone: "bg-emerald-500 text-white", amount: 12500 },
+  { l: "Orange Money", icon: Smartphone, tone: "bg-[#ff7900] text-black", amount: 8000 },
+  { l: "MTN MoMo", icon: Smartphone, tone: "bg-[#ffcc00] text-black", amount: 15000 },
+  { l: "Carte", icon: CreditCard, tone: "bg-sky-500 text-white", amount: 22500 },
+];
+
+function PaymentFlow() {
+  const [i, setI] = useState(0);
+  const [balance, setBalance] = useState(245000);
+  const [shown, setShown] = useState(245000);
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
+    const t = window.setInterval(() => {
+      setI((k) => {
+        const next = (k + 1) % PAY_METHODS.length;
+        setBalance((b) => (b > 900000 ? 245000 : b + PAY_METHODS[next].amount));
+        return next;
+      });
+    }, 3000);
+    return () => window.clearInterval(t);
+  }, []);
+  // le solde monte doucement quand la pièce arrive (après le passage par Amashia)
+  useEffect(() => {
+    if (shown === balance) return;
+    let raf = 0; const from = shown; const t0 = performance.now() + 1500;
+    const tick = (t: number) => {
+      const k = Math.max(0, Math.min(1, (t - t0) / 600));
+      setShown(Math.round(from + (balance - from) * k));
+      if (k < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [balance]); // eslint-disable-line react-hooks/exhaustive-deps
+  const m = PAY_METHODS[i];
+  return (
+    <div className="mt-6 space-y-3 text-left">
+      <div className="grid grid-cols-4 gap-1.5">
+        {PAY_METHODS.map((x, k) => (
+          <div key={x.l} className={`flex min-w-0 flex-col items-center gap-1 rounded-xl border px-1 py-2 text-center transition-all duration-500 ${k === i ? "scale-[1.04] border-primary bg-primary/10" : "border-border bg-[var(--surface-2)] opacity-60"}`}>
+            <span className={`grid h-7 w-7 place-items-center rounded-lg ${x.tone}`}><x.icon size={14} /></span>
+            <span className="flex h-[22px] w-full items-center justify-center text-[9.5px] font-semibold leading-[11px]">{x.l}</span>
+          </div>
+        ))}
+      </div>
+      <div className="rounded-xl border border-border bg-[var(--surface-2)] p-3">
+        <div className="relative flex h-9 items-center justify-between">
+          <div className="absolute inset-x-4 top-1/2 h-0.5 -translate-y-1/2 rounded bg-border" />
+          <span className="relative z-10 grid h-9 w-9 place-items-center rounded-full bg-secondary text-muted-foreground"><User size={15} /></span>
+          <span className="halo relative z-10 grid h-9 w-9 place-items-center rounded-full bg-primary text-black"><Lock size={15} /></span>
+          <span className="relative z-10 grid h-9 w-9 place-items-center rounded-full bg-emerald-500 text-white"><Wallet size={15} /></span>
+          <span key={i} className={`pay-coin absolute top-1/2 z-20 grid h-5 w-5 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full text-[9px] font-black shadow-lg ${m.tone}`}>F</span>
+        </div>
+        <div className="mt-1.5 grid grid-cols-3 text-[10px] font-semibold text-muted-foreground">
+          <span>Client</span><span className="text-center text-primary">Amashia</span><span className="text-right">Votre solde</span>
+        </div>
+      </div>
+      <div className="relative flex h-12 items-center justify-between rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3">
+        <span className="text-[11px] font-semibold text-muted-foreground">Solde disponible</span>
+        <span className="tabular text-base font-extrabold text-emerald-500">{shown.toLocaleString("fr-FR")}<span className="ml-0.5 align-super text-[8px]">FCFA</span></span>
+        <span key={`b${i}`} className="pay-plus pointer-events-none absolute -top-3 right-3 rounded-full bg-emerald-500 px-2 py-0.5 text-[10px] font-bold text-white">+{m.amount.toLocaleString("fr-FR")} FCFA</span>
+      </div>
+    </div>
+  );
 }

@@ -537,7 +537,7 @@ function Page() {
 }
 
 const inputCls = "w-full bg-background border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary disabled:opacity-50";
-const ctaCls = "w-full py-3.5 rounded-full bg-gradient-primary text-black font-semibold shadow-elegant hover:shadow-glow transition";
+const ctaCls = "cta-sweep w-full py-3.5 rounded-full bg-gradient-primary text-black font-semibold shadow-elegant hover:shadow-glow transition";
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return <div><label className="block text-sm font-medium mb-2">{label}</label>{children}</div>;
@@ -547,7 +547,7 @@ function NavBtns({ back, next, disabled, nextLabel = "Continuer" }: { back: () =
   return (
     <div className="grid grid-cols-2 gap-3 pt-2">
       <button onClick={back} className="py-3.5 rounded-full bg-secondary text-foreground font-semibold hover:opacity-90 transition">Précédent</button>
-      <button onClick={next} disabled={disabled} className="py-3.5 rounded-full bg-gradient-primary text-black font-semibold shadow-elegant hover:shadow-glow transition disabled:opacity-50 disabled:cursor-not-allowed">{nextLabel}</button>
+      <button onClick={next} disabled={disabled} className="cta-sweep py-3.5 rounded-full bg-gradient-primary text-black font-semibold shadow-elegant hover:shadow-glow transition disabled:opacity-50 disabled:cursor-not-allowed">{nextLabel}</button>
     </div>
   );
 }
@@ -672,7 +672,7 @@ function ExistingAccountModal({ hint, email, phone, password, onClose, onLogged 
         </div>
         <p className="mt-4 text-sm text-muted-foreground">Un compte Amashia Seller existe déjà avec {hint.via === "phone" ? "ce numéro de téléphone" : "cette adresse e-mail"}. Connectez-vous directement :</p>
         <div className="mt-4"><PasswordInput value={pwd} onChange={(e) => setPwd(e.target.value)} placeholder="Votre mot de passe" className={inputCls} onKeyDown={(e) => { if (e.key === "Enter") void login(); }} /></div>
-        <button onClick={() => void login()} disabled={busy} className="mt-3 flex h-12 w-full items-center justify-center gap-2 rounded-full bg-primary font-bold text-black disabled:opacity-60">{busy ? <Loader2 size={16} className="animate-spin" /> : null}Me connecter</button>
+        <button onClick={() => void login()} disabled={busy} className="cta-sweep mt-3 flex h-12 w-full items-center justify-center gap-2 rounded-full bg-primary font-bold text-black disabled:opacity-60">{busy ? <Loader2 size={16} className="animate-spin" /> : null}Me connecter</button>
         <div className="mt-3 flex items-center justify-between text-xs">
           <a href="/connexion" className="font-semibold text-primary hover:underline">Mot de passe oublié ?</a>
           <button onClick={onClose} className="text-muted-foreground hover:text-foreground">Ce n'est pas moi</button>
@@ -697,7 +697,7 @@ function LocationInfoModal({ onCancel, onConfirm }: { onCancel: () => void; onCo
         <p className="mt-3 text-xs text-muted-foreground">Si vous n'êtes pas sur place maintenant, choisissez « Plus tard » : vous pourrez l'enregistrer depuis votre espace vendeur.</p>
         <div className="mt-5 grid grid-cols-2 gap-2">
           <button onClick={onCancel} className="h-12 rounded-full bg-secondary font-semibold">Plus tard</button>
-          <button onClick={onConfirm} className="h-12 rounded-full bg-primary font-bold text-black">J'y suis, partager</button>
+          <button onClick={onConfirm} className="cta-sweep h-12 rounded-full bg-primary font-bold text-black">J'y suis, partager</button>
         </div>
       </div>
     </div>

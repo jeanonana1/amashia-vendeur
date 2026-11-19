@@ -27,7 +27,7 @@ export function Header() {
     <header className="sticky top-0 z-50 px-3 pt-3 sm:px-5">
       <div className={`mx-auto flex h-[4.5rem] max-w-[1200px] items-center justify-between gap-4 rounded-2xl border px-4 transition-all sm:px-5 ${scrolled || open ? "border-border bg-background shadow-card" : "border-transparent"}`}>
         <Link to="/" className="flex shrink-0 items-center" aria-label="Accueil amashia seller">
-          <SellerLogo className="h-9 sm:h-11" />
+          <SellerLogo className="h-11 sm:h-11" />
         </Link>
         <nav className="hidden items-center gap-1 md:flex">
           {links.map((l) => (
@@ -35,12 +35,12 @@ export function Header() {
           ))}
         </nav>
         <div className="flex items-center gap-2">
-          <LangToggle />
+          <div className="hidden sm:block"><LangToggle /></div>
           <button onClick={toggle} className="hidden h-9 w-9 place-items-center rounded-full text-muted-foreground transition hover:bg-secondary hover:text-foreground sm:grid" aria-label="Changer de thème">
             {theme === "dark" ? <Sun size={17} /> : <Moon size={17} />}
           </button>
           <Link to="/connexion" className="hidden rounded-full px-4 py-2 text-sm font-semibold text-muted-foreground transition hover:text-foreground sm:inline-flex">Se connecter</Link>
-          <Link to="/inscription" className="hidden h-10 items-center gap-1.5 rounded-full bg-primary px-4 text-sm font-bold text-black transition hover:bg-[#ff7a1f] sm:inline-flex">
+          <Link to="/inscription" className="cta-sweep hidden h-10 items-center gap-1.5 rounded-full bg-primary px-4 text-sm font-bold text-black transition hover:bg-[#ff7a1f] sm:inline-flex">
             Créer ma boutique <ArrowRight size={15} />
           </Link>
           <button onClick={() => setOpen((v) => !v)} className="grid h-10 w-10 place-items-center rounded-full bg-secondary md:hidden" aria-label="Menu">
@@ -53,9 +53,10 @@ export function Header() {
           {links.map((l) => <Link key={l.to} to={l.to} className="block rounded-xl px-4 py-3 text-[15px] font-semibold hover:bg-secondary">{l.label}</Link>)}
           <div className="mt-2 grid grid-cols-2 gap-2 border-t border-border pt-3">
             <Link to="/connexion" className="grid h-11 place-items-center rounded-full border border-border text-sm font-semibold">Se connecter</Link>
-            <Link to="/inscription" className="grid h-11 place-items-center rounded-full bg-primary text-sm font-bold text-black">Créer ma boutique</Link>
+            <Link to="/inscription" className="cta-sweep grid h-11 place-items-center rounded-full bg-primary text-sm font-bold text-black">Créer ma boutique</Link>
           </div>
-          <button onClick={toggle} className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl py-2.5 text-sm text-muted-foreground">
+          <div className="mt-2 flex items-center justify-between rounded-xl px-4 py-2.5 text-sm text-muted-foreground"><span>Langue / Language</span><LangToggle /></div>
+          <button onClick={toggle} className="mt-1 flex w-full items-center justify-center gap-2 rounded-xl py-2.5 text-sm text-muted-foreground">
             {theme === "dark" ? <><Sun size={15} /> Mode clair</> : <><Moon size={15} /> Mode sombre</>}
           </button>
         </div>

@@ -13,7 +13,7 @@ export function Trust() {
   return (
     <section className="relative py-24 md:py-32">
       <Container>
-        <div className="grid gap-12 lg:grid-cols-[1fr_1.2fr] lg:items-center">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-12 lg:grid-cols-[1fr_1.2fr] lg:items-center">
           <Reveal variant="left"><SectionHeading center={false} eyebrow="Confiance" title={<>Concentrez-vous sur vos produits. <span className="text-gradient">On sécurise le reste.</span></>}
             text="Amashia gère l'encaissement, la livraison et le service client : vous gardez le temps de faire grandir votre boutique." /></Reveal>
           <div className="grid gap-4 sm:grid-cols-2">

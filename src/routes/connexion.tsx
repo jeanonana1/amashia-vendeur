@@ -125,7 +125,7 @@ function Page() {
                   if (error) toast.error(error.message); else toast.success("Email de récupération envoyé.");
                 }}>Mot de passe oublié ?</Button>
               </div>
-              <button type="submit" disabled={loading} className="w-full h-12 rounded-full bg-primary text-black font-bold shadow-[0_10px_40px_-12px_var(--glow)] hover:bg-[#ff7a1f] transition disabled:opacity-60">
+              <button type="submit" disabled={loading} className="cta-sweep w-full h-12 rounded-full bg-primary text-black font-bold shadow-[0_10px_40px_-12px_var(--glow)] hover:bg-[#ff7a1f] transition disabled:opacity-60">
                 {loading ? "Connexion..." : recovery ? "Enregistrer le nouveau mot de passe" : "Se connecter"}
               </button>
               <p className="text-center text-sm text-muted-foreground">

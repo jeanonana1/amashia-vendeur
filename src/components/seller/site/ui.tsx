@@ -18,7 +18,7 @@ export function Eyebrow({ children }: { children: ReactNode }) {
 
 export function SectionHeading({ eyebrow, title, text, center = true }: { eyebrow?: string; title: ReactNode; text?: ReactNode; center?: boolean }) {
   return (
-    <div className={`${center ? "mx-auto text-center" : ""} max-w-2xl`}>
+    <div className={`${center ? "mx-auto text-center" : "mx-auto text-center lg:mx-0 lg:text-left"} max-w-2xl`}>
       {eyebrow && <p className="eyebrow mb-4">{eyebrow}</p>}
       <h2 className="text-balance text-3xl font-extrabold leading-[1.08] sm:text-4xl md:text-[3.2rem]">{title}</h2>
       {text && <p className="mt-5 text-base leading-relaxed text-muted-foreground md:text-lg">{text}</p>}
@@ -28,7 +28,7 @@ export function SectionHeading({ eyebrow, title, text, center = true }: { eyebro
 
 export function PrimaryCta({ to = "/inscription", children = "Créer ma boutique", className = "" }: { to?: string; children?: ReactNode; className?: string }) {
   return (
-    <Link to={to as never} className={`group inline-flex h-12 items-center justify-center gap-2 rounded-full bg-primary px-6 text-[15px] font-bold text-black shadow-[0_10px_40px_-12px_var(--glow)] transition hover:bg-[#ff7a1f] ${className}`}>
+    <Link to={to as never} className={`cta-sweep group inline-flex h-12 items-center justify-center gap-2 rounded-full bg-primary px-6 text-[15px] font-bold text-black shadow-[0_10px_40px_-12px_var(--glow)] transition hover:bg-[#ff7a1f] ${className}`}>
       {children}
       <ArrowRight size={17} className="transition-transform group-hover:translate-x-0.5" />
     </Link>

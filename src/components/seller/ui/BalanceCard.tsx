@@ -47,5 +47,5 @@ export function BalanceCard({ amount, loading, subtitle, chip, actions, footer, 
   );
 }
 
-export const primaryBtn = "flex h-12 items-center justify-center gap-2 rounded-full bg-primary px-6 text-sm font-bold text-black shadow-[0_10px_30px_-10px_var(--primary)] transition hover:brightness-95 disabled:opacity-50 disabled:shadow-none";
+export const primaryBtn = "cta-sweep flex h-12 items-center justify-center gap-2 rounded-full bg-primary px-6 text-sm font-bold text-black shadow-[0_10px_30px_-10px_var(--primary)] transition hover:brightness-95 disabled:opacity-50 disabled:shadow-none";
 export const ghostBtn = "flex h-12 items-center justify-center gap-1.5 rounded-full border border-border px-5 text-sm font-semibold hover:border-primary hover:text-primary";

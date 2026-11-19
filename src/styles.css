@@ -349,3 +349,13 @@ html[data-tr="wait"]::after {
 }
 html.light[data-tr="wait"]::after { background: #fff; color: #0b1f3a; }
 @keyframes tr-spin { to { transform: rotate(360deg); } }
+/* Mobile : pas de glissement latéral (il élargissait la page avant l'apparition des éléments) */
+@media (max-width: 1023px) { .reveal-left, .reveal-right { transform: translateY(28px); } }
+/* Livraison Prime : trait et livreur parfaitement synchronisés */
+@keyframes ride-fill { 0% { width: 0%; } 45%, 55% { width: 50%; } 95%, 100% { width: 100%; } }
+.ride, .ride-fill { animation-duration: 4.2s; animation-timing-function: cubic-bezier(.65,0,.35,1); animation-iteration-count: infinite; }
+.ride-fill { animation-name: ride-fill; }
+@media (prefers-reduced-motion: reduce) { .ride-fill { animation: none; width: 100%; } }
+@keyframes tag-pop { from { opacity: 0; transform: translateY(6px) scale(.85); } to { opacity: 1; transform: none; } }
+.hero-bubble-tag { animation: tag-pop .4s cubic-bezier(.34,1.56,.64,1) both; }
+.cta-sweep:disabled::after, .cta-sweep[aria-disabled="true"]::after { display: none; }

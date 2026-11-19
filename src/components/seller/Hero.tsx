@@ -11,8 +11,8 @@ export function Hero() {
         <div className="mx-auto max-w-4xl text-center animate-rise">
           <Eyebrow>La plateforme des vendeurs Amashia · Cameroun</Eyebrow>
           <h1 className="mt-6 font-extrabold leading-[1.05]">
-            <span className="block whitespace-nowrap text-[clamp(1.15rem,5.8vw,3.5rem)]">Vendez partout au Cameroun.</span>
-            <span className="mt-1 block text-balance text-[clamp(1.9rem,8.6vw,4.4rem)] text-gradient">On s'occupe du reste.</span>
+            <span className="block text-balance text-[clamp(2.2rem,10vw,3.4rem)] sm:whitespace-nowrap sm:text-[clamp(2rem,5.8vw,3.5rem)]">Vendez partout au Cameroun.</span>
+            <span className="mt-1 block text-balance text-[clamp(2.2rem,10vw,3.4rem)] text-gradient sm:text-[clamp(2rem,5.8vw,3.5rem)]">On s'occupe du reste.</span>
           </h1>
           <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-muted-foreground md:text-xl">
             Publiez vos produits en quelques minutes, recevez vos commandes en temps réel. Le paiement et la livraison sont gérés par Amashia, de votre boutique jusqu'au client.

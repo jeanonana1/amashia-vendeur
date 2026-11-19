@@ -1147,7 +1147,7 @@ function AddProductPage() {
                 <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-3"><p className="text-xs text-muted-foreground">Bénéfice ({margin}%)</p><p className="font-bold text-emerald-400">{fmtFCFA(profit)} FCFA</p></div>
               </div>
               <div className="flex flex-col sm:flex-row gap-3">
-                <button onClick={() => submit(false)} disabled={saving || !!compareError} className="flex-1 py-3.5 rounded-full bg-gradient-primary text-black font-semibold shadow-elegant disabled:opacity-50">
+                <button onClick={() => submit(false)} disabled={saving || !!compareError} className="cta-sweep flex-1 py-3.5 rounded-full bg-gradient-primary text-black font-semibold shadow-elegant disabled:opacity-50">
                   {saving ? "Publication…" : "Publier sur Amashia"}
                 </button>
                 <button onClick={() => submit(true)} disabled={saving} className="flex-1 py-3.5 rounded-full bg-secondary font-semibold disabled:opacity-50">Enregistrer en brouillon</button>
@@ -1158,7 +1158,7 @@ function AddProductPage() {
           {/* Mobile : barre d'actions épinglée en bas ; ordinateur : sous le formulaire */}
           <div className="hidden items-center justify-between gap-3 lg:flex">
             <button disabled={step === 0} onClick={() => setStep(step - 1)} className="px-5 py-2.5 rounded-full bg-secondary text-sm font-semibold disabled:opacity-40 flex items-center gap-2"><ArrowLeft size={15} /> Précédent</button>
-            {step < STEPS.length - 1 && <button disabled={!canNext()} onClick={() => setStep(step + 1)} className="px-5 py-2.5 rounded-full bg-primary text-black text-sm font-bold disabled:opacity-40 flex items-center gap-2">Suivant <ArrowRight size={15} /></button>}
+            {step < STEPS.length - 1 && <button disabled={!canNext()} onClick={() => setStep(step + 1)} className="cta-sweep px-5 py-2.5 rounded-full bg-primary text-black text-sm font-bold disabled:opacity-40 flex items-center gap-2">Suivant <ArrowRight size={15} /></button>}
           </div>
           {/* Mobile : barre collée tout en bas de l'écran (rendue hors des blocs animés pour rester vraiment épinglée) */}
           <BottomBar>
@@ -1166,7 +1166,7 @@ function AddProductPage() {
               <button disabled={step === 0} onClick={() => setStep(step - 1)} className="h-10 px-4 rounded-full bg-secondary text-sm font-semibold disabled:opacity-40 flex items-center gap-1.5"><ArrowLeft size={15} /> Précédent</button>
               <span className="text-xs font-semibold text-muted-foreground">Étape {step + 1}/{STEPS.length}</span>
               {step < STEPS.length - 1 ? (
-                <button disabled={!canNext()} onClick={() => setStep(step + 1)} className="h-10 px-5 rounded-full bg-primary text-black text-sm font-bold disabled:opacity-40 flex items-center gap-1.5">Suivant <ArrowRight size={15} /></button>
+                <button disabled={!canNext()} onClick={() => setStep(step + 1)} className="cta-sweep h-10 px-5 rounded-full bg-primary text-black text-sm font-bold disabled:opacity-40 flex items-center gap-1.5">Suivant <ArrowRight size={15} /></button>
               ) : <span className="w-[96px]" />}
             </div>
           </BottomBar>

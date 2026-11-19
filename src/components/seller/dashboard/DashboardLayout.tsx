@@ -205,7 +205,7 @@ export function DashboardLayout({ title, subtitle, actions, children }: { title:
                   <p className="tabular text-sm font-bold">{balanceStats ? money(balanceStats.balance) : "…"}</p>
                 </div>
               </div>
-              <LangToggle className="hidden sm:inline-flex" />
+              <div className="hidden sm:block"><LangToggle /></div>
               <button onClick={toggle} className={`${iconBtn} hidden sm:grid`} aria-label="Thème">{theme === "dark" ? <Sun size={17} /> : <Moon size={17} />}</button>
               <button onClick={toggleSound} className={`${iconBtn} hidden sm:grid`} title={sound ? "Couper les sons" : "Activer les sons"} aria-label={sound ? "Couper les sons" : "Activer les sons"}>{sound ? <Volume2 size={17} /> : <VolumeX size={17} />}</button>
               <Link to="/dashboard/notifications" className={`${iconBtn} relative`} title="Notifications" aria-label="Notifications">

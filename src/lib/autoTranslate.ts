@@ -15,7 +15,9 @@ const SKIP = 'head, script, style, noscript, textarea, code, pre, svg, [translat
 // Textes déjà en anglais (dictionnaire de l'interface) : rien à traduire
 const english = new Set<string>();
 
-const cache = new Map<string, string>();
+// Dictionnaire anglais livré avec le site : les textes de l'interface s'affichent tout de suite traduits
+import bundled from "./tr-en.json";
+const cache = new Map<string, string>(bundled as [string, string][]);
 try {
   const saved = JSON.parse(localStorage.getItem(STORE) || "[]") as [string, string][];
   for (const [k, v] of saved) cache.set(k, v);
@@ -59,7 +61,8 @@ function request(tpl: string): Promise<string> {
     waiting.set(tpl, [resolve]);
     queue.push(tpl);
     // texte encore jamais traduit : la page est masquée tout de suite (avant l'affichage du français)
-    if (active) holdPage();
+    // seulement au tout premier affichage : ensuite, les nouveaux textes se traduisent sans masquer la page
+    if (active && Date.now() - startedAt < 1200) holdPage();
     updateBusy();
     // les textes d'un même rendu partent ensemble
     if (!flushTimer) flushTimer = window.setTimeout(pump, 16);
@@ -104,7 +107,7 @@ export function holdPage() {
   document.documentElement.setAttribute("data-tr", "wait");
   window.clearTimeout(safetyTimer);
   // filet de sécurité : la page s'affiche quoi qu'il arrive
-  safetyTimer = window.setTimeout(releasePage, 12_000);
+  safetyTimer = window.setTimeout(releasePage, 2_500);
 }
 function releasePage() {
   window.clearTimeout(showTimer);
@@ -136,6 +139,14 @@ function translateTextNode(node: Text) {
   const { tpl, nums } = toTemplate(trimmed.replace(/\s+/g, " "));
   const state: TextState = { src: value, out: value };
   texts.set(node, state);
+  // traduction déjà connue : appliquée immédiatement, sans attente
+  const hit = cache.get(tpl);
+  if (hit !== undefined) {
+    const lead = value.match(/^\s*/)![0], trail = value.match(/\s*$/)![0];
+    state.out = lead + fromTemplate(hit, nums) + trail;
+    if (state.out !== value) node.nodeValue = state.out;
+    return;
+  }
   void request(tpl).then((t) => {
     if (!active || texts.get(node) !== state || node.nodeValue !== value) return;
     const lead = value.match(/^\s*/)![0], trail = value.match(/\s*$/)![0];
@@ -192,9 +203,11 @@ function translateTitle() {
   void request(tpl).then((r) => { if (active && document.title === t) { titleSrc = fromTemplate(r, nums); document.title = titleSrc; } });
 }
 
+let startedAt = 0;
 export function startAutoTranslate() {
   if (active || typeof window === "undefined") return;
   active = true;
+  startedAt = Date.now();
   document.documentElement.lang = "en";
   // toute la page (et non <body> seul : React peut recréer <body> après un écart d'hydratation)
   walk(document.body);

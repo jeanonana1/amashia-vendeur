@@ -23,7 +23,7 @@ export function Footer() {
       <div className="mx-auto max-w-[1200px] px-5 py-14 sm:px-8">
         <div className="grid gap-10 md:grid-cols-[1.3fr_repeat(4,1fr)]">
           <div>
-            <Link to="/" aria-label="Accueil amashia seller"><SellerLogo className="h-8" /></Link>
+            <Link to="/" aria-label="Accueil amashia seller"><SellerLogo className="h-10" /></Link>
             <p className="mt-4 max-w-xs text-sm leading-relaxed text-muted-foreground">La plateforme des vendeurs d'Amashia : vendez partout au Cameroun, nous nous occupons du paiement et de la livraison.</p>
           </div>
           {cols.map((c) => (

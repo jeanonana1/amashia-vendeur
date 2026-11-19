@@ -9,7 +9,7 @@ export function AuthSplit({ children, wide = false }: { children: ReactNode; wid
     <div className="grid min-h-screen bg-background lg:grid-cols-[1fr_minmax(0,0.9fr)]">
       <div className="relative flex flex-col px-5 py-6 sm:px-10">
         <div className="flex items-center justify-between">
-          <Link to="/" aria-label="Accueil amashia seller"><SellerLogo className="h-8" /></Link>
+          <Link to="/" aria-label="Accueil amashia seller"><SellerLogo className="h-10 sm:h-11" /></Link>
           <Link to="/" className="text-sm font-medium text-muted-foreground hover:text-foreground">← Retour au site</Link>
         </div>
         <div className="flex flex-1 items-center justify-center py-10">

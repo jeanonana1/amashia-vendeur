@@ -97,7 +97,10 @@ export function DashboardLayout({ title, subtitle, children }: { title: string; 
     return (
       <div className="min-h-screen bg-background grid place-items-center px-6 text-center">
         <div>
-          <SellerLogo className="mx-auto h-8 animate-pulse" />
+          <SellerLogo className="mx-auto h-12" />
+          <div className="mx-auto mt-6 h-1.5 w-48 overflow-hidden rounded-full bg-secondary" role="progressbar" aria-label="Chargement">
+            <div className="animate-loading h-full w-2/5 rounded-full bg-primary" />
+          </div>
           <p className="mt-4 text-sm text-muted-foreground">Chargement du tableau de bord…</p>
         </div>
       </div>
@@ -109,8 +112,8 @@ export function DashboardLayout({ title, subtitle, children }: { title: string; 
 
   const SidebarInner = (
     <>
-      <div className="flex h-16 items-center px-5">
-        <Link to="/" className="flex items-center" aria-label="Accueil amashia seller"><SellerLogo className="h-7" /></Link>
+      <div className="flex h-[4.5rem] items-center px-5">
+        <Link to="/" className="flex items-center" aria-label="Accueil amashia seller"><SellerLogo className="h-10" /></Link>
       </div>
       <nav className="flex-1 space-y-5 overflow-y-auto px-3 pb-4 pt-2">
         {GROUPS.map((g) => (
@@ -170,10 +173,10 @@ export function DashboardLayout({ title, subtitle, children }: { title: string; 
 
       <main className="min-w-0 flex-1 overflow-x-hidden">
         {/* Barre du haut */}
-        <header className="glass sticky top-0 z-30 border-b border-border">
+        <header className="sticky top-0 z-30 border-b border-border bg-background">
           <div className="mx-auto flex h-16 max-w-[1440px] items-center gap-3 px-4 sm:px-6 lg:px-8">
             <button onClick={() => setDrawerOpen(true)} className={`${iconBtn} lg:hidden`} aria-label="Ouvrir le menu"><Menu size={18} /></button>
-            <Link to="/" className="flex min-w-0 items-center lg:hidden" aria-label="Accueil amashia seller"><SellerLogo className="h-6 max-w-full" /></Link>
+            <Link to="/" className="flex min-w-0 items-center lg:hidden" aria-label="Accueil amashia seller"><SellerLogo className="h-8 max-w-full" /></Link>
             <div className="hidden min-w-0 items-center gap-2 text-sm text-muted-foreground lg:flex">
               <span>Espace vendeur</span><span className="text-border">/</span><span className="truncate font-semibold text-foreground">{current?.label ?? title}</span>
             </div>

@@ -1,4 +1,4 @@
-import { Bike, Bell, Sparkles, Smartphone, ShieldCheck, Truck, Wallet, BadgeCheck } from "lucide-react";
+import { Bike, Bell, Sparkles, Smartphone, ShieldCheck, Truck, Wallet, BadgeCheck, Star } from "lucide-react";
 import { Backdrop, Container, Eyebrow, GhostCta, PrimaryCta } from "@/components/seller/site/ui";
 
 /** Page d'accueil — en-tête : promesse + maquette animée de l'espace vendeur. */
@@ -38,8 +38,12 @@ function ProductMock() {
   const bars = [38, 52, 44, 61, 57, 74, 69, 88, 80, 96, 90, 100];
   return (
     <div className="relative mx-auto mt-16 max-w-5xl animate-rise" style={{ animationDelay: "0.15s" }}>
-      <div className="glow-orb absolute -inset-x-10 -top-10 bottom-0 -z-10 opacity-80" />
-      <div className="ring-gradient overflow-hidden rounded-[1.6rem] border border-border bg-card shadow-card">
+      <div className="glow-orb animate-breathe absolute -inset-x-10 -top-10 bottom-0 -z-10 opacity-80" />
+      <div className="ring-gradient relative overflow-hidden rounded-[1.6rem] border border-border bg-card shadow-card">
+        {/* reflet qui balaie la maquette */}
+        <div aria-hidden className="pointer-events-none absolute inset-0 z-10 overflow-hidden">
+          <div className="animate-shimmer absolute inset-y-0 -left-1/3 w-1/3 bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" style={{ animationDelay: "1.5s", animationDuration: "5s" }} />
+        </div>
         {/* barre de fenêtre */}
         <div className="flex items-center gap-2 border-b border-border px-4 py-3">
           <span className="h-3 w-3 rounded-full bg-[#ff5f57]" /><span className="h-3 w-3 rounded-full bg-[#febc2e]" /><span className="h-3 w-3 rounded-full bg-[#28c840]" />
@@ -48,7 +52,7 @@ function ProductMock() {
         <div className="grid md:grid-cols-[200px_1fr]">
           <aside className="hidden border-r border-border p-4 md:block">
             {["Aperçu", "Produits", "Commandes", "Livraison", "Paiements", "Analytique", "Promotions"].map((n, i) => (
-              <div key={n} className={`mb-1 rounded-lg px-3 py-2 text-xs ${i === 0 ? "bg-primary/12 font-semibold text-primary" : "text-muted-foreground"}`}>{n}</div>
+              <div key={n} className={`mb-1 rounded-lg px-3 py-2 text-xs animate-rise ${i === 0 ? "bg-primary/12 font-semibold text-primary" : "text-muted-foreground"}`} style={{ animationDelay: `${0.3 + i * 0.06}s` }}>{n}</div>
             ))}
           </aside>
           <div className="p-4 sm:p-6">
@@ -60,18 +64,19 @@ function ProductMock() {
               <span className="flex items-center gap-1.5 rounded-full bg-emerald-500/12 px-2.5 py-1 text-[11px] font-semibold text-emerald-500"><span className="relative flex h-2 w-2"><span className="animate-ping-soft absolute inline-flex h-full w-full rounded-full bg-emerald-500" /><span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" /></span>En direct</span>
             </div>
             <div className="mt-4 grid grid-cols-3 gap-2 sm:gap-3">
-              {[{ l: "Ventes", v: "▲", c: "text-primary" }, { l: "Commandes", v: "●", c: "text-emerald-500" }, { l: "Visiteurs", v: "◆", c: "text-sky-400" }].map((k) => (
+              {[{ l: "Ventes", w: "72%", c: "bg-primary" }, { l: "Commandes", w: "58%", c: "bg-emerald-500" }, { l: "Visiteurs", w: "84%", c: "bg-sky-400" }].map((k, i) => (
                 <div key={k.l} className="rounded-xl border border-border bg-[var(--surface-2)] p-3 text-left">
                   <p className="text-[10px] text-muted-foreground sm:text-[11px]">{k.l}</p>
-                  <div className="mt-2 h-2 w-3/4 rounded-full bg-secondary"><div className="h-2 w-2/3 rounded-full bg-current opacity-70" style={{ color: "var(--primary)" }} /></div>
-                  <p className={`mt-1 text-xs ${k.c}`}>{k.v}</p>
+                  <div className="mt-2.5 h-2 w-full overflow-hidden rounded-full bg-secondary"><div className={`animate-width h-2 rounded-full ${k.c}`} style={{ width: k.w, animationDelay: `${0.6 + i * 0.15}s` }} /></div>
                 </div>
               ))}
             </div>
             <div className="mt-3 rounded-xl border border-border bg-[var(--surface-2)] p-3 sm:p-4">
               <div className="flex items-end gap-1.5 sm:gap-2" style={{ height: 120 }}>
                 {bars.map((h, i) => (
-                  <div key={i} className="flex-1 rounded-t-md bg-gradient-to-t from-primary/25 to-primary transition-all" style={{ height: `${h}%`, opacity: 0.45 + i * 0.045 }} />
+                  <div key={i} className="animate-bar flex-1 rounded-t-md bg-gradient-to-t from-primary/25 to-primary" style={{ height: `${h}%`, opacity: 0.45 + i * 0.045, animationDelay: `${0.5 + i * 0.07}s` }}>
+                    <div className="animate-breathe h-full w-full rounded-t-md" style={{ animationDelay: `${i * 0.25}s` }} />
+                  </div>
                 ))}
               </div>
             </div>
@@ -79,22 +84,31 @@ function ProductMock() {
         </div>
       </div>
 
-      {/* cartes flottantes */}
-      <FloatCard className="left-[-0.5rem] top-24 sm:left-[-2.5rem]" delay="0.5s" icon={<Bell size={16} />} tone="bg-primary text-black" title="Nouvelle commande" text="Sonnerie dans votre espace" />
-      <FloatCard className="right-[-0.5rem] top-44 sm:right-[-2.5rem]" delay="0.8s" icon={<Bike size={16} />} tone="bg-sky-500 text-white" title="Livreur Prime en route" text="Récupération chez vous" />
-      <FloatCard className="bottom-[-1.25rem] left-1/2 -translate-x-1/2 sm:left-[18%] sm:translate-x-0" delay="1.1s" icon={<Wallet size={16} />} tone="bg-emerald-500 text-white" title="Commande livrée" text="Le montant passe dans votre solde" />
-      <p className="mt-16 text-center text-[11px] text-muted-foreground">Illustration de l'espace vendeur</p>
+      {/* bulles flottantes : apparition « pop », puis flottement continu */}
+      <FloatCard className="-left-1 -top-6 sm:left-[-2.5rem] sm:top-24" delay={0.9} dur={5} icon={<Bell size={16} />} tone="bg-primary text-black" title="Nouvelle commande" text="Sonnerie dans votre espace" />
+      <FloatCard className="right-1 top-36 sm:right-[-2.5rem] sm:top-44" delay={1.3} dur={6} icon={<Bike size={16} />} tone="bg-sky-500 text-white" title="Livreur Prime en route" text="Récupération chez vous" />
+      <FloatCard className="bottom-[-1.5rem] left-1/2 -translate-x-1/2 sm:left-[16%] sm:translate-x-0" delay={1.7} dur={5.5} icon={<Wallet size={16} />} tone="bg-emerald-500 text-white" title="Commande livrée" text="Le montant passe dans votre solde" />
+      <FloatCard className="hidden lg:flex -right-14 bottom-16" delay={2.1} dur={6.5} icon={<Star size={16} />} tone="bg-amber-400 text-black" title="Nouvel avis ★★★★★" text="Laissé par un acheteur vérifié" />
+      <FloatCard className="hidden lg:flex -left-16 bottom-24" delay={2.5} dur={7} icon={<Smartphone size={16} />} tone="bg-[#ffcc00] text-black" title="Paiement Mobile Money" text="Encaissé par Amashia" />
+      <p className="mt-20 text-center text-[11px] text-muted-foreground sm:mt-16">Illustration de l'espace vendeur</p>
     </div>
   );
 }
 
-function FloatCard({ className, delay, icon, tone, title, text }: { className: string; delay: string; icon: React.ReactNode; tone: string; title: string; text: string }) {
+function FloatCard({ className, delay, dur, icon, tone, title, text }: { className: string; delay: number; dur: number; icon: React.ReactNode; tone: string; title: string; text: string }) {
   return (
-    <div className={`glass absolute z-10 hidden items-center gap-3 rounded-2xl border border-border px-3.5 py-3 shadow-card animate-rise sm:flex ${className}`} style={{ animationDelay: delay }}>
-      <span className={`grid h-9 w-9 place-items-center rounded-xl ${tone}`}>{icon}</span>
-      <div className="text-left">
-        <p className="text-[13px] font-bold leading-tight">{title}</p>
-        <p className="text-[11px] text-muted-foreground">{text}</p>
+    <div className={`absolute z-20 ${className.includes("hidden") ? "" : "flex"} ${className}`}>
+      <div className="animate-pop" style={{ animationDelay: `${delay}s` }}>
+        <div className="animate-bob flex items-center gap-2.5 rounded-2xl border border-border bg-card/95 px-3 py-2.5 shadow-card backdrop-blur sm:gap-3 sm:px-3.5 sm:py-3" style={{ animationDuration: `${dur}s`, animationDelay: `${delay}s` }}>
+          <span className={`relative grid h-8 w-8 place-items-center rounded-xl sm:h-9 sm:w-9 ${tone}`}>
+            <span className={`animate-ping-soft absolute inset-0 rounded-xl ${tone} opacity-60`} style={{ animationDelay: `${delay}s` }} />
+            <span className="relative">{icon}</span>
+          </span>
+          <div className="text-left">
+            <p className="text-[12px] font-bold leading-tight sm:text-[13px]">{title}</p>
+            <p className="hidden text-[11px] text-muted-foreground sm:block">{text}</p>
+          </div>
+        </div>
       </div>
     </div>
   );

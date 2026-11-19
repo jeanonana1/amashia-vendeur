@@ -89,7 +89,7 @@ function DashboardOverview() {
         <div className="relative flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">Chiffre d'affaires · {period.sub}</p>
-            <p className="tabular mt-1 text-4xl font-extrabold sm:text-5xl">{stats ? money(stats.revenue) : "…"}</p>
+            <p className="tabular mt-1 text-[1.85rem] font-extrabold leading-tight sm:text-5xl">{stats ? <Amount text={money(stats.revenue)} /> : "…"}</p>
             <div className="mt-2 flex items-center gap-2 text-xs text-muted-foreground">{stats && <Trend value={trend(stats.revenue, stats.revenue_prev)} />}<span>comparé à {period.prev}</span></div>
           </div>
           <div className="flex flex-col gap-3 sm:items-end">
@@ -121,7 +121,7 @@ function DashboardOverview() {
                 <div className="flex items-center gap-2.5"><div className={`grid h-9 w-9 place-items-center rounded-xl ${c.color}`}><Icon size={17} /></div><p className="text-sm font-medium text-muted-foreground">{c.label}</p></div>
                 {c.t !== undefined && <Trend value={c.t} />}
               </div>
-              <p className="tabular text-[1.75rem] font-extrabold leading-none">{c.value}</p>
+              <p className="tabular text-[1.45rem] font-extrabold leading-none sm:text-[1.75rem]"><Amount text={c.value} /></p>
               <p className="mt-2 text-[11px] text-muted-foreground">{period.sub}{c.t !== undefined ? ` · comparé à ${period.prev}` : ""}</p>
             </div>
           );
@@ -210,6 +210,12 @@ function DashboardOverview() {
       {openOrder && <OrderDetailModal line={openOrder} onClose={() => setOpenOrder(null)} />}
     </DashboardLayout>
   );
+}
+
+/** Montant : « FCFA » épinglé en petit en haut à droite du nombre. */
+function Amount({ text }: { text: string }) {
+  if (!text.endsWith(" FCFA")) return <>{text}</>;
+  return <>{text.slice(0, -5)}<sup className="ml-1 align-super text-[0.38em] font-bold tracking-wide text-muted-foreground">FCFA</sup></>;
 }
 
 function Trend({ value }: { value: number | null }) {

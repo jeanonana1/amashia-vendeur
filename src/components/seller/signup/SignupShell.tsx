@@ -29,7 +29,8 @@ export function SignupShell({ step, children, onBack }: { step: number; children
               <div className={`w-9 h-9 rounded-full grid place-items-center text-xs font-bold mb-1.5 transition ${done || active ? "bg-gradient-primary text-black" : "bg-secondary text-muted-foreground"}`}>
                 {done ? <Check size={16} /> : num}
               </div>
-              <span className={`text-[10px] ${active ? "text-foreground font-semibold" : "text-muted-foreground"}`}>{label}</span>
+              {/* mobile : seul le titre de l'étape en cours s'affiche ; ordinateur : tous les titres */}
+              <span className={`text-[10px] ${active ? "text-foreground font-semibold" : "text-muted-foreground hidden sm:block"} whitespace-nowrap`}>{label}</span>
             </div>
           );
         })}

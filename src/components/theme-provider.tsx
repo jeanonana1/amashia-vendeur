@@ -10,7 +10,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   // Thème mémorisé lu une seule fois ; il n'est réécrit qu'une fois chargé (sinon « sombre » l'écraserait au chargement).
   useEffect(() => {
     let stored: string | null = null;
-    try { stored = localStorage.getItem("theme"); } catch { /* stockage indisponible */ }
+    try { stored = localStorage.getItem("amashia-seller-theme"); } catch { /* stockage indisponible */ }
     if (stored === "light" || stored === "dark") setTheme(stored);
     setReady(true);
   }, []);
@@ -20,7 +20,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     const root = document.documentElement;
     root.classList.remove("light", "dark");
     root.classList.add(theme);
-    try { localStorage.setItem("theme", theme); } catch { /* stockage indisponible */ }
+    try { localStorage.setItem("amashia-seller-theme", theme); } catch { /* stockage indisponible */ }
   }, [theme, ready]);
 
   return (

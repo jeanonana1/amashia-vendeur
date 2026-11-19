@@ -48,7 +48,7 @@ export function Backdrop({ className = "" }: { className?: string }) {
   return (
     <div aria-hidden className={`pointer-events-none absolute inset-0 -z-10 overflow-hidden ${className}`}>
       <div className="bg-grid absolute inset-0" />
-      <div className="glow-orb absolute left-1/2 top-[-18rem] h-[38rem] w-[60rem] -translate-x-1/2" />
+      <div className="glow-orb animate-drift absolute left-1/2 top-[-18rem] h-[38rem] w-[60rem]" style={{ transform: "translateX(-50%)" }} />
     </div>
   );
 }

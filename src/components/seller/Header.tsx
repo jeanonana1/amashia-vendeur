@@ -24,9 +24,9 @@ export function Header() {
   }, []);
   return (
     <header className="sticky top-0 z-50 px-3 pt-3 sm:px-5">
-      <div className={`mx-auto flex h-16 max-w-[1200px] items-center justify-between gap-4 rounded-2xl border px-4 transition-all sm:px-5 ${scrolled || open ? "glass border-border shadow-card" : "border-transparent"}`}>
+      <div className={`mx-auto flex h-[4.5rem] max-w-[1200px] items-center justify-between gap-4 rounded-2xl border px-4 transition-all sm:px-5 ${scrolled || open ? "border-border bg-background shadow-card" : "border-transparent"}`}>
         <Link to="/" className="flex shrink-0 items-center" aria-label="Accueil amashia seller">
-          <SellerLogo className="h-7 sm:h-8" />
+          <SellerLogo className="h-9 sm:h-11" />
         </Link>
         <nav className="hidden items-center gap-1 md:flex">
           {links.map((l) => (
@@ -47,7 +47,7 @@ export function Header() {
         </div>
       </div>
       {open && (
-        <div className="glass mx-auto mt-2 max-w-[1200px] rounded-2xl border border-border p-3 shadow-card md:hidden">
+        <div className="mx-auto mt-2 max-w-[1200px] bg-background rounded-2xl border border-border p-3 shadow-card md:hidden">
           {links.map((l) => <Link key={l.to} to={l.to} className="block rounded-xl px-4 py-3 text-[15px] font-semibold hover:bg-secondary">{l.label}</Link>)}
           <div className="mt-2 grid grid-cols-2 gap-2 border-t border-border pt-3">
             <Link to="/connexion" className="grid h-11 place-items-center rounded-full border border-border text-sm font-semibold">Se connecter</Link>

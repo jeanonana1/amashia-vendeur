@@ -30,7 +30,7 @@ export function CommissionCalculator({ rates }: { rates: Rate[] | null }) {
       <div className="mt-6 grid gap-4 sm:grid-cols-2">
         <label className="text-sm font-medium text-muted-foreground">Prix de vente
           <div className="mt-1.5 flex items-center rounded-xl border border-border bg-[var(--surface-2)] px-3 focus-within:ring-2 focus-within:ring-primary">
-            <input inputMode="numeric" value={Number(price || 0).toLocaleString("fr-FR")} onChange={(e) => setPrice(e.target.value.replace(/\D/g, "").slice(0, 9))} className="tabular h-12 min-w-0 flex-1 bg-transparent text-lg font-bold text-foreground outline-none" />
+            <input inputMode="numeric" value={Number(price || 0).toLocaleString("fr-FR")} onChange={(e) => setPrice(e.target.value.replace(/\D/g, "").slice(0, 9))} className="tabular h-12 w-full min-w-0 flex-1 bg-transparent text-lg font-bold text-foreground outline-none" />
             <span className="text-sm font-semibold">FCFA</span>
           </div>
         </label>
@@ -41,9 +41,12 @@ export function CommissionCalculator({ rates }: { rates: Rate[] | null }) {
         </label>
       </div>
       <div className="mt-6 space-y-3 rounded-2xl bg-[var(--surface-2)] p-5">
-        <div className="flex justify-between text-sm"><span className="text-muted-foreground">Prix payé par le client</span><span className="tabular font-semibold">{fcfa(p)}</span></div>
-        <div className="flex justify-between text-sm"><span className="text-muted-foreground">Commission Amashia ({rate} %)</span><span className="tabular font-semibold">− {fcfa(fee)}</span></div>
-        <div className="flex items-end justify-between border-t border-border pt-3"><span className="font-semibold">Vous recevez</span><span className="tabular text-3xl font-extrabold text-primary">{fcfa(p - fee)}</span></div>
+        <div className="flex flex-wrap justify-between gap-x-3 gap-y-0.5 text-sm"><span className="text-muted-foreground">Prix payé par le client</span><span className="tabular whitespace-nowrap font-semibold">{fcfa(p)}</span></div>
+        <div className="flex flex-wrap justify-between gap-x-3 gap-y-0.5 text-sm"><span className="text-muted-foreground">Commission Amashia ({rate} %)</span><span className="tabular whitespace-nowrap font-semibold">− {fcfa(fee)}</span></div>
+        <div className="flex flex-col gap-1 border-t border-border pt-3 sm:flex-row sm:items-end sm:justify-between">
+          <span className="font-semibold">Vous recevez</span>
+          <span className="tabular whitespace-nowrap text-[1.9rem] font-extrabold leading-none text-primary sm:text-3xl">{Math.round(p - fee).toLocaleString("fr-FR")}<sup className="ml-1 align-super text-xs font-bold">FCFA</sup></span>
+        </div>
       </div>
       <p className="mt-3 text-xs text-muted-foreground">Taux réels de la catégorie, appliqués uniquement aux commandes livrées. Les frais de livraison sont payés par le client.</p>
     </div>

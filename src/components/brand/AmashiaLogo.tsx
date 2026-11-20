@@ -14,20 +14,22 @@ export function AmashiaLogo({ variant = "dark", size, ink, className = "", style
   return (
     <span
       className={`amashia-logo ${className}`}
-      style={{ fontSize: size, color, display: "inline-flex", alignItems: "center", gap: ".14em", fontFamily: "'Ubuntu', system-ui, sans-serif", fontWeight: 700, letterSpacing: "-0.035em", lineHeight: 1, paddingBottom: ".12em", ...style }}
+      style={{ fontSize: size, color, display: "inline-flex", alignItems: "center", gap: ".14em", fontFamily: "'Ubuntu', system-ui, sans-serif", fontWeight: 700, letterSpacing: "-0.035em", lineHeight: 1, paddingBottom: ".26em", ...style }}
       aria-label="Amashia"
       role="img"
     >
       <svg viewBox="0 0 100 100" aria-hidden style={{ height: ".78em", width: ".75em", flexShrink: 0, display: "block", transform: "translateY(.12em)" }}>
         <circle cx="50" cy="50" r="50" fill={circle} />
         <rect x="22" y="47" width="13" height="27" rx="2" fill={thumb} />
-        <path d="M39 49 L48 47 L54 31 Q56 23 62 25 Q67 27 65 35 L62 46 L74 46 Q80 46 79.5 51.5 Q79 54.5 76 55.5 Q79.5 57 78.5 61 Q77.5 64 75 64.5 Q78 66.5 76.5 70 Q75 73 71 73 L46 74 Q41 74 39 71 Z" fill={thumb} />
+        {/* pouce levé + 4 doigts repliés */}
+        <path d="M39 49 L48 47 L54 31 Q56 23 62 25 Q67 27 65 35 L62 46 L74.5 46 Q80 46 79.8 49.6 Q79.6 52.3 76.6 53 Q80 53.8 79.6 57 Q79.3 59.6 76.4 60 Q79.6 60.8 79.1 64 Q78.7 66.6 75.9 67 Q78.6 68 78 71 Q77.3 74 73 74 L46 74 Q41 74 39 71 Z" fill={thumb} />
+        <path d="M76.6 53 L70 53 M76.4 60 L69.5 60 M75.9 67 L69 67" stroke={circle} strokeWidth="1.6" strokeLinecap="round" fill="none" />
       </svg>
       <span aria-hidden style={{ display: "block" }}>
         am
         <span style={{ position: "relative", display: "inline-block" }}>
           a
-          <svg viewBox="0 0 100 30" style={{ position: "absolute", left: ".01em", width: "100%", height: ".16em", top: ".86em", overflow: "visible" }}>
+          <svg viewBox="0 0 100 30" style={{ position: "absolute", left: ".01em", width: "100%", height: ".16em", top: "1em", overflow: "visible" }}>
             <path d="M8 6 Q50 34 92 6" fill="none" stroke={ORANGE} strokeWidth="9" strokeLinecap="round" />
           </svg>
         </span>

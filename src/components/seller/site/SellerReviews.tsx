@@ -33,6 +33,11 @@ function ago(iso: string) {
 
 export function SellerReviews() {
   const [data, setData] = useState<Data | null>(null);
+  // vidéo choisie dans l'admin : elle remplace la pile de cartes, les vrais avis passent en dessous
+  const [video, setVideo] = useState<{ url?: string; poster?: string | null } | null>(null);
+  useEffect(() => {
+    void (supabase as any).rpc("seller_home_video").then(({ data }: { data: { url?: string } | null }) => setVideo(data ?? {}));
+  }, []);
   useEffect(() => {
     void (supabase as any).rpc("seller_platform_reviews_public").then(({ data }: { data: Data | null }) =>
       setData(data ?? { total: 0, avg: null, dist: { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 }, items: [] }));
@@ -55,10 +60,24 @@ export function SellerReviews() {
               <p className="avis__note-legal">Avis de vendeurs Amashia vérifiés, laissés depuis leur espace vendeur ou recueillis par l'équipe Amashia avec leur accord.</p>
             )}
           </div>
-          <DeckEntrance ready={!!data}>
-            {data ? (empty ? <EmptyDeck /> : <Deck items={data.items} />) : <LoadingDeck />}
-          </DeckEntrance>
+          {video === null ? <DeckEntrance ready={false}><LoadingDeck /></DeckEntrance>
+            : video.url ? <ReviewsVideo url={video.url} poster={video.poster ?? undefined} />
+            : (
+              <DeckEntrance ready={!!data}>
+                {data ? (empty ? <EmptyDeck /> : <Deck items={data.items} />) : <LoadingDeck />}
+              </DeckEntrance>
+            )}
         </div>
+        {/* avec la vidéo : les vrais avis des vendeurs, en cartes sous la section */}
+        {video?.url && data && data.items.length > 0 && (
+          <div className="avis-list">
+            {data.items.map((r, i) => (
+              <article key={i} className="avis-card avis-card--static">
+                <ReviewCardContent r={r} i={i} />
+              </article>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );
@@ -120,25 +139,9 @@ function Deck({ items }: { items: Review[] }) {
   return (
     <div className="avis-deck">
       {(single ? list.slice(0, 1) : list).map((r, i) => {
-        const [bg, fg] = AV[(i * 3) % 4];
         return (
           <article key={i} className={`avis-card ${single ? "avis-card--still" : ""}`} style={{ animationDelay: `${-4 * i}s` }} aria-hidden={i >= items.length || undefined}>
-            {/* grande photo : l'image de la catégorie du vendeur, affichée dans ses propres proportions (nette, sans recadrage) */}
-            <CardMedia src={r.img} fallback={catImg(r.category)} category={r.category} />
-            <div className="avis-card__body">
-              <span className="avis-card__stars" aria-label={`${r.rating} sur 5`}>{"★".repeat(r.rating)}<span className="off">{"★".repeat(5 - r.rating)}</span></span>
-              <p className="avis-card__text">« {r.text} »</p>
-              <div className="avis-card__who">
-                {r.logo
-                  ? <img {...imgProps(r.logo, { width: 64 })} alt={r.shop || r.name} className="avis-card__av object-cover" loading="lazy" />
-                  : <div className="avis-card__av" style={{ background: bg, color: fg }}>{initials(r.name)}</div>}
-                <div className="min-w-0">
-                  <div className="avis-card__name" translate="no">{r.name} <span>✓</span></div>
-                  {r.shop && <div className="avis-card__city font-semibold !text-[#2a2722]" translate="no">{r.shop}</div>}
-                  <div className="avis-card__city">{[r.city, ago(r.at), r.collected ? "recueilli par Amashia" : ""].filter(Boolean).join(" · ")}</div>
-                </div>
-              </div>
-            </div>
+            <ReviewCardContent r={r} i={i} />
           </article>
         );
       })}
@@ -217,6 +220,51 @@ function CardMedia({ src, fallback, category }: { src: string | null; fallback: 
         ? <img src={src} alt={`Catégorie ${category}`} loading="lazy" decoding="async" onLoad={onLoad} />
         : <img src={url} alt="" loading="lazy" decoding="async" onLoad={onLoad} onError={(e) => { e.currentTarget.style.display = "none"; }} />)}
       {category && <span className="avis-card__cat">{category.toUpperCase()}</span>}
+    </div>
+  );
+}
+
+/** Contenu d'une carte d'avis (photo de la catégorie, étoiles, texte, vendeur). */
+function ReviewCardContent({ r, i }: { r: Review; i: number }) {
+  const [bg, fg] = AV[(i * 3) % 4];
+  return (
+    <>
+            {/* grande photo : l'image de la catégorie du vendeur, affichée dans ses propres proportions (nette, sans recadrage) */}
+            <CardMedia src={r.img} fallback={catImg(r.category)} category={r.category} />
+            <div className="avis-card__body">
+              <span className="avis-card__stars" aria-label={`${r.rating} sur 5`}>{"★".repeat(r.rating)}<span className="off">{"★".repeat(5 - r.rating)}</span></span>
+              <p className="avis-card__text">« {r.text} »</p>
+              <div className="avis-card__who">
+                {r.logo
+                  ? <img {...imgProps(r.logo, { width: 64 })} alt={r.shop || r.name} className="avis-card__av object-cover" loading="lazy" />
+                  : <div className="avis-card__av" style={{ background: bg, color: fg }}>{initials(r.name)}</div>}
+                <div className="min-w-0">
+                  <div className="avis-card__name" translate="no">{r.name} <span>✓</span></div>
+                  {r.shop && <div className="avis-card__city font-semibold !text-[#2a2722]" translate="no">{r.shop}</div>}
+                  <div className="avis-card__city">{[r.city, ago(r.at), r.collected ? "recueilli par Amashia" : ""].filter(Boolean).join(" · ")}</div>
+                </div>
+              </div>
+            </div>
+    </>
+  );
+}
+
+/** Vidéo de la section avis : lecture automatique, en boucle, sans son (condition des navigateurs pour l'autoplay). */
+function ReviewsVideo({ url, poster }: { url: string; poster?: string }) {
+  const ref = useRef<HTMLVideoElement>(null);
+  useEffect(() => {
+    const v = ref.current;
+    if (!v) return;
+    const play = () => { void v.play().catch(() => {}); };
+    play();
+    // relance si le navigateur met la vidéo en pause (retour sur l'onglet, économie d'énergie)
+    const onVis = () => { if (document.visibilityState === "visible") play(); };
+    document.addEventListener("visibilitychange", onVis);
+    return () => document.removeEventListener("visibilitychange", onVis);
+  }, [url]);
+  return (
+    <div className="avis-video">
+      <video ref={ref} src={url} poster={poster} autoPlay muted loop playsInline preload="auto" controls={false} disablePictureInPicture aria-label="Vidéo : ils vendent sur Amashia" onEnded={(e) => { e.currentTarget.currentTime = 0; void e.currentTarget.play().catch(() => {}); }} />
     </div>
   );
 }

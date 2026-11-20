@@ -421,6 +421,17 @@ html.light[data-tr="wait"]::after { background: #fff; color: #0b1f3a; }
   90%, 97.5% { transform: translate(10.5%, -3.5%) scale(.93) rotate(2.5deg); opacity: 1; z-index: 4; }
   100% { transform: none; opacity: 1; z-index: 5; }
 }
+/* Vidéo de la section avis (choisie dans l'admin) : lecture automatique en boucle, coins arrondis comme les cartes */
+.avis-video { width: 100%; max-width: 600px; justify-self: center; border-radius: 28px; overflow: hidden; background: #161512; box-shadow: 0 40px 70px -35px rgba(0,0,0,.45); }
+.avis-video video { display: block; width: 100%; height: auto; max-height: 78vh; object-fit: cover; }
+/* Vrais avis sous la vidéo : cartes alignées (défilement horizontal sur mobile) */
+.avis-list { margin-top: clamp(32px, 5vw, 56px); display: grid; gap: 18px; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+.avis-card.avis-card--static { position: relative; left: auto; top: auto; width: auto; height: auto; min-height: 340px; animation: none; transform: none; box-shadow: 0 24px 50px -32px rgba(0,0,0,.4); }
+.avis-card--static .avis-card__media:not(.avis-card__media--fit) { flex: 0 0 auto; aspect-ratio: 4 / 3; }
+@media (max-width: 640px) {
+  .avis-list { grid-auto-flow: column; grid-template-columns: none; grid-auto-columns: 82%; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 6px; }
+  .avis-list > * { scroll-snap-align: start; }
+}
 /* la carte qui part vers la gauche ne doit pas élargir la page */
 .avis-panel { overflow: hidden; }
 @media (prefers-reduced-motion: reduce) { .avis-card { animation: none; } .avis-card:not(:first-child) { display: none; } }

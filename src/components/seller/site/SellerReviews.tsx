@@ -10,17 +10,9 @@ import { imgProps } from "@/lib/img";
 type Review = { name: string; collected?: boolean; shop?: string; logo?: string | null; city: string; category: string; rating: number; text: string; at: string; img: string | null };
 type Data = { total: number; avg: number | null; dist: Record<string, number>; items: Review[] };
 
-/** Photo d'illustration par catégorie (public/avis/<catégorie>.webp), utilisée quand la boutique n'a pas de photo. */
-const CAT_IMG: Record<string, string> = {
-  mode: "mode", "mode & vêtements": "mode", vêtements: "mode", "électronique": "electronique", "téléphones & tablettes": "electronique",
-  "beauté": "beaute", "beauté & soins": "beaute", "beauté & cosmétiques": "beaute", maison: "maison", "maison & décoration": "maison", "maison & jardin": "maison",
-  "cuisine & maison": "maison", alimentation: "alimentation", "bijoux & accessoires": "bijoux", bijoux: "bijoux", "sports & loisirs": "sport", services: "services",
-};
-const catImg = (c: string) => { const k = CAT_IMG[c.trim().toLowerCase()]; return k ? `/avis/${k}.webp` : null; };
-
 const AV: [string, string][] = [["oklch(0.68 0.19 42)", "#fff"], ["oklch(0.89 0.18 95)", "#161512"], ["#e9e6df", "#161512"], ["#161512", "#fff"]];
 /** Initiale du prénom (Jean → J) quand la boutique n'a pas de logo */
-const initials = (n: string) => (n.trim()[0] ?? "A").toUpperCase();
+const initials = (n: string) => n.trim().split(/\s+/).slice(0, 2).map((w) => w[0] ?? "").join("").toUpperCase() || "A";
 const fmt1 = (v: number) => v.toFixed(1).replace(".", ",");
 
 function ago(iso: string) {
@@ -60,22 +52,13 @@ export function SellerReviews() {
               <p className="avis__note-legal">Avis de vendeurs Amashia vérifiés, laissés depuis leur espace vendeur ou recueillis par l'équipe Amashia avec leur accord.</p>
             )}
           </div>
-          {video === null ? <DeckEntrance ready={false}><LoadingDeck /></DeckEntrance>
-            : video.url ? <ReviewsVideo url={video.url} poster={video.poster ?? undefined} />
-            : (
-              <DeckEntrance ready={!!data}>
-                {data ? (empty ? <EmptyDeck /> : <Deck items={data.items} />) : <LoadingDeck />}
-              </DeckEntrance>
-            )}
+          {/* en face de la note : le cadre vidéo (lecture automatique en boucle, vidéo choisie dans l'admin) */}
+          <ReviewsVideo url={video?.url} poster={video?.poster ?? undefined} />
         </div>
-        {/* avec la vidéo : les vrais avis des vendeurs, en cartes sous la section */}
-        {video?.url && data && data.items.length > 0 && (
+        {/* les vrais avis des vendeurs : un cadre par avis, sans image */}
+        {data && data.items.length > 0 && (
           <div className="avis-list">
-            {data.items.map((r, i) => (
-              <article key={i} className="avis-card avis-card--static">
-                <ReviewCardContent r={r} i={i} />
-              </article>
-            ))}
+            {data.items.map((r, i) => <ReviewTextCard key={i} r={r} i={i} />)}
           </div>
         )}
       </div>
@@ -131,130 +114,35 @@ function ScoreCard({ data }: { data: Data | null }) {
   );
 }
 
-/* ---------- Carrousel : cartes empilées, animation deck en boucle ---------- */
-function Deck({ items }: { items: Review[] }) {
-  // l'animation est prévue pour 10 cartes (40 s) ; avec moins d'avis, on répète la liste
-  const list = items.length ? Array.from({ length: 10 }, (_, i) => items[i % items.length]) : [];
-  const single = items.length === 1;
-  return (
-    <div className="avis-deck">
-      {(single ? list.slice(0, 1) : list).map((r, i) => {
-        return (
-          <article key={i} className={`avis-card ${single ? "avis-card--still" : ""}`} style={{ animationDelay: `${-4 * i}s` }} aria-hidden={i >= items.length || undefined}>
-            <ReviewCardContent r={r} i={i} />
-          </article>
-        );
-      })}
-    </div>
-  );
-}
-
-/** Aucun avis encore : même pile animée, mais une invitation à laisser le premier avis (aucun faux témoignage). */
-function EmptyDeck() {
-  const cats = ["Mode", "Électronique", "Beauté", "Maison", "Alimentation"];
-  return (
-    <div className="avis-deck">
-      {Array.from({ length: 10 }, (_, i) => (
-        <article key={i} className="avis-card" style={{ animationDelay: `${-4 * i}s` }} aria-hidden={i > 0 || undefined}>
-          <div className="avis-card__media">
-            <div className="absolute inset-0 grid place-items-center text-[44px] text-[#d9d5cc]">★</div>
-            {catImg(cats[i % cats.length]) && <img src={catImg(cats[i % cats.length])!} alt="" loading="lazy" width={800} height={600} onError={(e) => { e.currentTarget.style.display = "none"; }} />}
-            <span className="avis-card__cat">{cats[i % cats.length].toUpperCase()}</span>
-          </div>
-          <div className="avis-card__body">
-            <span className="avis-card__stars"><span className="off">★★★★★</span></span>
-            <p className="avis-card__text">Votre avis apparaîtra ici. Les vendeurs Amashia partagent leur expérience depuis leur espace vendeur.</p>
-            <div className="avis-card__who">
-              <div className="avis-card__av" style={{ background: AV[(i * 3) % 4][0], color: AV[(i * 3) % 4][1] }}>?</div>
-              <div><div className="avis-card__name">Votre boutique</div><div className="avis-card__city">Yaoundé ou Douala</div></div>
-            </div>
-          </div>
-        </article>
-      ))}
-    </div>
-  );
-}
-
-/** Les avis « se chargent » : cartes squelettes qui scintillent, puis la pile arrive en glissant et se déploie. */
-function DeckEntrance({ ready, children }: { ready: boolean; children: React.ReactNode }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [seen, setSeen] = useState(false);
-  useEffect(() => {
-    const el = ref.current; if (!el) return;
-    const io = new IntersectionObserver((en) => { if (en[0].isIntersecting) { setSeen(true); io.disconnect(); } }, { threshold: 0.25 });
-    io.observe(el); return () => io.disconnect();
-  }, []);
-  return <div ref={ref} className={`avis-entrance ${seen && ready ? "is-in" : ""}`}>{children}</div>;
-}
-
-function LoadingDeck() {
-  return (
-    <div className="avis-deck" aria-label="Chargement des avis">
-      {[2, 1, 0].map((i) => (
-        <div key={i} className="avis-card avis-card--still avis-skeleton" style={{ transform: `translate(${i * 9}%, ${-i * 3}%) scale(${1 - i * 0.06}) rotate(${i * 2.5}deg)`, zIndex: 5 - i, opacity: 1 - i * 0.25 }}>
-          <div className="avis-card__media" />
-          <div className="avis-card__body">
-            <span className="h-3 w-24 rounded-full bg-[#ece8e0]" /><span className="h-3 w-full rounded-full bg-[#ece8e0]" /><span className="h-3 w-4/5 rounded-full bg-[#ece8e0]" />
-            <div className="mt-auto flex items-center gap-2.5"><span className="h-[34px] w-[34px] rounded-full bg-[#ece8e0]" /><span className="h-3 w-28 rounded-full bg-[#ece8e0]" /></div>
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-/**
- * Image de la carte d'avis : le cadre prend exactement les proportions de l'image (ex. bannière 1500×300 = 5:1),
- * sans recadrage ni agrandissement, donc l'image reste nette. Les images très hautes sont limitées à la moitié de la carte.
- */
-function CardMedia({ src, fallback, category }: { src: string | null; fallback: string | null; category: string }) {
-  const [ratio, setRatio] = useState<number | null>(null);
-  const url = src ?? fallback;
-  const onLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
-    const { naturalWidth: w, naturalHeight: h } = e.currentTarget;
-    if (w && h) setRatio(w / h);
-  };
-  return (
-    <div className={`avis-card__media ${ratio ? "avis-card__media--fit" : ""}`} style={ratio ? { aspectRatio: String(ratio) } : undefined}>
-      {url && (src
-        ? <img src={src} alt={`Catégorie ${category}`} loading="lazy" decoding="async" onLoad={onLoad} />
-        : <img src={url} alt="" loading="lazy" decoding="async" onLoad={onLoad} onError={(e) => { e.currentTarget.style.display = "none"; }} />)}
-      {category && <span className="avis-card__cat">{category.toUpperCase()}</span>}
-    </div>
-  );
-}
-
-/** Contenu d'une carte d'avis (photo de la catégorie, étoiles, texte, vendeur). */
-function ReviewCardContent({ r, i }: { r: Review; i: number }) {
+/** Carte d'un vrai avis : étoiles, texte de l'avis, photo de profil (logo de la boutique) ou initiales, nom, boutique, ville. */
+function ReviewTextCard({ r, i }: { r: Review; i: number }) {
   const [bg, fg] = AV[(i * 3) % 4];
   return (
-    <>
-            {/* grande photo : l'image de la catégorie du vendeur, affichée dans ses propres proportions (nette, sans recadrage) */}
-            <CardMedia src={r.img} fallback={catImg(r.category)} category={r.category} />
-            <div className="avis-card__body">
-              <span className="avis-card__stars" aria-label={`${r.rating} sur 5`}>{"★".repeat(r.rating)}<span className="off">{"★".repeat(5 - r.rating)}</span></span>
-              <p className="avis-card__text">« {r.text} »</p>
-              <div className="avis-card__who">
-                {r.logo
-                  ? <img {...imgProps(r.logo, { width: 64 })} alt={r.shop || r.name} className="avis-card__av object-cover" loading="lazy" />
-                  : <div className="avis-card__av" style={{ background: bg, color: fg }}>{initials(r.name)}</div>}
-                <div className="min-w-0">
-                  <div className="avis-card__name" translate="no">{r.name} <span>✓</span></div>
-                  {r.shop && <div className="avis-card__city font-semibold !text-[#2a2722]" translate="no">{r.shop}</div>}
-                  <div className="avis-card__city">{[r.city, ago(r.at), r.collected ? "recueilli par Amashia" : ""].filter(Boolean).join(" · ")}</div>
-                </div>
-              </div>
-            </div>
-    </>
+    <article className="avis-quote">
+      <span className="avis-quote__mark" aria-hidden>“</span>
+      <span className="avis-card__stars" aria-label={`${r.rating} sur 5`}>{"★".repeat(r.rating)}<span className="off">{"★".repeat(5 - r.rating)}</span></span>
+      <p className="avis-quote__text">{r.text}</p>
+      <div className="avis-card__who avis-quote__who">
+        {r.logo
+          ? <img {...imgProps(r.logo, { width: 96 })} alt={r.shop || r.name} className="avis-quote__av object-cover" loading="lazy" />
+          : <div className="avis-quote__av" style={{ background: bg, color: fg }}>{initials(r.name)}</div>}
+        <div className="min-w-0">
+          <div className="avis-card__name" translate="no">{r.name} <span>✓</span></div>
+          {r.shop && <div className="avis-card__city font-semibold !text-[#2a2722]" translate="no">{r.shop}</div>}
+          <div className="avis-card__city">{[r.city, ago(r.at), r.collected ? "recueilli par Amashia" : ""].filter(Boolean).join(" · ")}</div>
+        </div>
+      </div>
+    </article>
   );
 }
 
-/** Vidéo de la section avis : lecture automatique, en boucle, sans son (condition des navigateurs pour l'autoplay). */
-function ReviewsVideo({ url, poster }: { url: string; poster?: string }) {
+/** Cadre vidéo de la section avis : lecture automatique, en boucle, sans son (condition des navigateurs pour l'autoplay).
+ *  Tant qu'aucune vidéo n'est ajoutée dans l'admin, le cadre reste en place avec un fond sobre. */
+function ReviewsVideo({ url, poster }: { url?: string; poster?: string }) {
   const ref = useRef<HTMLVideoElement>(null);
   useEffect(() => {
     const v = ref.current;
-    if (!v) return;
+    if (!v || !url) return;
     const play = () => { void v.play().catch(() => {}); };
     play();
     // relance si le navigateur met la vidéo en pause (retour sur l'onglet, économie d'énergie)
@@ -263,8 +151,14 @@ function ReviewsVideo({ url, poster }: { url: string; poster?: string }) {
     return () => document.removeEventListener("visibilitychange", onVis);
   }, [url]);
   return (
-    <div className="avis-video">
-      <video ref={ref} src={url} poster={poster} autoPlay muted loop playsInline preload="auto" controls={false} disablePictureInPicture aria-label="Vidéo : ils vendent sur Amashia" onEnded={(e) => { e.currentTarget.currentTime = 0; void e.currentTarget.play().catch(() => {}); }} />
+    <div className={`avis-video ${url ? "" : "avis-video--empty"}`}>
+      {url ? (
+        <video ref={ref} src={url} poster={poster} autoPlay muted loop playsInline preload="auto" controls={false} disablePictureInPicture aria-label="Vidéo : ils vendent sur Amashia" onEnded={(e) => { e.currentTarget.currentTime = 0; void e.currentTarget.play().catch(() => {}); }} />
+      ) : (
+        <div className="avis-video__placeholder" aria-hidden>
+          <span className="avis-video__play"><svg viewBox="0 0 24 24" width="30" height="30"><path d="M8 5.5v13l11-6.5z" fill="currentColor" /></svg></span>
+        </div>
+      )}
     </div>
   );
 }

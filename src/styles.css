@@ -424,8 +424,22 @@ html.light[data-tr="wait"]::after { background: #fff; color: #0b1f3a; }
 /* Vidéo de la section avis (choisie dans l'admin) : lecture automatique en boucle, coins arrondis comme les cartes */
 .avis-video { width: 100%; max-width: 600px; justify-self: center; border-radius: 28px; overflow: hidden; background: #161512; box-shadow: 0 40px 70px -35px rgba(0,0,0,.45); }
 .avis-video video { display: block; width: 100%; height: auto; max-height: 78vh; object-fit: cover; }
+/* Cadre vidéo vide (aucune vidéo ajoutée dans l'admin) : même cadre, fond sobre et bouton lecture */
+.avis-video { aspect-ratio: 4 / 5; }
+.avis-video video { height: 100%; max-height: none; }
+.avis-video--empty { background: radial-gradient(120% 90% at 30% 10%, #2a2722 0%, #161512 60%); }
+.avis-video__placeholder { position: absolute; inset: 0; display: grid; place-items: center; }
+.avis-video { position: relative; }
+.avis-video__play { width: 76px; height: 76px; border-radius: 999px; display: grid; place-items: center; color: #161512; background: var(--orange, #ff6800); box-shadow: 0 0 0 12px rgba(255,104,0,.18), 0 18px 40px -12px rgba(255,104,0,.6); }
+.avis-video__play svg { transform: translateX(2px); }
+/* Vrais avis : un cadre par avis, sans image */
+.avis-quote { position: relative; display: flex; flex-direction: column; gap: 12px; padding: 24px 22px 20px; border-radius: 24px; background: #fff; border: 1px solid var(--line); box-shadow: 0 24px 50px -32px rgba(0,0,0,.35); min-width: 0; }
+.avis-quote__mark { position: absolute; right: 18px; top: 4px; font-family: Georgia, serif; font-size: 72px; line-height: 1; color: var(--orange-ink); opacity: .18; }
+.avis-quote__text { margin: 0; font-size: 15px; line-height: 1.55; color: #2a2722; display: -webkit-box; -webkit-line-clamp: 6; -webkit-box-orient: vertical; overflow: hidden; }
+.avis-quote__who { margin-top: auto; padding-top: 12px; border-top: 1px solid var(--line); }
+.avis-quote__av { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; font-size: 15px; font-weight: 700; flex-shrink: 0; border: 1px solid var(--line); }
 /* Vrais avis sous la vidéo : cartes alignées (défilement horizontal sur mobile) */
-.avis-list { margin-top: clamp(32px, 5vw, 56px); display: grid; gap: 18px; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+.avis-list { margin-top: clamp(32px, 5vw, 56px); display: grid; gap: 18px; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
 .avis-card.avis-card--static { position: relative; left: auto; top: auto; width: auto; height: auto; min-height: 340px; animation: none; transform: none; box-shadow: 0 24px 50px -32px rgba(0,0,0,.4); }
 .avis-card--static .avis-card__media:not(.avis-card__media--fit) { flex: 0 0 auto; aspect-ratio: 4 / 3; }
 @media (max-width: 640px) {

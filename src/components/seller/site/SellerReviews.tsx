@@ -56,11 +56,18 @@ export function SellerReviews() {
           <ReviewsVideo url={video?.url} poster={video?.poster ?? undefined} />
         </div>
         {/* les vrais avis des vendeurs : un cadre par avis, sans image */}
-        {data && data.items.length > 0 && (
+        {data && data.items.length > 0 && (data.items.length >= 5 ? (
+          /* à partir de 5 avis : défilement horizontal automatique et continu (pause au survol) */
+          <div className="avis-marquee" aria-label="Avis des vendeurs">
+            <div className="avis-marquee__track" style={{ animationDuration: `${data.items.length * 7}s` }}>
+              {[...data.items, ...data.items].map((r, i) => <ReviewTextCard key={i} r={r} i={i % data.items.length} hidden={i >= data.items.length} />)}
+            </div>
+          </div>
+        ) : (
           <div className="avis-list">
             {data.items.map((r, i) => <ReviewTextCard key={i} r={r} i={i} />)}
           </div>
-        )}
+        ))}
       </div>
     </section>
   );
@@ -115,10 +122,10 @@ function ScoreCard({ data }: { data: Data | null }) {
 }
 
 /** Carte d'un vrai avis : étoiles, texte de l'avis, photo de profil (logo de la boutique) ou initiales, nom, boutique, ville. */
-function ReviewTextCard({ r, i }: { r: Review; i: number }) {
+function ReviewTextCard({ r, i, hidden }: { r: Review; i: number; hidden?: boolean }) {
   const [bg, fg] = AV[(i * 3) % 4];
   return (
-    <article className="avis-quote">
+    <article className="avis-quote" aria-hidden={hidden || undefined}>
       <span className="avis-quote__mark" aria-hidden>“</span>
       <span className="avis-card__stars" aria-label={`${r.rating} sur 5`}>{"★".repeat(r.rating)}<span className="off">{"★".repeat(5 - r.rating)}</span></span>
       <p className="avis-quote__text">{r.text}</p>

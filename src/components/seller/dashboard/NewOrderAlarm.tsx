@@ -121,6 +121,10 @@ export function NewOrderAlarm({ uid }: { uid: string }) {
     const start = () => { a.loop = true; void a.play().then(() => setBlocked(false)).catch(() => setBlocked(true)); };
     start();
     const retry = window.setInterval(() => { if (a.paused) start(); }, 3000);
+    // téléphone : vibration en même temps que la sonnerie
+    const buzz = () => { try { navigator.vibrate?.([600, 200, 600, 200, 900]); } catch { /* ignore */ } };
+    buzz();
+    const vib = window.setInterval(buzz, 3500);
     let notif: Notification | null = null;
     if ("Notification" in window && Notification.permission === "granted" && document.hidden) {
       try {
@@ -133,7 +137,7 @@ export function NewOrderAlarm({ uid }: { uid: string }) {
     const title = document.title;
     let flip = false;
     const blink = window.setInterval(() => { flip = !flip; document.title = flip ? `🔔 ${count > 1 ? `${count} nouvelles commandes` : "Nouvelle commande"} !` : title; }, 1000);
-    return () => { window.clearInterval(retry); window.clearInterval(blink); document.title = title; a.pause(); a.currentTime = 0; notif?.close(); };
+    return () => { window.clearInterval(retry); window.clearInterval(vib); try { navigator.vibrate?.(0); } catch { /* ignore */ } window.clearInterval(blink); document.title = title; a.pause(); a.currentTime = 0; notif?.close(); };
   }, [ringing, count, navigate]);
 
   if (!ringing) return null;

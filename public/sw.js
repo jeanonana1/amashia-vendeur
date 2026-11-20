@@ -38,3 +38,6 @@ self.addEventListener("notificationclick", (event) => {
     await self.clients.openWindow(url);
   })());
 });
+
+// Application installable (téléphone et ordinateur) : le réseau reste la source, rien n'est mis en cache.
+self.addEventListener("fetch", () => {});

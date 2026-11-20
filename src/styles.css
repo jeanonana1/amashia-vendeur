@@ -438,6 +438,13 @@ html.light[data-tr="wait"]::after { background: #fff; color: #0b1f3a; }
 .avis-quote__text { margin: 0; font-size: 13.5px; line-height: 1.5; color: #2a2722; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 .avis-quote__who { margin-top: auto; padding-top: 8px; border-top: 1px solid var(--line); }
 .avis-quote__av { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; font-size: 12px; font-weight: 700; flex-shrink: 0; border: 1px solid var(--line); }
+/* 5 avis et plus : bande qui défile seule, en continu (la liste est doublée pour boucler sans saut) */
+.avis-marquee { margin-top: clamp(28px, 4vw, 44px); overflow: hidden; -webkit-mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent); mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent); }
+.avis-marquee__track { display: flex; gap: 14px; width: max-content; animation: avis-marquee linear infinite; padding: 4px 0 18px; }
+.avis-marquee__track > .avis-quote { width: min(82vw, 340px); flex: 0 0 auto; }
+.avis-marquee:hover .avis-marquee__track { animation-play-state: paused; }
+@keyframes avis-marquee { from { transform: translateX(0); } to { transform: translateX(calc(-50% - 7px)); } }
+@media (prefers-reduced-motion: reduce) { .avis-marquee { overflow-x: auto; } .avis-marquee__track { animation: none; } }
 /* Vrais avis sous la vidéo : cartes alignées (défilement horizontal sur mobile) */
 .avis-list { margin-top: clamp(28px, 4vw, 44px); display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 360px)); }
 .avis-card.avis-card--static { position: relative; left: auto; top: auto; width: auto; height: auto; min-height: 340px; animation: none; transform: none; box-shadow: 0 24px 50px -32px rgba(0,0,0,.4); }

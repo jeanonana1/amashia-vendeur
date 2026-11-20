@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { imgProps } from "@/lib/img";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { DashboardLayout, useSellerName } from "@/components/seller/dashboard/DashboardLayout";
+import { InstallAppCard } from "@/components/seller/dashboard/InstallAppCard";
 import {
   Wallet, Package, ShoppingCart, Users, TrendingUp, TrendingDown, ArrowUpRight, Eye, Radio, MousePointerClick, ExternalLink, Minus,
   Plus,
@@ -83,6 +84,8 @@ function DashboardOverview() {
 
   return (
     <DashboardLayout title={`${greeting}, ${name}! 👋`} subtitle="Voici l'activité réelle de votre boutique">
+      {/* téléphone : application Amashia Seller ; ordinateur : version PC — alertes de commandes avec son et vibration */}
+      <InstallAppCard />
       {/* Bandeau : période, raccourcis */}
       <div className="ring-gradient relative mb-6 overflow-hidden rounded-[1.4rem] border border-border bg-card p-5 shadow-card sm:p-6">
         <div aria-hidden className="glow-orb pointer-events-none absolute -right-24 -top-28 h-72 w-72 opacity-70" />

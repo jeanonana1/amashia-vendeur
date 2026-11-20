@@ -400,6 +400,7 @@ html.light[data-tr="wait"]::after { background: #fff; color: #0b1f3a; }
 .avis-card .avis-card__media.avis-card__media--fit { flex: 0 0 auto; width: 100%; max-height: 52%; }
 .avis-card__media--fit img { object-fit: contain; background: #fff; }
 .avis-card__media--fit ~ .avis-card__body .avis-card__text { -webkit-line-clamp: 6; }
+.avis-card__media--fit .avis-card__cat { left: 8px; top: 8px; font-size: 10px; padding: 4px 9px; }
 .avis-card__cat { position: absolute; left: 12px; top: 12px; z-index: 1; font-size: 12px; font-weight: 600; background: #fff; color: var(--ink); padding: 6px 11px; border-radius: 999px; }
 .avis-card__body { flex: 1; min-height: 0; padding: 16px 18px; display: flex; flex-direction: column; gap: 8px; }
 .avis-card__stars { color: var(--orange-ink); font-size: 15px; letter-spacing: 1.5px; }

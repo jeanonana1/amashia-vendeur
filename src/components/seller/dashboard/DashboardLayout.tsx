@@ -48,6 +48,8 @@ const GROUPS: { title: string; items: NavItem[] }[] = [
 ];
 const NAV = GROUPS.flatMap((g) => g.items);
 
+import { NewOrderAlarm } from "@/components/seller/dashboard/NewOrderAlarm";
+import { PushAlertsButton } from "@/components/seller/dashboard/PushAlertsButton";
 export function DashboardLayout({ title, subtitle, actions, children }: { title: string; subtitle?: string; actions?: ReactNode; children: ReactNode }) {
   const badges = useNavBadges();
   // sons de l'espace vendeur : activés par défaut, coupables d'un clic
@@ -211,6 +213,7 @@ export function DashboardLayout({ title, subtitle, actions, children }: { title:
               <div className="hidden sm:block"><LangToggle /></div>
               <button onClick={toggle} className={`${iconBtn} hidden sm:grid`} aria-label="Thème">{theme === "dark" ? <Sun size={17} /> : <Moon size={17} />}</button>
               <button onClick={toggleSound} className={`${iconBtn} hidden sm:grid`} title={sound ? "Couper les sons" : "Activer les sons"} aria-label={sound ? "Couper les sons" : "Activer les sons"}>{sound ? <Volume2 size={17} /> : <VolumeX size={17} />}</button>
+              <PushAlertsButton className={iconBtn} />
               <Link to="/dashboard/notifications" className={`${iconBtn} relative`} title="Notifications" aria-label="Notifications">
                 <Bell size={17} />
                 {badges.notifications > 0 && <span key={badges.notifications} className="badge-beat absolute -right-1 -top-1 grid h-5 min-w-5 place-items-center rounded-full bg-primary px-1 text-[10px] font-bold text-black">{badges.notifications > 99 ? "99+" : badges.notifications}</span>}
@@ -233,6 +236,7 @@ export function DashboardLayout({ title, subtitle, actions, children }: { title:
           </div>
           {children}
           {uid && <ReviewPrompt uid={uid} />}
+          {uid && <NewOrderAlarm uid={uid} />}
         </div>
       </main>
     </div>

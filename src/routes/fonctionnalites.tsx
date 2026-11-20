@@ -8,9 +8,10 @@ import { Store, Package, ShoppingBag, Wallet, BarChart3, Megaphone, Check } from
 
 export const Route = createFileRoute("/fonctionnalites")({
   head: () => ({
+    links: [{ rel: "canonical", href: "https://seller.amachia.com/fonctionnalites" }],
     meta: [
       { title: "Fonctionnalités — Amachia Seller" }, { name: "description", content: "Boutique, produits, commandes, livraison Prime, paiements, analytique, promotions : tous les outils pour vendre sur Amachia." },
-      { property: "og:title", content: "Fonctionnalités — Amachia Seller" }, { property: "og:description", content: "Tous les outils pour vendre sur Amachia." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" },
+      { property: "og:title", content: "Fonctionnalités — Amachia Seller" }, { property: "og:description", content: "Tous les outils pour vendre sur Amachia." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: Page,

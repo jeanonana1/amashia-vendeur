@@ -13,13 +13,19 @@ import { SectionDivider } from "@/components/seller/site/motion";
 
 export const Route = createFileRoute("/")({
   head: () => ({
+    scripts: [{ type: "application/ld+json", children: JSON.stringify([
+      { "@context": "https://schema.org", "@type": "Organization", "@id": "https://amachia.com/#organization", name: "Amachia", url: "https://amachia.com", logo: "https://amachia.com/icon-512.png", areaServed: "CM" },
+      { "@context": "https://schema.org", "@type": "WebSite", name: "Amachia Seller", alternateName: "Vendre sur Amachia", url: "https://seller.amachia.com", inLanguage: "fr-CM", publisher: { "@id": "https://amachia.com/#organization" } },
+      { "@context": "https://schema.org", "@type": "WebPage", name: "Vendre sur Amachia : ouvrez votre boutique en ligne au Cameroun", url: "https://seller.amachia.com/", description: "Ouvrez votre boutique sur Amachia gratuitement : publiez vos produits, recevez vos commandes en temps réel. Paiement et livraison gérés par Amachia." },
+    ]) }],
+    links: [{ rel: "canonical", href: "https://seller.amachia.com/" }],
     meta: [
       { title: "Amachia Seller — Vendez partout au Cameroun" },
       { name: "description", content: "Ouvrez votre boutique sur Amachia gratuitement : publiez vos produits, recevez vos commandes en temps réel. Paiement et livraison gérés par Amachia." },
       { property: "og:title", content: "Amachia Seller — Vendez partout au Cameroun" },
       { property: "og:description", content: "Créez votre boutique, gérez vos produits et développez votre activité sur Amachia." },
       { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: Index,

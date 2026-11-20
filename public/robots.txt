@@ -1,0 +1,9 @@
+# Amachia Seller — espace des vendeurs Amachia
+User-agent: *
+Allow: /
+Disallow: /dashboard
+Disallow: /capture/
+Disallow: /api/
+Disallow: /download/
+
+Sitemap: https://seller.amachia.com/sitemap.xml

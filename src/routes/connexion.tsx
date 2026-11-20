@@ -11,8 +11,9 @@ import { cmDigits, cmPhoneError, formatCm, toE164 } from "@/lib/phone";
 
 export const Route = createFileRoute("/connexion")({
   head: () => ({
+    links: [{ rel: "canonical", href: "https://seller.amachia.com/connexion" }],
     meta: [
-      { title: "Connexion — Amachia Seller" }, { property: "og:title", content: "Connexion — Amachia Seller" }, { property: "og:description", content: "Accédez à votre tableau de bord vendeur Amachia Seller." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" },
+      { title: "Connexion — Amachia Seller" }, { property: "og:title", content: "Connexion — Amachia Seller" }, { property: "og:description", content: "Accédez à votre tableau de bord vendeur Amachia Seller." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" },
       { name: "description", content: "Accédez à votre tableau de bord vendeur Amachia Seller." },
     ],
   }),

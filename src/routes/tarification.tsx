@@ -9,9 +9,10 @@ import { Check, X } from "lucide-react";
 
 export const Route = createFileRoute("/tarification")({
   head: () => ({
+    links: [{ rel: "canonical", href: "https://seller.amachia.com/tarification" }],
     meta: [
       { title: "Tarifs et commissions — Amachia Seller" }, { name: "description", content: "Inscription gratuite, aucun abonnement : une commission par catégorie, seulement sur les commandes livrées." },
-      { property: "og:title", content: "Tarifs et commissions — Amachia Seller" }, { property: "og:description", content: "Une commission seulement sur les ventes livrées." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" },
+      { property: "og:title", content: "Tarifs et commissions — Amachia Seller" }, { property: "og:description", content: "Une commission seulement sur les ventes livrées." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: Page,

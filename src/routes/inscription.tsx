@@ -4,8 +4,9 @@ import { AuthSplit } from "@/components/seller/site/AuthSplit";
 
 export const Route = createFileRoute("/inscription")({
   head: () => ({
+    links: [{ rel: "canonical", href: "https://seller.amachia.com/inscription" }],
     meta: [
-      { title: "Inscription — Amachia Seller" }, { property: "og:title", content: "Inscription — Amachia Seller" }, { property: "og:description", content: "Choisissez votre type de compte et rejoignez Amachia Seller." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" },
+      { title: "Inscription — Amachia Seller" }, { property: "og:title", content: "Inscription — Amachia Seller" }, { property: "og:description", content: "Choisissez votre type de compte et rejoignez Amachia Seller." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" },
       { name: "description", content: "Choisissez votre type de compte et rejoignez Amachia Seller." },
     ],
   }),

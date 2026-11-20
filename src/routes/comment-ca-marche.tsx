@@ -9,9 +9,10 @@ import { ShoppingCart, PackageCheck, Bike, Home, Wallet } from "lucide-react";
 
 export const Route = createFileRoute("/comment-ca-marche")({
   head: () => ({
+    links: [{ rel: "canonical", href: "https://seller.amachia.com/comment-ca-marche" }],
     meta: [
       { title: "Comment ça marche — Amachia Seller" }, { name: "description", content: "De l'inscription à votre premier versement : comment vendre sur Amachia, étape par étape." },
-      { property: "og:title", content: "Comment ça marche — Amachia Seller" }, { property: "og:description", content: "Vendre sur Amachia, étape par étape." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" },
+      { property: "og:title", content: "Comment ça marche — Amachia Seller" }, { property: "og:description", content: "Vendre sur Amachia, étape par étape." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: Page,

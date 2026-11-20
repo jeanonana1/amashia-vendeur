@@ -6,7 +6,9 @@ import { SellerLogo } from "@/components/seller/SellerLogo";
 
 export const Route = createFileRoute("/capture/$session")({
   head: () => ({
+    // page technique (photo depuis le téléphone) : non référencée
     meta: [
+      { name: "robots", content: "noindex, nofollow" },
       { title: "Filmer le produit — Amachia Seller" },
       { name: "description", content: "Capturez votre produit avec la caméra de votre téléphone et envoyez-le instantanément à votre fiche produit Amachia." },
       { property: "og:title", content: "Filmer le produit — Amachia Seller" },

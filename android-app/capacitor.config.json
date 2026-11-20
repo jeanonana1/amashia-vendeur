@@ -1,0 +1,11 @@
+{
+  "appId": "cm.amashia.seller",
+  "appName": "Amashia Seller",
+  "webDir": "www",
+  "server": {
+    "url": "https://amashia-vendeur.vercel.app/dashboard?app=android",
+    "errorPath": "index.html",
+    "allowNavigation": ["amashia-vendeur.vercel.app", "oawobzuyjkcnmaorqfmh.supabase.co"]
+  },
+  "android": { "allowMixedContent": false }
+}

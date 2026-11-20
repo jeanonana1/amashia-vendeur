@@ -50,6 +50,13 @@ const NAV = GROUPS.flatMap((g) => g.items);
 
 import { NewOrderAlarm } from "@/components/seller/dashboard/NewOrderAlarm";
 import { PushAlertsButton } from "@/components/seller/dashboard/PushAlertsButton";
+import { registerAppPush } from "@/lib/nativeApp";
+/** Application Android Amashia Seller : enregistre ce téléphone pour les alertes de commandes. */
+function AppPushRegister({ uid }: { uid: string }) {
+  useEffect(() => { void registerAppPush(); }, [uid]);
+  return null;
+}
+
 export function DashboardLayout({ title, subtitle, actions, children }: { title: string; subtitle?: string; actions?: ReactNode; children: ReactNode }) {
   const badges = useNavBadges();
   // sons de l'espace vendeur : activés par défaut, coupables d'un clic
@@ -237,6 +244,7 @@ export function DashboardLayout({ title, subtitle, actions, children }: { title:
           {children}
           {uid && <ReviewPrompt uid={uid} />}
           {uid && <NewOrderAlarm uid={uid} />}
+          {uid && <AppPushRegister uid={uid} />}
         </div>
       </main>
     </div>

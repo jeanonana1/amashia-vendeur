@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { BellRing, Volume2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { appVibrate } from "@/lib/nativeApp";
 
 /**
  * Alerte des nouvelles commandes du vendeur (comme dans l'espace admin) :
@@ -122,7 +123,7 @@ export function NewOrderAlarm({ uid }: { uid: string }) {
     start();
     const retry = window.setInterval(() => { if (a.paused) start(); }, 3000);
     // téléphone : vibration en même temps que la sonnerie
-    const buzz = () => { try { navigator.vibrate?.([600, 200, 600, 200, 900]); } catch { /* ignore */ } };
+    const buzz = () => { if (appVibrate()) return; try { navigator.vibrate?.([600, 200, 600, 200, 900]); } catch { /* ignore */ } };
     buzz();
     const vib = window.setInterval(buzz, 3500);
     let notif: Notification | null = null;

@@ -1,0 +1,13 @@
+{
+  "name": "amashia-seller-android",
+  "private": true,
+  "description": "Application Android Amashia Seller : le tableau de bord vendeur en ligne + alertes Firebase (sonnerie et vibration) à chaque nouvelle commande.",
+  "scripts": { "sync": "cap sync android" },
+  "dependencies": {
+    "@capacitor/android": "7.4.4",
+    "@capacitor/core": "7.4.4"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "7.4.4"
+  }
+}

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Smartphone, Monitor, Download, BellRing, CheckCircle2, X, Share, PlusSquare, Loader2 } from "lucide-react";
 import { enablePush, pushState, registerSW, type PushState } from "@/lib/push";
+import { APK_URL, isSellerApp } from "@/lib/nativeApp";
 
 /** Évènement « beforeinstallprompt » (Chrome, Edge, Samsung Internet) : capturé dès le chargement. */
 type InstallEvent = Event & { prompt: () => Promise<void>; userChoice: Promise<{ outcome: "accepted" | "dismissed" }> };
@@ -16,6 +17,7 @@ const HIDE_KEY = "amashia-seller-install-hidden";
 const isStandalone = () => typeof window !== "undefined" && (window.matchMedia?.("(display-mode: standalone)").matches || (navigator as unknown as { standalone?: boolean }).standalone === true);
 const isIos = () => /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
 const isMobile = () => /android|iphone|ipad|ipod|mobile/i.test(navigator.userAgent);
+const isAndroid = () => /android/i.test(navigator.userAgent);
 
 /**
  * Tableau de bord du vendeur : invitation à installer l'application Amashia Seller
@@ -38,7 +40,8 @@ export function InstallAppCard() {
     setReady(true);
     return () => { listeners.delete(f); };
   }, []);
-  if (!ready || hidden) return null;
+  // dans l'application Android : les alertes sont déjà actives (Firebase)
+  if (!ready || hidden || isSellerApp()) return null;
   const installed = isStandalone();
   const mobile = isMobile();
   // déjà installée et alertes actives : plus rien à proposer
@@ -73,17 +76,23 @@ export function InstallAppCard() {
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          {!installed && deferred && (
+          {!installed && mobile && isAndroid() && (
+            <a href={APK_URL} download className="btn-shine inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-black"><Download size={16} />Télécharger l'application (APK)</a>
+          )}
+          {!installed && deferred && !(mobile && isAndroid()) && (
             <button onClick={() => void install()} className="btn-shine inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-black"><Download size={16} />{mobile ? "Télécharger l'application" : "Installer la version PC"}</button>
           )}
-          {push !== "on" && push !== "unsupported" && push !== "ios-install" && (
+          {push !== "on" && push !== "unsupported" && push !== "ios-install" && !(mobile && isAndroid() && !installed) && (
             <button disabled={busy} onClick={() => void activate()} className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold ${!installed && deferred ? "border border-border bg-card" : "btn-shine bg-primary text-black"}`}>{busy ? <Loader2 size={16} className="animate-spin" /> : <BellRing size={16} />}Activer les alertes</button>
           )}
           {push === "on" && <span className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-500/10 px-3 py-2 text-sm font-semibold text-emerald-600"><CheckCircle2 size={16} />Alertes activées</span>}
         </div>
       </div>
       {/* sans bouton d'installation automatique : marche à suivre selon l'appareil */}
-      {!installed && !deferred && (
+      {!installed && mobile && isAndroid() && (
+        <p className="mt-3 rounded-xl bg-muted/60 p-3 text-xs text-muted-foreground">Une fois le fichier téléchargé, ouvrez-le et autorisez l'installation depuis cette source si Android le demande. L'application Amashia Seller vous demandera ensuite d'autoriser les notifications.</p>
+      )}
+      {!installed && !deferred && !(mobile && isAndroid()) && (
         <div className="mt-3 rounded-xl bg-muted/60 p-3 text-xs text-muted-foreground">
           {isIos() ? (
             <p className="flex flex-wrap items-center gap-1.5">Sur iPhone : dans Safari, touchez <Share size={14} className="text-primary" /> « Partager », puis <PlusSquare size={14} className="text-primary" /> « Sur l'écran d'accueil ». Ouvrez ensuite Amashia Seller depuis l'icône et activez les alertes.</p>

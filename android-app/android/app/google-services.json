@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "466414795107",
+    "project_id": "amashia-prime",
+    "storage_bucket": "amashia-prime.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:466414795107:android:b417acddbaa00ad8153b56",
+        "android_client_info": {
+          "package_name": "cm.amashia.livreur"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDBng7VjyMmj8uSRNiLS3vG4tuZbDBjFvo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:466414795107:android:8637fba41e49ba3c153b56",
+        "android_client_info": {
+          "package_name": "cm.amashia.seller"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDBng7VjyMmj8uSRNiLS3vG4tuZbDBjFvo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

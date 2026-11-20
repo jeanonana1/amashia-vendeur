@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { SellerLogo } from "@/components/seller/SellerLogo";
+import { FooterWordmark } from "@/components/brand/AmashiaLogo";
 
 const CLIENT = "https://amashia-client.vercel.app";
 
@@ -41,6 +42,10 @@ export function Footer() {
           <p>© {new Date().getFullYear()} Amashia. Tous droits réservés.</p>
           <p>Fait au Cameroun, pour les vendeurs du Cameroun.</p>
         </div>
+      </div>
+      {/* grand logo Amashia : lettres et cercle à peine plus foncés que le fond (clair ou sombre), pouce et sourire orange */}
+      <div className="mx-auto max-w-[1200px] px-5 pb-6 sm:px-8 sm:pb-10">
+        <FooterWordmark ink="color-mix(in oklab, var(--foreground) 9%, var(--background))" />
       </div>
     </footer>
   );

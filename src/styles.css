@@ -425,7 +425,11 @@ html.light[data-tr="wait"]::after { background: #fff; color: #0b1f3a; }
 .avis-video { width: 100%; max-width: 600px; justify-self: center; border-radius: 28px; overflow: hidden; background: #161512; box-shadow: 0 40px 70px -35px rgba(0,0,0,.45); }
 .avis-video video { display: block; width: 100%; height: auto; max-height: 78vh; object-fit: cover; }
 /* Cadre vidéo vide (aucune vidéo ajoutée dans l'admin) : même cadre, fond sobre et bouton lecture */
-.avis-video { aspect-ratio: 4 / 3; max-width: 460px !important; align-self: center; }
+.avis-video { aspect-ratio: 4 / 3; align-self: center; }
+.avis-video.avis-video--empty { max-width: 460px; }
+/* vidéo ajoutée : cadre aux proportions de la vidéo, plus grand, vidéo affichée en entier */
+.avis-video.avis-video--fit { width: 100%; }
+.avis-video--fit video { object-fit: contain; }
 .avis-video video { height: 100%; max-height: none; }
 .avis-video--empty { background: radial-gradient(120% 90% at 30% 10%, #2a2722 0%, #161512 60%); }
 .avis-video__placeholder { position: absolute; inset: 0; display: grid; place-items: center; }

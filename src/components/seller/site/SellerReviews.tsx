@@ -147,6 +147,8 @@ function ReviewTextCard({ r, i, hidden }: { r: Review; i: number; hidden?: boole
  *  Tant qu'aucune vidéo n'est ajoutée dans l'admin, le cadre reste en place avec un fond sobre. */
 function ReviewsVideo({ url, poster }: { url?: string; poster?: string }) {
   const ref = useRef<HTMLVideoElement>(null);
+  // le cadre prend les proportions exactes de la vidéo (carrée, verticale ou horizontale) : rien n'est écrasé ni coupé
+  const [ratio, setRatio] = useState<number | null>(null);
   useEffect(() => {
     const v = ref.current;
     if (!v || !url) return;
@@ -158,9 +160,9 @@ function ReviewsVideo({ url, poster }: { url?: string; poster?: string }) {
     return () => document.removeEventListener("visibilitychange", onVis);
   }, [url]);
   return (
-    <div className={`avis-video ${url ? "" : "avis-video--empty"}`}>
+    <div className={`avis-video ${url ? "avis-video--fit" : "avis-video--empty"}`} style={ratio ? { aspectRatio: String(ratio), maxWidth: `min(560px, ${Math.round(80 * ratio)}vh)` } : undefined}>
       {url ? (
-        <video ref={ref} src={url} poster={poster} autoPlay muted loop playsInline preload="auto" controls={false} disablePictureInPicture aria-label="Vidéo : ils vendent sur Amashia" onEnded={(e) => { e.currentTarget.currentTime = 0; void e.currentTarget.play().catch(() => {}); }} />
+        <video ref={ref} src={url} poster={poster} autoPlay muted loop playsInline preload="auto" controls={false} disablePictureInPicture aria-label="Vidéo : ils vendent sur Amashia" onLoadedMetadata={(e) => { const v = e.currentTarget; if (v.videoWidth && v.videoHeight) setRatio(v.videoWidth / v.videoHeight); }} onEnded={(e) => { e.currentTarget.currentTime = 0; void e.currentTarget.play().catch(() => {}); }} />
       ) : (
         <div className="avis-video__placeholder" aria-hidden>
           <span className="avis-video__play"><svg viewBox="0 0 24 24" width="30" height="30"><path d="M8 5.5v13l11-6.5z" fill="currentColor" /></svg></span>

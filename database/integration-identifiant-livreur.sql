@@ -181,3 +181,41 @@ begin
   update couriers set activation_hash = encode(digest(code || ':' || id::text, 'sha256'), 'hex'), activation_expires = now() + interval '72 hours', activation_attempts = 0 where id = c.id;
   return jsonb_build_object('code', code, 'phone', c.phone, 'expires_at', now() + interval '72 hours', 'activated', c.user_id is not null, 'courier_code', c.courier_code);
 end $function$;
+
+-- correctif : commande sans livreur => courier null
+CREATE OR REPLACE FUNCTION public.admin_orders(_filter text DEFAULT 'all'::text, _q text DEFAULT NULL::text, _limit integer DEFAULT 200)
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ STABLE SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+begin
+  perform public.admin_guard('admin_orders');
+  return coalesce((
+    select jsonb_agg(x order by x->>'created_at' desc) from (
+      select jsonb_build_object(
+        'id', o.id, 'order_number', o.order_number, 'status', o.status, 'step', o.step, 'courier_lock', public.order_courier_lock(o.id), 'created_at', o.created_at,
+        'customer', coalesce(o.full_name, p.full_name, 'Client'), 'email', coalesce(o.contact_email, p.email),
+        'phone', coalesce(o.contact_phone, p.phone), 'city', o.city, 'district', o.district,
+        'total', o.total_fcfa, 'discount', o.discount_fcfa, 'shipping', o.shipping_fee_fcfa, 'payment', o.payment_method,
+        'channel', o.traffic_channel, 'gps', public.order_gps(o.address_details), 'address_details', o.address_details, 'admin_status', o.admin_status, 'admin_status_at', o.admin_status_at,
+        'items', (select count(*) from order_items oi where oi.order_id = o.id),
+        'image', (select pr.images ->> 0 from order_items oi join products pr on pr.id = oi.product_id
+                  where oi.order_id = o.id order by oi.created_at, oi.id limit 1),
+        'first_title', (select oi.product_title from order_items oi where oi.order_id = o.id order by oi.created_at, oi.id limit 1),
+        'sellers', (select coalesce(jsonb_agg(distinct s.name), '[]'::jsonb) from order_items oi join sellers s on s.id = oi.seller_id where oi.order_id = o.id),
+        'returns', (select count(*) from return_requests r where r.order_id = o.id),
+        'courier', (select case when j is null then null else jsonb_build_object('name', j->>'name', 'code', j->>'code', 'photo_url', j->>'photo_url', 'delivery_status', j->>'delivery_status') end from public.order_courier_json(o.id) j),
+        'validation_method', (select dl.validation_method from deliveries dl where dl.order_id = o.id and dl.validation_method is not null order by dl.validated_at desc limit 1)
+      ) x
+      from orders o left join profiles p on p.id = o.user_id
+      where (_filter = 'all'
+          or (_filter = 'cancelled' and o.status = 'Annulée')
+          or (_filter = 'active' and o.status not in ('Annulée', 'Livrée'))
+          or (_filter = 'delivered' and o.status = 'Livrée'))
+        and (_q is null or _q = '' or o.order_number ilike '%' || _q || '%' or coalesce(o.full_name, p.full_name, '') ilike '%' || _q || '%' or coalesce(o.city, '') ilike '%' || _q || '%')
+      order by o.created_at desc
+      limit greatest(1, least(coalesce(_limit, 200), 500))
+    ) t
+  ), '[]'::jsonb);
+end $function$;

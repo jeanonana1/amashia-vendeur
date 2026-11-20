@@ -39,6 +39,7 @@ jobs:
       - name: Publier l'APK sur le site
         working-directory: .
         run: |
+          mkdir -p public/download
           cp android-app/android/app/build/outputs/apk/release/app-release.apk public/download/amashia-seller.apk
           jq -n --argjson build "${{ github.run_number }}" --arg date "$(date -u +%Y-%m-%dT%H:%M:%SZ)" --argjson size "$(stat -c %s public/download/amashia-seller.apk)" --arg sha "${GITHUB_SHA::7}" \
             '{build:$build,date:$date,size:$size,sha:$sha}' > public/download/amashia-seller.json
@@ -47,6 +48,8 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add public/download/amashia-seller.apk public/download/amashia-seller.json
           git commit -m "APK Amashia Seller mis à jour (${GITHUB_SHA::7})" || exit 0
+          # fichiers régénérés par la compilation : on ne les envoie pas
+          git stash --include-untracked || true
           for i in 1 2 3 4; do git pull --rebase origin main && git push origin HEAD:main && exit 0; sleep 5; done
           exit 1
       - uses: actions/upload-artifact@v4

@@ -123,13 +123,8 @@ function Deck({ items }: { items: Review[] }) {
         const [bg, fg] = AV[(i * 3) % 4];
         return (
           <article key={i} className={`avis-card ${single ? "avis-card--still" : ""}`} style={{ animationDelay: `${-4 * i}s` }} aria-hidden={i >= items.length || undefined}>
-            <div className="avis-card__media">
-              {/* grande photo : l'image de la catégorie du vendeur */}
-              {r.img
-                ? <img {...imgProps(r.img, { width: 640 })} alt={`Catégorie ${r.category}`} loading="lazy" width={800} height={600} />
-                : catImg(r.category) && <img src={catImg(r.category)!} alt="" loading="lazy" width={800} height={600} onError={(e) => { e.currentTarget.style.display = "none"; }} />}
-              {r.category && <span className="avis-card__cat">{r.category.toUpperCase()}</span>}
-            </div>
+            {/* grande photo : l'image de la catégorie du vendeur, affichée dans ses propres proportions (nette, sans recadrage) */}
+            <CardMedia src={r.img} fallback={catImg(r.category)} category={r.category} />
             <div className="avis-card__body">
               <span className="avis-card__stars" aria-label={`${r.rating} sur 5`}>{"★".repeat(r.rating)}<span className="off">{"★".repeat(5 - r.rating)}</span></span>
               <p className="avis-card__text">« {r.text} »</p>
@@ -201,6 +196,27 @@ function LoadingDeck() {
           </div>
         </div>
       ))}
+    </div>
+  );
+}
+
+/**
+ * Image de la carte d'avis : le cadre prend exactement les proportions de l'image (ex. bannière 1500×300 = 5:1),
+ * sans recadrage ni agrandissement, donc l'image reste nette. Les images très hautes sont limitées à la moitié de la carte.
+ */
+function CardMedia({ src, fallback, category }: { src: string | null; fallback: string | null; category: string }) {
+  const [ratio, setRatio] = useState<number | null>(null);
+  const url = src ?? fallback;
+  const onLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    const { naturalWidth: w, naturalHeight: h } = e.currentTarget;
+    if (w && h) setRatio(w / h);
+  };
+  return (
+    <div className={`avis-card__media ${ratio ? "avis-card__media--fit" : ""}`} style={ratio ? { aspectRatio: String(ratio) } : undefined}>
+      {url && (src
+        ? <img {...imgProps(src, { width: 640, sizes: "(max-width: 560px) 74vw, 400px" })} alt={`Catégorie ${category}`} loading="lazy" decoding="async" onLoad={onLoad} />
+        : <img src={url} alt="" loading="lazy" decoding="async" onLoad={onLoad} onError={(e) => { e.currentTarget.style.display = "none"; }} />)}
+      {category && <span className="avis-card__cat">{category.toUpperCase()}</span>}
     </div>
   );
 }

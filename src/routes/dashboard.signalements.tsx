@@ -9,9 +9,9 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/dashboard/signalements")({
   head: () => ({
     meta: [
-      { title: "Produits signalés — Amashia Seller" },
+      { title: "Produits signalés — Amachia Seller" },
       { name: "description", content: "Consultez les signalements laissés par les clients sur vos produits et traitez-les." },
-      { property: "og:title", content: "Produits signalés — Amashia Seller" },
+      { property: "og:title", content: "Produits signalés — Amachia Seller" },
       { property: "og:description", content: "Consultez les signalements laissés par les clients sur vos produits." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

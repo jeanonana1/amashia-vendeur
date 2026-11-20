@@ -1,4 +1,4 @@
--- Amashia — Admin, étape 6 : commissions, solde vendeur net, finances (transactions), retraits, Prime (plans).
+-- Amachia — Admin, étape 6 : commissions, solde vendeur net, finances (transactions), retraits, Prime (plans).
 -- La commission ne s'applique qu'aux commandes passées à partir de cette mise à jour (taux figé sur chaque article).
 
 -- 1. Commission figée sur chaque article commandé ---------------------------------------------------
@@ -55,7 +55,7 @@ end $$;
 -- Ventes du vendeur : commission et montant net (ajoutés en fin de vue)
 create or replace view public.seller_orders as
  SELECT oi.id, o.order_number, oi.product_id AS listing_id, sp.id AS product_id, s.owner_id AS seller_id,
-    COALESCE(NULLIF(TRIM(BOTH FROM o.full_name), ''::text), 'Client Amashia'::text) AS customer_name,
+    COALESCE(NULLIF(TRIM(BOTH FROM o.full_name), ''::text), 'Client Amachia'::text) AS customer_name,
     concat_ws(', '::text, NULLIF(o.district, ''::text), NULLIF(o.city, ''::text)) AS delivery_area,
     oi.product_title, oi.quantity, oi.unit_price_fcfa AS unit_price,
     oi.unit_price_fcfa * COALESCE(oi.quantity, 1) - oi.discount_fcfa AS amount,

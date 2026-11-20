@@ -1,4 +1,4 @@
--- Amashia : liste des clients du vendeur avec l'historique de leurs commandes
+-- Amachia : liste des clients du vendeur avec l'historique de leurs commandes
 -- (un client = un compte ; aucune coordonnée personnelle n'est transmise).
 begin;
 create or replace function public.seller_customers()
@@ -23,7 +23,7 @@ returns jsonb language sql stable security definer set search_path = public as $
     select jsonb_build_object(
       'id', md5(l.user_id::text),
       'code', upper(left(md5(l.user_id::text), 6)),
-      'name', (array_agg(coalesce(nullif(trim(l.full_name), ''), 'Client Amashia') order by l.created_at desc))[1],
+      'name', (array_agg(coalesce(nullif(trim(l.full_name), ''), 'Client Amachia') order by l.created_at desc))[1],
       'area', (array_agg(concat_ws(', ', nullif(l.district, ''), nullif(l.city, '')) order by l.created_at desc))[1],
       'orders', count(distinct l.order_id) filter (where l.valid),
       'items', coalesce(sum(l.quantity) filter (where l.valid), 0),

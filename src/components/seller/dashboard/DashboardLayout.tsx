@@ -51,7 +51,7 @@ const NAV = GROUPS.flatMap((g) => g.items);
 import { NewOrderAlarm } from "@/components/seller/dashboard/NewOrderAlarm";
 import { PushAlertsButton } from "@/components/seller/dashboard/PushAlertsButton";
 import { registerAppPush } from "@/lib/nativeApp";
-/** Application Android Amashia Seller : enregistre ce téléphone pour les alertes de commandes. */
+/** Application Android Amachia Seller : enregistre ce téléphone pour les alertes de commandes. */
 function AppPushRegister({ uid }: { uid: string }) {
   useEffect(() => { void registerAppPush(); }, [uid]);
   return null;
@@ -132,7 +132,7 @@ export function DashboardLayout({ title, subtitle, actions, children }: { title:
   const SidebarInner = (
     <>
       <div className="flex h-[4.5rem] items-center px-5">
-        <Link to="/" className="flex items-center" aria-label="Accueil amashia seller"><SellerLogo className="h-10" /></Link>
+        <Link to="/" className="flex items-center" aria-label="Accueil amachia seller"><SellerLogo className="h-10" /></Link>
       </div>
       <nav className="flex-1 space-y-5 overflow-y-auto px-3 pb-4 pt-2">
         {GROUPS.map((g) => (
@@ -173,7 +173,7 @@ export function DashboardLayout({ title, subtitle, actions, children }: { title:
           {avatar ? <img src={avatar} alt="" className="h-9 w-9 rounded-full object-cover" /> : <div className="grid h-9 w-9 place-items-center rounded-full bg-primary text-sm font-bold text-black">{name[0]}</div>}
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-semibold">{name}</p>
-            <a href="https://amashia-client.vercel.app" target="_blank" rel="noreferrer" className="text-[11px] text-muted-foreground hover:text-primary">Voir Amashia ↗</a>
+            <a href="https://amashia-client.vercel.app" target="_blank" rel="noreferrer" className="text-[11px] text-muted-foreground hover:text-primary">Voir Amachia ↗</a>
           </div>
           <button onClick={logout} className="grid h-8 w-8 place-items-center rounded-lg text-muted-foreground transition hover:bg-destructive/10 hover:text-destructive" title="Déconnexion" aria-label="Déconnexion"><LogOut size={16} /></button>
         </div>
@@ -205,7 +205,7 @@ export function DashboardLayout({ title, subtitle, actions, children }: { title:
         <header className="sticky top-0 z-30 border-b border-border bg-background">
           <div className="mx-auto flex h-16 max-w-[1440px] items-center gap-3 px-4 sm:px-6 lg:px-8">
             <button onClick={() => setDrawerOpen(true)} className={`${iconBtn} lg:hidden`} aria-label="Ouvrir le menu"><Menu size={18} /></button>
-            <Link to="/" className="flex min-w-0 items-center lg:hidden" aria-label="Accueil amashia seller"><SellerLogo className="h-8 max-w-full" /></Link>
+            <Link to="/" className="flex min-w-0 items-center lg:hidden" aria-label="Accueil amachia seller"><SellerLogo className="h-8 max-w-full" /></Link>
             <div className="hidden min-w-0 items-center gap-2 text-sm text-muted-foreground lg:flex">
               <span>Espace vendeur</span><span className="text-border">/</span><span className="truncate font-semibold text-foreground">{current?.label ?? title}</span>
             </div>

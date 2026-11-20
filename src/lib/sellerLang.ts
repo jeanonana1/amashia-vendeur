@@ -1,7 +1,7 @@
 /**
  * Langue du site vendeur : choix du vendeur (Paramètres / inscription / bouton FR-EN),
  * sinon la langue du téléphone ou de l'ordinateur. En anglais, toute la page est traduite
- * automatiquement (service de traduction Amashia, résultats gardés en cache).
+ * automatiquement (service de traduction Amachia, résultats gardés en cache).
  */
 export type SellerLang = "fr" | "en";
 export const LANG_KEY = "amashia-seller-lang";

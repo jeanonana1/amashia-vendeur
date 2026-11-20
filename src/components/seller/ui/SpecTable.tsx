@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 
 /**
- * Tableau Amashia (style « Comment votre solde est calculé ») : bordures, en-tête discret,
+ * Tableau Amachia (style « Comment votre solde est calculé ») : bordures, en-tête discret,
  * une ligne par élément, colonnes séparées par un trait. Défile de gauche à droite si l'écran est trop étroit.
  */
 export function TableScroll({ children, minWidth = 0, className = "" }: { children: ReactNode; minWidth?: number; className?: string }) {

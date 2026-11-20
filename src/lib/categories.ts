@@ -1,5 +1,5 @@
 /**
- * Catégories du site Amashia, regroupées comme elles apparaissent aux acheteurs
+ * Catégories du site Amachia, regroupées comme elles apparaissent aux acheteurs
  * (même répartition que la fonction de publication seller_category_slug en base).
  * Les valeurs sont celles du formulaire produit : une catégorie choisie ici
  * est donc reprise telle quelle.
@@ -18,7 +18,7 @@ export const SITE_CATEGORY_GROUPS: { group: string; categories: string[] }[] = [
 export const SITE_CATEGORIES = SITE_CATEGORY_GROUPS.flatMap((g) => g.categories);
 
 // ---------------------------------------------------------------------------
-// Classification gérée depuis l'espace admin Amashia (catégories, sous-catégories,
+// Classification gérée depuis l'espace admin Amachia (catégories, sous-catégories,
 // marques, attributs). La liste ci-dessus ne sert plus que de secours hors connexion.
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";

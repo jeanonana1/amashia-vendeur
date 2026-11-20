@@ -1,5 +1,5 @@
 -- ============================================================================
--- Espace admin Amashia : fonctions réservées aux administrateurs (rôle « admin »
+-- Espace admin Amachia : fonctions réservées aux administrateurs (rôle « admin »
 -- dans user_roles). Chaque fonction vérifie le rôle avant de lire ou modifier.
 -- ============================================================================
 

@@ -12,7 +12,7 @@ import { Select } from "@/components/ui/app-select";
 import { BalanceCard, primaryBtn, ghostBtn } from "@/components/seller/ui/BalanceCard";
 
 export const Route = createFileRoute("/dashboard/paiements")({
-  head: () => ({ meta: [{ title: "Paiements — Amashia Seller" }, { name: "description", content: "Paiements : votre espace vendeur Amashia pour gérer votre activité." }, { property: "og:title", content: "Paiements — Amashia Seller" }, { property: "og:description", content: "Paiements : votre espace vendeur Amashia pour gérer votre activité." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
+  head: () => ({ meta: [{ title: "Paiements — Amachia Seller" }, { name: "description", content: "Paiements : votre espace vendeur Amachia pour gérer votre activité." }, { property: "og:title", content: "Paiements — Amachia Seller" }, { property: "og:description", content: "Paiements : votre espace vendeur Amachia pour gérer votre activité." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   component: PaiementsPage,
 });
 
@@ -98,10 +98,10 @@ function PaiementsPage() {
         footer={stats && balance < 1000 ? <p className="mt-2 text-[11px] text-muted-foreground">Il vous manque {money(1000 - balance)} pour pouvoir retirer.</p> : null}
         lines={[
           { icon: Clock, tone: "text-amber-400 bg-amber-500/12", label: "En attente de livraison", hint: "Ventes pas encore livrées (après commission)", value: stats?.pending_balance ?? 0 },
-          { icon: ArrowDownToLine, tone: "text-sky-400 bg-sky-500/12", label: "Retraits en cours", hint: "En cours de traitement par Amashia", value: pendingOut },
+          { icon: ArrowDownToLine, tone: "text-sky-400 bg-sky-500/12", label: "Retraits en cours", hint: "En cours de traitement par Amachia", value: pendingOut },
           { icon: CheckCircle2, tone: "text-emerald-400 bg-emerald-500/12", label: "Déjà versé", hint: "Retraits payés sur votre compte", value: paidOut },
         ]}
-        note="Ce solde vous appartient entièrement : la commission Amashia a déjà été prélevée sur chaque vente."
+        note="Ce solde vous appartient entièrement : la commission Amachia a déjà été prélevée sur chaque vente."
       />
 
 
@@ -144,7 +144,7 @@ function PaiementsPage() {
               })}
             </div>
           )}
-          <p className="mt-4 text-[11px] text-muted-foreground">Les retraits sont traités par l'équipe Amashia sous 48 h ouvrées vers le moyen choisi.</p>
+          <p className="mt-4 text-[11px] text-muted-foreground">Les retraits sont traités par l'équipe Amachia sous 48 h ouvrées vers le moyen choisi.</p>
         </div>
       </div>
 
@@ -317,7 +317,7 @@ function WithdrawModal({ balance, methods, onClose, onDone }: { balance: number;
         {methods.map((m) => <option key={m.id} value={m.id}>{(m.label || KIND[m.kind].label)} · {mask(m.account_number)}</option>)}
       </Select>
       <button onClick={submit} disabled={busy} className="mt-5 w-full rounded-full bg-gradient-primary py-3 text-sm font-semibold text-black disabled:opacity-60">{busy ? "Envoi…" : "Confirmer le retrait"}</button>
-      <p className="mt-3 text-[11px] text-muted-foreground">Le montant est réservé immédiatement et versé par l'équipe Amashia sous 48 h ouvrées.</p>
+      <p className="mt-3 text-[11px] text-muted-foreground">Le montant est réservé immédiatement et versé par l'équipe Amachia sous 48 h ouvrées.</p>
     </Modal>
   );
 }

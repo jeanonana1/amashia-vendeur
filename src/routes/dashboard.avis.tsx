@@ -8,11 +8,11 @@ import { dateTime, num, REVIEWS_SEEN_EVENT } from "@/lib/sellerStats";
 import { Select } from "@/components/ui/app-select";
 
 export const Route = createFileRoute("/dashboard/avis")({
-  head: () => ({ meta: [{ title: "Avis — Amashia Seller" }, { name: "description", content: "Avis : votre espace vendeur Amashia pour gérer votre activité." }, { property: "og:title", content: "Avis — Amashia Seller" }, { property: "og:description", content: "Avis : votre espace vendeur Amashia pour gérer votre activité." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
+  head: () => ({ meta: [{ title: "Avis — Amachia Seller" }, { name: "description", content: "Avis : votre espace vendeur Amachia pour gérer votre activité." }, { property: "og:title", content: "Avis — Amachia Seller" }, { property: "og:description", content: "Avis : votre espace vendeur Amachia pour gérer votre activité." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   component: AvisPage,
 });
 
-/** Avis laissé par un client sur le site Amashia, sur un produit du vendeur. */
+/** Avis laissé par un client sur le site Amachia, sur un produit du vendeur. */
 type Review = {
   id: string; rating: number; comment: string | null; author: string; photos: string[] | null;
   verified: boolean; created_at: string; product_id: string; product_title: string; product_image: string | null;
@@ -75,7 +75,7 @@ function AvisPage() {
     (!q.trim() || `${r.comment ?? ""} ${r.author}`.toLowerCase().includes(q.trim().toLowerCase()))), [all, filter, product, q]);
 
   return (
-    <DashboardLayout title="Avis clients" subtitle="Les avis laissés par les clients sur vos produits, sur Amashia">
+    <DashboardLayout title="Avis clients" subtitle="Les avis laissés par les clients sur vos produits, sur Amachia">
       <div className="mb-6 grid grid-cols-1 gap-5 lg:grid-cols-3">
         <div className="grid place-items-center rounded-2xl border border-border bg-card p-6 text-center">
           <div>
@@ -119,7 +119,7 @@ function AvisPage() {
         {reviews && list.length === 0 && (
           <p className="flex flex-col items-center gap-2 py-12 text-center text-sm text-muted-foreground">
             <MessageSquare size={28} />
-            {all.length === 0 ? "Aucun avis pour le moment. Les avis de vos clients sur Amashia apparaîtront ici." : "Aucun avis ne correspond à ces filtres."}
+            {all.length === 0 ? "Aucun avis pour le moment. Les avis de vos clients sur Amachia apparaîtront ici." : "Aucun avis ne correspond à ces filtres."}
           </p>
         )}
 

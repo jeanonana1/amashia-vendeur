@@ -34,7 +34,7 @@ export const publishToMarketplace = createServerFn({ method: "POST" })
       .select("id,marketplace_product_id,published_at")
       .single();
     if (publishError) throw new Error(publishError.message);
-    if (!published?.marketplace_product_id) throw new Error("La publication sur Amashia a échoué.");
+    if (!published?.marketplace_product_id) throw new Error("La publication sur Amachia a échoué.");
 
     const listing = {
       id: published.marketplace_product_id as string,

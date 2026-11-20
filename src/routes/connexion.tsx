@@ -12,8 +12,8 @@ import { cmDigits, cmPhoneError, formatCm, toE164 } from "@/lib/phone";
 export const Route = createFileRoute("/connexion")({
   head: () => ({
     meta: [
-      { title: "Connexion — Amashia Seller" }, { property: "og:title", content: "Connexion — Amashia Seller" }, { property: "og:description", content: "Accédez à votre tableau de bord vendeur Amashia Seller." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" },
-      { name: "description", content: "Accédez à votre tableau de bord vendeur Amashia Seller." },
+      { title: "Connexion — Amachia Seller" }, { property: "og:title", content: "Connexion — Amachia Seller" }, { property: "og:description", content: "Accédez à votre tableau de bord vendeur Amachia Seller." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" },
+      { name: "description", content: "Accédez à votre tableau de bord vendeur Amachia Seller." },
     ],
   }),
   component: Page,
@@ -33,7 +33,7 @@ function Page() {
     const { data } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === "PASSWORD_RECOVERY") { setRecovery(true); return; }
       if (fromEmailLink && session && (event === "SIGNED_IN" || event === "INITIAL_SESSION") && !/type=recovery/.test(window.location.hash)) {
-        toast.success("Email confirmé ! Bienvenue sur Amashia.");
+        toast.success("Email confirmé ! Bienvenue sur Amachia.");
         navigate({ to: "/dashboard", replace: true });
       }
     });

@@ -1,4 +1,4 @@
-/* Service worker de l'espace vendeur Amashia : alertes « Nouvelle commande » reçues même navigateur fermé
+/* Service worker de l'espace vendeur Amachia : alertes « Nouvelle commande » reçues même navigateur fermé
    ou téléphone verrouillé (notification système avec son et vibration). */
 self.addEventListener("install", () => self.skipWaiting());
 self.addEventListener("activate", (e) => e.waitUntil(self.clients.claim()));
@@ -6,7 +6,7 @@ self.addEventListener("activate", (e) => e.waitUntil(self.clients.claim()));
 self.addEventListener("push", (event) => {
   let d = {};
   try { d = event.data ? event.data.json() : {}; } catch { d = { body: event.data && event.data.text() }; }
-  const title = d.title || "🔔 Nouvelle commande — Amashia";
+  const title = d.title || "🔔 Nouvelle commande — Amachia";
   event.waitUntil((async () => {
     await self.registration.showNotification(title, {
       body: d.body || "Ouvrez vos commandes pour la préparer.",

@@ -11,7 +11,7 @@ export function FinalCTA() {
             <div className="glow-breathe absolute left-1/2 top-full h-[30rem] w-[50rem] rounded-full bg-[#ff6800]/40 blur-[110px]" />
           </div>
           <h2 className="mx-auto max-w-3xl text-balance text-3xl font-extrabold leading-[1.05] sm:text-5xl md:text-6xl">Votre prochaine vente commence aujourd'hui.</h2>
-          <p className="mx-auto mt-5 max-w-xl text-white/70 md:text-lg">Ouvrez votre boutique en quelques minutes et touchez les clients d'Amashia partout au Cameroun.</p>
+          <p className="mx-auto mt-5 max-w-xl text-white/70 md:text-lg">Ouvrez votre boutique en quelques minutes et touchez les clients d'Amachia partout au Cameroun.</p>
           <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <PrimaryCta className="cta-sweep w-full sm:w-auto">Créer ma boutique gratuitement</PrimaryCta>
             <GhostCta to="/connexion" className="w-full border-white/15 bg-white/5 text-white hover:bg-white/10 sm:w-auto">J'ai déjà un compte</GhostCta>

@@ -3,11 +3,11 @@ import { Container, SectionHeading } from "@/components/seller/site/ui";
 import { Reveal } from "@/components/seller/site/motion";
 
 export const FAQ = [
-  { q: "Combien coûte l'ouverture d'une boutique ?", a: "Rien. L'inscription et la boutique sont gratuites. Amashia prélève seulement une commission sur chaque commande livrée, selon la catégorie du produit." },
-  { q: "Qui livre mes commandes ?", a: "Dans les villes couvertes, un livreur Amashia (application Prime) proche de votre boutique vient récupérer le colis et le livre au client. Ailleurs, la commande part par une agence d'expédition partenaire." },
-  { q: "Comment suis-je payé ?", a: "Le client paie Amashia (à la livraison, Orange Money, MTN MoMo ou carte). Une fois la commande livrée, le montant moins la commission passe dans votre solde, que vous suivez en direct ; Amashia vous le verse sur le moyen de paiement choisi à l'inscription." },
-  { q: "Ai-je besoin d'un site ou de connaissances techniques ?", a: "Non. Vos produits apparaissent directement sur la marketplace Amashia. Tout se gère depuis votre espace vendeur, sur téléphone ou ordinateur." },
-  { q: "Les coordonnées de mes clients sont-elles visibles ?", a: "Pour protéger les clients, leur téléphone et leur e-mail ne sont pas transmis aux vendeurs : vous voyez le prénom et le quartier. La livraison est assurée par Amashia." },
+  { q: "Combien coûte l'ouverture d'une boutique ?", a: "Rien. L'inscription et la boutique sont gratuites. Amachia prélève seulement une commission sur chaque commande livrée, selon la catégorie du produit." },
+  { q: "Qui livre mes commandes ?", a: "Dans les villes couvertes, un livreur Amachia (application Prime) proche de votre boutique vient récupérer le colis et le livre au client. Ailleurs, la commande part par une agence d'expédition partenaire." },
+  { q: "Comment suis-je payé ?", a: "Le client paie Amachia (à la livraison, Orange Money, MTN MoMo ou carte). Une fois la commande livrée, le montant moins la commission passe dans votre solde, que vous suivez en direct ; Amachia vous le verse sur le moyen de paiement choisi à l'inscription." },
+  { q: "Ai-je besoin d'un site ou de connaissances techniques ?", a: "Non. Vos produits apparaissent directement sur la marketplace Amachia. Tout se gère depuis votre espace vendeur, sur téléphone ou ordinateur." },
+  { q: "Les coordonnées de mes clients sont-elles visibles ?", a: "Pour protéger les clients, leur téléphone et leur e-mail ne sont pas transmis aux vendeurs : vous voyez le prénom et le quartier. La livraison est assurée par Amachia." },
   { q: "Puis-je vendre plusieurs types de produits ?", a: "Oui. Chaque produit suit le taux de commission de sa catégorie. Les comptes Entreprise peuvent vendre dans un nombre illimité de catégories." },
 ];
 

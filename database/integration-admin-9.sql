@@ -1,4 +1,4 @@
--- Amashia — Admin, étape 9 : personnalisation du site client (logo, menu, couleurs) et pages de contenu modifiables.
+-- Amachia — Admin, étape 9 : personnalisation du site client (logo, menu, couleurs) et pages de contenu modifiables.
 
 create table if not exists public.site_settings (
   key text primary key,

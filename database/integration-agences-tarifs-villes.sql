@@ -8,7 +8,7 @@ alter table public.orders
   add column if not exists agency_fee_fcfa int,
   add column if not exists dropoff_fee_fcfa int;
 
--- Livraison par Amashia du colis jusqu'à l'agence : même prix qu'une livraison client dans ce quartier.
+-- Livraison par Amachia du colis jusqu'à l'agence : même prix qu'une livraison client dans ce quartier.
 create or replace function public.agency_dropoff_fee(_city text, _district text) returns int
 language sql stable security definer set search_path = public as $$
   select coalesce(
@@ -40,7 +40,7 @@ begin
       'base_fee', fee, 'district_fee', d.fee, 'free_threshold', thr, 'prime', prime, 'zone', z.city, 'region', reg,
       'delay_label', 'Entre 30 min et 4 h', 'days', 0);
   end if;
-  -- hors Yaoundé / Douala : livraison par Amashia jusqu'à l'agence + expédition par l'agence vers la ville du client
+  -- hors Yaoundé / Douala : livraison par Amachia jusqu'à l'agence + expédition par l'agence vers la ville du client
   select coalesce(jsonb_agg(jsonb_build_object('id', x.id, 'name', x.name, 'phone', x.phone, 'address', x.address,
       'depot', nullif(concat_ws(', ', x.depot_district, x.depot_city), ''),
       'shipping_fee', public.agency_city_fee(x, _city),
@@ -108,7 +108,7 @@ begin
   return coalesce((select jsonb_agg(to_jsonb(a) || jsonb_build_object(
       'dropoff_fee', public.agency_dropoff_fee(coalesce(a.depot_city, 'Yaoundé'), a.depot_district),
       'orders', (select count(*) from orders o where o.shipping_agency_id = a.id and o.status <> 'Annulée'),
-      -- frais versés à l'agence (hors livraison jusqu'à l'agence, qui revient à Amashia)
+      -- frais versés à l'agence (hors livraison jusqu'à l'agence, qui revient à Amachia)
       'fees_total', (select coalesce(sum(coalesce(o.agency_fee_fcfa, o.shipping_fee_fcfa - coalesce(o.dropoff_fee_fcfa, 0))), 0) from orders o where o.shipping_agency_id = a.id and o.status <> 'Annulée'),
       'dropoff_total', (select coalesce(sum(o.dropoff_fee_fcfa), 0) from orders o where o.shipping_agency_id = a.id and o.status <> 'Annulée'))
     order by a.sort, a.name) from shipping_agencies a), '[]'::jsonb);

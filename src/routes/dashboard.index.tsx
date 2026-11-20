@@ -13,7 +13,7 @@ import { TrafficSources } from "@/components/seller/dashboard/TrafficSources";
 import { ORDER_FIELDS, OrderDetailModal, type SellerOrderLine } from "@/components/seller/dashboard/OrderDetailModal";
 
 export const Route = createFileRoute("/dashboard/")({
-  head: () => ({ meta: [{ title: "Tableau de bord — Amashia Seller" }, { name: "description", content: "Tableau de bord : votre espace vendeur Amashia pour gérer votre activité." }, { property: "og:title", content: "Tableau de bord — Amashia Seller" }, { property: "og:description", content: "Tableau de bord : votre espace vendeur Amashia pour gérer votre activité." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
+  head: () => ({ meta: [{ title: "Tableau de bord — Amachia Seller" }, { name: "description", content: "Tableau de bord : votre espace vendeur Amachia pour gérer votre activité." }, { property: "og:title", content: "Tableau de bord — Amachia Seller" }, { property: "og:description", content: "Tableau de bord : votre espace vendeur Amachia pour gérer votre activité." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   component: DashboardOverview,
 });
 
@@ -84,7 +84,7 @@ function DashboardOverview() {
 
   return (
     <DashboardLayout title={`${greeting}, ${name}! 👋`} subtitle="Voici l'activité réelle de votre boutique">
-      {/* téléphone : application Amashia Seller ; ordinateur : version PC — alertes de commandes avec son et vibration */}
+      {/* téléphone : application Amachia Seller ; ordinateur : version PC — alertes de commandes avec son et vibration */}
       <InstallAppCard />
       {/* Bandeau : période, raccourcis */}
       <div className="ring-gradient relative mb-6 overflow-hidden rounded-[1.4rem] border border-border bg-card p-5 shadow-card sm:p-6">
@@ -175,7 +175,7 @@ function DashboardOverview() {
         {orders === null ? (
           <div className="h-32 animate-pulse rounded-xl bg-secondary/40" />
         ) : orders.length === 0 ? (
-          <p className="py-8 text-center text-sm text-muted-foreground">Aucune commande pour le moment. Vos ventes sur Amashia apparaîtront ici.</p>
+          <p className="py-8 text-center text-sm text-muted-foreground">Aucune commande pour le moment. Vos ventes sur Amachia apparaîtront ici.</p>
         ) : (
           <>
           {/* Mobile : une carte par commande, textes coupés proprement */}

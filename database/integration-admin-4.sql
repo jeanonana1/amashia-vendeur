@@ -1,4 +1,4 @@
--- Amashia — Admin, étape 4 : statut des commandes décidé par l'admin, image des commandes,
+-- Amachia — Admin, étape 4 : statut des commandes décidé par l'admin, image des commandes,
 -- avis au client quand son signalement est résolu.
 
 -- 1. Statut fixé par l'administration ----------------------------------------------------------
@@ -24,7 +24,7 @@ begin
     -- le statut global d'abord : les déclencheurs « vendeur » ignorent alors la commande annulée
     update public.orders set status = 'Annulée', updated_at = now() where id = _order;
     update public.order_items set seller_status = 'cancelled' where order_id = _order and seller_status <> 'cancelled';
-    perform public.add_order_event(_order, 'cancelled', 'Commande annulée par Amashia');
+    perform public.add_order_event(_order, 'cancelled', 'Commande annulée par Amachia');
   else
     -- historique de suivi dans l'ordre chronologique (le client le voit tel quel)
     if _status in ('preparing', 'shipped', 'delivered') then perform public.add_order_event(_order, 'preparing', 'En préparation chez le vendeur'); end if;
@@ -56,7 +56,7 @@ begin
   end if;
   if exists (select 1 from public.order_items oi join public.orders o on o.id = oi.order_id
              where oi.id = _item_id and o.admin_status is not null) then
-    raise exception 'Le statut de cette commande a été fixé par l''administration Amashia : il ne peut plus être modifié.';
+    raise exception 'Le statut de cette commande a été fixé par l''administration Amachia : il ne peut plus être modifié.';
   end if;
   update public.order_items set seller_status = _status
   where id = _item_id and seller_id in (select id from public.sellers where owner_id = auth.uid());

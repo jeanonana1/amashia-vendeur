@@ -7,10 +7,10 @@ import { SellerLogo } from "@/components/seller/SellerLogo";
 export const Route = createFileRoute("/capture/$session")({
   head: () => ({
     meta: [
-      { title: "Filmer le produit — Amashia Seller" },
-      { name: "description", content: "Capturez votre produit avec la caméra de votre téléphone et envoyez-le instantanément à votre fiche produit Amashia." },
-      { property: "og:title", content: "Filmer le produit — Amashia Seller" },
-      { property: "og:description", content: "Capture caméra instantanée pour vos fiches produits Amashia." },
+      { title: "Filmer le produit — Amachia Seller" },
+      { name: "description", content: "Capturez votre produit avec la caméra de votre téléphone et envoyez-le instantanément à votre fiche produit Amachia." },
+      { property: "og:title", content: "Filmer le produit — Amachia Seller" },
+      { property: "og:description", content: "Capture caméra instantanée pour vos fiches produits Amachia." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],

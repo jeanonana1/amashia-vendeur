@@ -1,8 +1,8 @@
 {
   "id": "/dashboard",
-  "name": "Amashia Seller",
-  "description": "Votre boutique Amashia : commandes en temps réel, notifications, sonnerie et vibration.",
-  "short_name": "Amashia Seller",
+  "name": "Amachia Seller",
+  "description": "Votre boutique Amachia : commandes en temps réel, notifications, sonnerie et vibration.",
+  "short_name": "Amachia Seller",
   "start_url": "/dashboard",
   "scope": "/",
   "display": "standalone",

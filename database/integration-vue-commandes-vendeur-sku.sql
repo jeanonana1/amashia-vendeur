@@ -5,7 +5,7 @@ create or replace view public.seller_orders with (security_invoker = true) as
     oi.product_id AS listing_id,
     sp.id AS product_id,
     s.owner_id AS seller_id,
-    COALESCE(NULLIF(TRIM(BOTH FROM o.full_name), ''::text), 'Client Amashia'::text) AS customer_name,
+    COALESCE(NULLIF(TRIM(BOTH FROM o.full_name), ''::text), 'Client Amachia'::text) AS customer_name,
     concat_ws(', '::text, NULLIF(o.district, ''::text), NULLIF(o.city, ''::text)) AS delivery_area,
     oi.product_title,
     oi.quantity,

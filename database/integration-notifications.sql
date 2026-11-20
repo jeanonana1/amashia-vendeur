@@ -109,11 +109,11 @@ end $$;
 drop trigger if exists notif_stock on public.seller_products;
 create trigger notif_stock after update of stock on public.seller_products for each row execute function public.notif_stock();
 
--- produit mis en ligne sur Amashia
+-- produit mis en ligne sur Amachia
 create or replace function public.notif_published() returns trigger language plpgsql security definer set search_path = public as $$
 begin
   if new.published_at is not null and old.published_at is null then
-    perform public.notify_seller(new.user_id, 'published', 'Produit en ligne sur Amashia', left(new.name, 120), '/dashboard/produits');
+    perform public.notify_seller(new.user_id, 'published', 'Produit en ligne sur Amachia', left(new.name, 120), '/dashboard/produits');
   end if;
   return new;
 end $$;

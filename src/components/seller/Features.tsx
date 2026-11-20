@@ -26,7 +26,7 @@ export function Features() {
               ))}
             </div>
           </Tile>
-          <Tile className="md:col-span-2" icon={<Bike size={18} />} title="Livraison Prime" text="Amashia envoie un livreur proche de votre boutique : il récupère le colis et le livre au client. Ailleurs, expédition par agence.">
+          <Tile className="md:col-span-2" icon={<Bike size={18} />} title="Livraison Prime" text="Amachia envoie un livreur proche de votre boutique : il récupère le colis et le livre au client. Ailleurs, expédition par agence.">
             <div className="mt-7 px-4">
               {/* le trait et le livreur avancent ensemble (même animation, même durée) */}
               <div className="relative h-1.5 rounded-full bg-secondary">
@@ -35,13 +35,13 @@ export function Features() {
                 <span className="ride absolute top-1/2 grid h-8 w-8 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-primary text-black shadow-[0_6px_20px_-6px_var(--primary)]"><Bike size={15} /></span>
               </div>
               <div className="relative mt-4 h-4 text-[11px] font-semibold text-muted-foreground">
-                <span className="absolute left-0 -translate-x-1/2">Amashia</span>
+                <span className="absolute left-0 -translate-x-1/2">Amachia</span>
                 <span className="absolute left-1/2 -translate-x-1/2">Boutique</span>
                 <span className="absolute left-full flex -translate-x-1/2 items-center gap-1">Client <Check size={12} className="text-emerald-500" /></span>
               </div>
             </div>
           </Tile>
-          <Tile className="md:col-span-2" icon={<Wallet size={18} />} title="Encaissement sécurisé" text="Paiement à la livraison, Orange Money, MTN MoMo ou carte : Amashia encaisse, vous suivez votre solde en direct.">
+          <Tile className="md:col-span-2" icon={<Wallet size={18} />} title="Encaissement sécurisé" text="Paiement à la livraison, Orange Money, MTN MoMo ou carte : Amachia encaisse, vous suivez votre solde en direct.">
             <PaymentFlow />
           </Tile>
           <Tile className="md:col-span-2" icon={<BarChart3 size={18} />} title="Analytique claire" text="Ventes, visiteurs en direct, taux de conversion et sources de trafic (Facebook, TikTok…).">
@@ -52,7 +52,7 @@ export function Features() {
               <Countdown />
             </div>
           </Tile>
-          <Tile className="md:col-span-3" icon={<Megaphone size={18} />} title="Sponsoring" text="Mettez vos produits en avant sur Amashia et mesurez les vues, clics et ventes de chaque campagne." >
+          <Tile className="md:col-span-3" icon={<Megaphone size={18} />} title="Sponsoring" text="Mettez vos produits en avant sur Amachia et mesurez les vues, clics et ventes de chaque campagne." >
             <div className="mt-6 grid grid-cols-3 gap-2 text-center">
               {["Vues", "Clics", "Ventes"].map((t, i) => <div key={t} className="rounded-xl border border-border bg-[var(--surface-2)] px-3 py-3"><div className="h-1.5 overflow-hidden rounded-full bg-secondary"><div className="fill-x h-full rounded-full bg-primary" style={{ width: `${[100, 64, 38][i]}%`, animationDelay: `${i * 0.3}s` }} /></div><p className="mt-2 text-[11px] text-muted-foreground">{t}</p></div>)}
             </div>
@@ -164,7 +164,7 @@ function Caret() {
   return <span className="ml-0.5 inline-block h-[1em] w-[2px] translate-y-[2px] animate-pulse bg-primary align-baseline" />;
 }
 
-/* Encaissement : un moyen de paiement s'allume, l'argent passe par Amashia (sécurisé) et arrive dans le solde. */
+/* Encaissement : un moyen de paiement s'allume, l'argent passe par Amachia (sécurisé) et arrive dans le solde. */
 const PAY_METHODS = [
   { l: "À la livraison", icon: Banknote, tone: "bg-emerald-500 text-white", amount: 12500 },
   { l: "Orange Money", icon: Smartphone, tone: "bg-[#ff7900] text-black", amount: 8000 },
@@ -187,7 +187,7 @@ function PaymentFlow() {
     }, 3000);
     return () => window.clearInterval(t);
   }, []);
-  // le solde monte doucement quand la pièce arrive (après le passage par Amashia)
+  // le solde monte doucement quand la pièce arrive (après le passage par Amachia)
   useEffect(() => {
     if (shown === balance) return;
     let raf = 0; const from = shown; const t0 = performance.now() + 1500;
@@ -219,7 +219,7 @@ function PaymentFlow() {
           <span key={i} className={`pay-coin absolute top-1/2 z-20 grid h-5 w-5 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full text-[9px] font-black shadow-lg ${m.tone}`}>F</span>
         </div>
         <div className="mt-1.5 grid grid-cols-3 text-[10px] font-semibold text-muted-foreground">
-          <span>Client</span><span className="text-center text-primary">Amashia</span><span className="text-right">Votre solde</span>
+          <span>Client</span><span className="text-center text-primary">Amachia</span><span className="text-right">Votre solde</span>
         </div>
       </div>
       <div className="relative flex h-12 items-center justify-between rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3">

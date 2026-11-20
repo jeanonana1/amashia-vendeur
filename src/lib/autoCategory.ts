@@ -1,6 +1,6 @@
 /**
  * Détection automatique de la sous-catégorie à partir du titre du produit.
- * Chaque règle associe une sous-catégorie (nom exact de la classification Amashia) à des mots-clés
+ * Chaque règle associe une sous-catégorie (nom exact de la classification Amachia) à des mots-clés
  * (français, anglais, marques courantes au Cameroun). Les expressions longues et précises l'emportent
  * sur les mots courts : « chargeur iPhone » → Accessoires téléphone, « montre connectée » → Objets connectés.
  */

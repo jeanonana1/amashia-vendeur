@@ -5,8 +5,8 @@ import { AuthSplit } from "@/components/seller/site/AuthSplit";
 export const Route = createFileRoute("/inscription")({
   head: () => ({
     meta: [
-      { title: "Inscription — Amashia Seller" }, { property: "og:title", content: "Inscription — Amashia Seller" }, { property: "og:description", content: "Choisissez votre type de compte et rejoignez Amashia Seller." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" },
-      { name: "description", content: "Choisissez votre type de compte et rejoignez Amashia Seller." },
+      { title: "Inscription — Amachia Seller" }, { property: "og:title", content: "Inscription — Amachia Seller" }, { property: "og:description", content: "Choisissez votre type de compte et rejoignez Amachia Seller." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" },
+      { name: "description", content: "Choisissez votre type de compte et rejoignez Amachia Seller." },
     ],
   }),
   component: Page,
@@ -32,7 +32,7 @@ function Page() {
             <span className="absolute right-4 top-4 rounded-full bg-primary px-2.5 py-1 text-[11px] font-bold text-black">Recommandé</span>
             <span className="grid h-12 w-12 place-items-center rounded-2xl bg-primary text-black"><Store size={22} /></span>
             <h3 className="mt-5 text-xl font-bold">Entreprise</h3>
-            <p className="mt-2 text-sm text-muted-foreground">Votre boutique sur Amashia, avec des catégories illimitées. Idéal pour les commerces et marques.</p>
+            <p className="mt-2 text-sm text-muted-foreground">Votre boutique sur Amachia, avec des catégories illimitées. Idéal pour les commerces et marques.</p>
             <span className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-primary">Continuer <ArrowRight size={16} className="transition group-hover:translate-x-0.5" /></span>
           </button>
         </div>

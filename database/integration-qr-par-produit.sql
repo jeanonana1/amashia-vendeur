@@ -195,7 +195,7 @@ begin
   if _status not in ('picked_up', 'in_transit', 'delivered', 'failed') then raise exception 'Statut inconnu.'; end if;
   if _status = 'failed' and length(btrim(coalesce(_note, ''))) < 5 then raise exception 'Indiquez la raison de l''échec (client absent, adresse introuvable…).'; end if;
   select * into o from orders where id = _order;
-  if o.status = 'Annulée' then raise exception 'Commande annulée par Amashia : ne la livrez pas.'; end if;
+  if o.status = 'Annulée' then raise exception 'Commande annulée par Amachia : ne la livrez pas.'; end if;
   -- récupération : chaque produit doit avoir été scanné (code-barres / SKU) chez le vendeur
   if _status in ('picked_up', 'in_transit') and d.status = 'assigned' and exists (
       select 1 from order_items i where i.order_id = _order and i.seller_status <> 'cancelled' and coalesce(i.sku, '') <> ''

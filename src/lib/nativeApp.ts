@@ -1,7 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 
 /**
- * Pont avec l'application Android « Amashia Seller » (le tableau de bord tourne dans l'application) :
+ * Pont avec l'application Android « Amachia Seller » (le tableau de bord tourne dans l'application) :
  * jeton Firebase du téléphone pour les alertes de commandes, et vibration native.
  */
 type CapacitorLike = { isNativePlatform?: () => boolean; registerPlugin?: <T>(name: string) => T };
@@ -10,7 +10,7 @@ const cap = (): CapacitorLike | undefined => (typeof window !== "undefined" ? (w
 let plugin: SellerAlerts | null = null;
 const alerts = () => (plugin ??= cap()?.registerPlugin?.<SellerAlerts>("SellerAlerts") ?? null);
 
-/** Vrai quand le tableau de bord est ouvert dans l'application Android Amashia Seller. */
+/** Vrai quand le tableau de bord est ouvert dans l'application Android Amachia Seller. */
 export const isSellerApp = () => !!cap()?.isNativePlatform?.();
 
 /** Enregistre ce téléphone pour recevoir les alertes de commandes (sonnerie + vibration, application fermée). */

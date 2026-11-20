@@ -10,7 +10,7 @@ import { compressImage } from "@/lib/imageCompress";
 import { MARKETPLACE_URL, num, useSellerStats } from "@/lib/sellerStats";
 
 export const Route = createFileRoute("/dashboard/boutique")({
-  head: () => ({ meta: [{ title: "Ma Boutique — Amashia Seller" }, { name: "description", content: "Ma Boutique : votre espace vendeur Amashia pour gérer votre activité." }, { property: "og:title", content: "Ma Boutique — Amashia Seller" }, { property: "og:description", content: "Ma Boutique : votre espace vendeur Amashia pour gérer votre activité." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
+  head: () => ({ meta: [{ title: "Ma Boutique — Amachia Seller" }, { name: "description", content: "Ma Boutique : votre espace vendeur Amachia pour gérer votre activité." }, { property: "og:title", content: "Ma Boutique — Amachia Seller" }, { property: "og:description", content: "Ma Boutique : votre espace vendeur Amachia pour gérer votre activité." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   component: BoutiquePage,
 });
 
@@ -102,7 +102,7 @@ function BoutiquePage() {
       if (upErr) throw upErr;
       setProfile({ ...profile, [column]: url } as Profile);
       void reloadStats();
-      toast.success(kind === "logo" ? "Logo mis à jour sur Amashia" : "Bannière mise à jour sur Amashia");
+      toast.success(kind === "logo" ? "Logo mis à jour sur Amachia" : "Bannière mise à jour sur Amachia");
     } catch (e: any) {
       console.error("[upload]", e);
       toast.error(`Envoi de l'image impossible : ${e?.message || "erreur inconnue"}`);
@@ -129,7 +129,7 @@ function BoutiquePage() {
       setProfile({ ...profile, ...payload });
       setEditing(false);
       void reloadStats();
-      toast.success("Boutique mise à jour : les changements sont visibles sur Amashia.");
+      toast.success("Boutique mise à jour : les changements sont visibles sur Amachia.");
     } catch (e: any) {
       console.error("[boutique]", e);
       toast.error(`Enregistrement impossible : ${e?.message || "erreur inconnue"}`);
@@ -216,7 +216,7 @@ function BoutiquePage() {
               <h2 className="text-2xl font-extrabold truncate">{profile?.shop_name || form.shop_name}</h2>
               {stats?.shop && (
                 <a href={`${MARKETPLACE_URL}/seller/${stats.shop.slug}`} target="_blank" rel="noreferrer" className="flex items-center gap-1 rounded-full bg-primary/15 px-3 py-1 text-xs font-semibold text-primary hover:bg-primary/25">
-                  Voir sur Amashia <ExternalLink size={12} />
+                  Voir sur Amachia <ExternalLink size={12} />
                 </a>
               )}
             </div>

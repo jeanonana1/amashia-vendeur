@@ -1,6 +1,6 @@
 // Fonction Supabase « courier-call » : appel masqué livreur ↔ client.
-// Amashia (Twilio) appelle d'abord le livreur ; quand il décroche, il est relié au client.
-// Chacun ne voit que le numéro d'Amashia. Le numéro du client ne quitte jamais le serveur.
+// Amachia (Twilio) appelle d'abord le livreur ; quand il décroche, il est relié au client.
+// Chacun ne voit que le numéro d'Amachia. Le numéro du client ne quitte jamais le serveur.
 import { createClient } from "npm:@supabase/supabase-js@2.45.4";
 
 const db = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, { auth: { persistSession: false } });
@@ -22,7 +22,7 @@ Deno.serve(async (req) => {
     if (p?.error) return json({ error: p.error }, 400);
 
     const from = esc(p.from_number);
-    const twiml = `<Response><Say language="fr-FR" voice="alice">Amashia. Mise en relation avec votre client. Veuillez patienter.</Say>`
+    const twiml = `<Response><Say language="fr-FR" voice="alice">Amachia. Mise en relation avec votre client. Veuillez patienter.</Say>`
       + `<Dial callerId="${from}" timeLimit="${Math.max(60, Number(p.max_minutes) * 60)}" timeout="30"><Number>${esc(p.customer_phone)}</Number></Dial>`
       + `<Say language="fr-FR" voice="alice">Le client n'a pas répondu. Réessayez dans quelques minutes.</Say></Response>`;
     const body = new URLSearchParams({ To: p.courier_phone, From: p.from_number, Twiml: twiml, Timeout: "30" });
@@ -34,7 +34,7 @@ Deno.serve(async (req) => {
     const d = await r.json().catch(() => ({}));
     if (!r.ok) {
       await db.rpc("masked_call_result", { _call: p.call_id, _sid: null, _status: "failed", _error: `${d.code ?? r.status} ${d.message ?? ""}` });
-      return json({ error: "Le service d'appel a refusé l'appel : prévenez Amashia." }, 502);
+      return json({ error: "Le service d'appel a refusé l'appel : prévenez Amachia." }, 502);
     }
     await db.rpc("masked_call_result", { _call: p.call_id, _sid: d.sid ?? null, _status: d.status ?? "queued", _error: null });
     return json({ ok: true });

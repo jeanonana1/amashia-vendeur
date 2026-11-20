@@ -26,7 +26,7 @@ export function Header() {
   return (
     <header className="sticky top-0 z-50 px-3 pt-3 sm:px-5">
       <div className={`mx-auto flex h-[4.5rem] max-w-[1200px] items-center justify-between gap-4 rounded-2xl border px-4 transition-all sm:px-5 ${scrolled || open ? "border-border bg-background shadow-card" : "border-transparent"}`}>
-        <Link to="/" className="flex shrink-0 items-center" aria-label="Accueil amashia seller">
+        <Link to="/" className="flex shrink-0 items-center" aria-label="Accueil amachia seller">
           <SellerLogo className="h-11 sm:h-11" />
         </Link>
         <nav className="hidden items-center gap-1 md:flex">

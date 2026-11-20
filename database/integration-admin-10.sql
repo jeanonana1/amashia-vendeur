@@ -1,4 +1,4 @@
--- Amashia — Admin, étape 10 :
+-- Amachia — Admin, étape 10 :
 --   1. Commissions : interrupteur général (protégé par mot de passe), commission appliquée aux anciennes commandes
 --   2. Vendeurs : plus aucun accès direct au téléphone, à l'e-mail ni à l'adresse détaillée des clients
 --   3. Rapport d'activité des membres de l'équipe (pages visitées, actions)

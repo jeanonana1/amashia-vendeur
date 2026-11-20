@@ -11,7 +11,7 @@ import { FlashSales } from "@/components/seller/dashboard/FlashSales";
 import { Select } from "@/components/ui/app-select";
 
 export const Route = createFileRoute("/dashboard/promotions")({
-  head: () => ({ meta: [{ title: "Promotions — Amashia Seller" }, { name: "description", content: "Créez des coupons de réduction pour vos produits Amashia." }] }),
+  head: () => ({ meta: [{ title: "Promotions — Amachia Seller" }, { name: "description", content: "Créez des coupons de réduction pour vos produits Amachia." }] }),
   component: PromotionsPage,
 });
 
@@ -65,7 +65,7 @@ function PromotionsPage() {
     void (async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
-      // seuls les produits publiés sur Amashia peuvent recevoir un coupon
+      // seuls les produits publiés sur Amachia peuvent recevoir un coupon
       const { data } = await (supabase as any).from("seller_products").select("name, images, price, marketplace_product_id")
         .eq("user_id", user.id).not("marketplace_product_id", "is", null).order("created_at", { ascending: false });
       setProducts(((data ?? []) as any[]).map((p) => ({ id: p.marketplace_product_id, name: p.name, images: p.images, price: Number(p.price) || 0 })));

@@ -39,9 +39,9 @@ language plpgsql security definer set search_path = public, extensions as $$
 declare c couriers; d text := right(regexp_replace(coalesce(_phone, ''), '\D', '', 'g'), 9);
 begin
   select * into c from couriers where right(regexp_replace(coalesce(phone, ''), '\D', '', 'g'), 9) = d and status = 'active' order by created_at limit 1;
-  if c.id is null then return jsonb_build_object('ok', false, 'error', 'Aucun livreur Amashia n''est enregistré avec ce numéro.'); end if;
-  if c.activation_hash is null or c.activation_expires < now() then return jsonb_build_object('ok', false, 'error', 'Code expiré ou inexistant : demandez un nouveau code à Amashia.'); end if;
-  if c.activation_attempts >= 5 then return jsonb_build_object('ok', false, 'error', 'Trop d''essais : demandez un nouveau code à Amashia.'); end if;
+  if c.id is null then return jsonb_build_object('ok', false, 'error', 'Aucun livreur Amachia n''est enregistré avec ce numéro.'); end if;
+  if c.activation_hash is null or c.activation_expires < now() then return jsonb_build_object('ok', false, 'error', 'Code expiré ou inexistant : demandez un nouveau code à Amachia.'); end if;
+  if c.activation_attempts >= 5 then return jsonb_build_object('ok', false, 'error', 'Trop d''essais : demandez un nouveau code à Amachia.'); end if;
   if encode(digest(coalesce(_code, '') || ':' || c.id::text, 'sha256'), 'hex') <> c.activation_hash then
     update couriers set activation_attempts = activation_attempts + 1 where id = c.id;
     return jsonb_build_object('ok', false, 'error', 'Code incorrect.');
@@ -244,7 +244,7 @@ begin
   if _status not in ('picked_up', 'in_transit', 'delivered', 'failed') then raise exception 'Statut inconnu.'; end if;
   if _status = 'failed' and length(btrim(coalesce(_note, ''))) < 5 then raise exception 'Indiquez la raison de l''échec (client absent, adresse introuvable…).'; end if;
   select * into o from orders where id = _order;
-  if o.status = 'Annulée' then raise exception 'Commande annulée par Amashia : ne la livrez pas.'; end if;
+  if o.status = 'Annulée' then raise exception 'Commande annulée par Amachia : ne la livrez pas.'; end if;
   update deliveries set status = _status, note = coalesce(nullif(btrim(_note), ''), note), updated_at = now(),
     picked_at = case when _status in ('picked_up', 'in_transit', 'delivered') then coalesce(picked_at, now()) else picked_at end,
     delivered_at = case when _status = 'delivered' then now() else delivered_at end,

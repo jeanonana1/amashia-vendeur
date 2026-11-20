@@ -1,4 +1,4 @@
--- Amashia — Admin, étape 8 : sécurité.
+-- Amachia — Admin, étape 8 : sécurité.
 --  * Double authentification (code à 6 chiffres, application d'authentification) obligatoire pour tout administrateur :
 --    toutes les fonctions admin exigent une session « aal2 ».
 --  * Équipe : chaque administrateur a des droits par section ; la base refuse toute action hors de ses droits.

@@ -3,7 +3,7 @@ import { createPortal } from "react-dom";
 import { Check, ChevronDown, Search, X } from "lucide-react";
 
 /**
- * Menu déroulant Amashia : remplace le <Select> du navigateur partout sur le site vendeur.
+ * Menu déroulant Amachia : remplace le <Select> du navigateur partout sur le site vendeur.
  * S'utilise exactement comme un <select> (value, onChange(e) avec e.target.value, <option>, <optgroup>),
  * mais ouvre notre propre fenêtre : feuille en bas de l'écran sur mobile, fenêtre centrée sur ordinateur.
  */

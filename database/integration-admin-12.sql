@@ -1,4 +1,4 @@
--- Amashia — Admin, étape 12 : quartiers des villes du Cameroun (zones de livraison)
+-- Amachia — Admin, étape 12 : quartiers des villes du Cameroun (zones de livraison)
 -- Liste de référence (recherche en ligne) + quartiers ajoutés par l'équipe admin.
 create table if not exists public.cm_districts (
   id bigserial primary key,

@@ -10,10 +10,10 @@ import { Select } from "@/components/ui/app-select";
 export const Route = createFileRoute("/dashboard/analytique")({
   head: () => ({
     meta: [
-      { title: "Analytique — Amashia Seller" },
-      { name: "description", content: "Suivez vues, conversions et évolution des ventes de votre boutique Amashia par jour, semaine, mois ou année." },
-      { property: "og:title", content: "Analytique — Amashia Seller" },
-      { property: "og:description", content: "Tableaux de bord et évolution des ventes de votre boutique Amashia." },
+      { title: "Analytique — Amachia Seller" },
+      { name: "description", content: "Suivez vues, conversions et évolution des ventes de votre boutique Amachia par jour, semaine, mois ou année." },
+      { property: "og:title", content: "Analytique — Amachia Seller" },
+      { property: "og:description", content: "Tableaux de bord et évolution des ventes de votre boutique Amachia." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -32,8 +32,8 @@ type Analytics = {
 };
 
 const SOURCES: Record<string, string> = {
-  search: "Recherche Amashia", category: "Pages catégories", home: "Page d'accueil", shop: "Votre boutique",
-  product: "Autres fiches produit", external: "Autres sites (réseaux sociaux, liens…)", direct: "Accès direct", other: "Autres pages Amashia",
+  search: "Recherche Amachia", category: "Pages catégories", home: "Page d'accueil", shop: "Votre boutique",
+  product: "Autres fiches produit", external: "Autres sites (réseaux sociaux, liens…)", direct: "Accès direct", other: "Autres pages Amachia",
 };
 const CATEGORIES: Record<string, string> = { electronics: "Électronique", fashion: "Mode", "home-garden": "Maison & Jardin", beauty: "Beauté", "kitchen-home": "Cuisine & Maison", autre: "Autre" };
 const PRESETS = [
@@ -94,7 +94,7 @@ function AnalytiquePage() {
   ] : [];
 
   return (
-    <DashboardLayout title="Analytique" subtitle="Les vraies performances de votre boutique sur Amashia">
+    <DashboardLayout title="Analytique" subtitle="Les vraies performances de votre boutique sur Amachia">
       {/* Filtres */}
       <div className="mb-6 flex flex-wrap items-end gap-3 rounded-2xl border border-border bg-card p-4">
         <div className="flex flex-wrap rounded-full bg-secondary p-1 text-xs">

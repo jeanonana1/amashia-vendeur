@@ -343,7 +343,7 @@ export function AiImageModal({ productName, category, description, formImages, o
                 <div className="text-center">
                   {qr ? <img src={qr} alt="QR code pour filmer le produit" className="mx-auto h-48 w-48 rounded-xl bg-white p-2" /> : <div className="mx-auto grid h-48 w-48 place-items-center rounded-xl bg-secondary"><QrCode size={32} /></div>}
                   <p className="mt-3 text-sm">Scannez ce code avec l'appareil photo de votre téléphone.</p>
-                  <p className="mt-1 text-xs text-muted-foreground">La page Amashia s'ouvre sur le téléphone : prenez le produit en photo, elle apparaît ici et dans votre fiche automatiquement. Vous pouvez en envoyer plusieurs.</p>
+                  <p className="mt-1 text-xs text-muted-foreground">La page Amachia s'ouvre sur le téléphone : prenez le produit en photo, elle apparaît ici et dans votre fiche automatiquement. Vous pouvez en envoyer plusieurs.</p>
                   <p className="mt-3 inline-flex items-center gap-1.5 text-xs text-primary"><Loader2 className="animate-spin" size={12} /> En attente des photos du téléphone…</p>
                   <button onClick={() => setPicker("menu")} className={`${btn} mt-4 w-full bg-secondary py-2.5 text-xs`}>Retour</button>
                 </div>

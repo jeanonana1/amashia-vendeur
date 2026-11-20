@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { ORDER_FIELDS, ORDER_STATUS, OrderDetailModal, OrderStatusTrack, type SellerOrderLine } from "@/components/seller/dashboard/OrderDetailModal";
 
 export const Route = createFileRoute("/dashboard/livraison")({
-  head: () => ({ meta: [{ title: "Livraison — Amashia Seller" }, { name: "description", content: "Suivi en direct de la livraison de vos commandes." }, { property: "og:title", content: "Livraison — Amashia Seller" }, { property: "og:description", content: "Suivi en direct de la livraison de vos commandes." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
+  head: () => ({ meta: [{ title: "Livraison — Amachia Seller" }, { name: "description", content: "Suivi en direct de la livraison de vos commandes." }, { property: "og:title", content: "Livraison — Amachia Seller" }, { property: "og:description", content: "Suivi en direct de la livraison de vos commandes." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   component: LivraisonPage,
 });
 
@@ -99,7 +99,7 @@ function LivraisonPage() {
             ))}
           </div>
         )}
-        <p className="mt-4 text-xs text-muted-foreground">Le statut se met à jour tout seul quand le livreur Amashia récupère puis livre le colis.</p>
+        <p className="mt-4 text-xs text-muted-foreground">Le statut se met à jour tout seul quand le livreur Amachia récupère puis livre le colis.</p>
       </div>
       {open && <OrderDetailModal line={open} onClose={() => setOpen(null)} />}
     </DashboardLayout>

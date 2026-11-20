@@ -1,5 +1,5 @@
 -- =====================================================================
--- Amashia : retraits vendeurs, signalements, clients, avis, analytique
+-- Amachia : retraits vendeurs, signalements, clients, avis, analytique
 -- Migration ADDITIVE (deux contraintes NOT NULL assouplies sur
 -- product_reports pour accepter les signalements du site client).
 -- =====================================================================
@@ -15,7 +15,7 @@ select
   oi.product_id as listing_id,
   sp.id as product_id,
   s.owner_id as seller_id,
-  coalesce(nullif(trim(o.full_name), ''), 'Client Amashia') as customer_name,
+  coalesce(nullif(trim(o.full_name), ''), 'Client Amachia') as customer_name,
   concat_ws(', ', nullif(o.district, ''), nullif(o.city, '')) as delivery_area,
   oi.product_title,
   oi.quantity,
@@ -145,7 +145,7 @@ returns jsonb language sql stable security definer set search_path = public as $
   select coalesce(jsonb_agg(c order by (c->>'last_order') desc), '[]'::jsonb) from (
     select jsonb_build_object(
       'id', md5(user_id::text),
-      'name', (array_agg(coalesce(nullif(trim(full_name), ''), 'Client Amashia') order by created_at desc))[1],
+      'name', (array_agg(coalesce(nullif(trim(full_name), ''), 'Client Amachia') order by created_at desc))[1],
       'area', (array_agg(concat_ws(', ', nullif(district, ''), nullif(city, '')) order by created_at desc))[1],
       'orders', count(distinct order_id) filter (where valid),
       'items', coalesce(sum(quantity) filter (where valid), 0),
@@ -163,7 +163,7 @@ grant execute on function public.seller_customers() to authenticated;
 create or replace function public.seller_reviews()
 returns jsonb language sql stable security definer set search_path = public as $$
   select coalesce(jsonb_agg(jsonb_build_object(
-    'id', r.id, 'rating', r.rating, 'comment', r.comment, 'author', coalesce(nullif(trim(r.author_name), ''), 'Client Amashia'),
+    'id', r.id, 'rating', r.rating, 'comment', r.comment, 'author', coalesce(nullif(trim(r.author_name), ''), 'Client Amachia'),
     'photos', r.photos, 'verified', r.is_verified_purchase, 'created_at', r.created_at,
     'product_id', p.id, 'product_title', p.title, 'product_image', p.images->>0
   ) order by r.created_at desc), '[]'::jsonb)

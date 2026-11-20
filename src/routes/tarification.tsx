@@ -10,8 +10,8 @@ import { Check, X } from "lucide-react";
 export const Route = createFileRoute("/tarification")({
   head: () => ({
     meta: [
-      { title: "Tarifs et commissions — Amashia Seller" }, { name: "description", content: "Inscription gratuite, aucun abonnement : une commission par catégorie, seulement sur les commandes livrées." },
-      { property: "og:title", content: "Tarifs et commissions — Amashia Seller" }, { property: "og:description", content: "Une commission seulement sur les ventes livrées." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" },
+      { title: "Tarifs et commissions — Amachia Seller" }, { name: "description", content: "Inscription gratuite, aucun abonnement : une commission par catégorie, seulement sur les commandes livrées." },
+      { property: "og:title", content: "Tarifs et commissions — Amachia Seller" }, { property: "og:description", content: "Une commission seulement sur les ventes livrées." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" },
     ],
   }),
   component: Page,
@@ -21,7 +21,7 @@ const FAQ_PRICE = [
   { q: "Quand la commission est-elle prélevée ?", a: "Uniquement sur les commandes livrées. Une commande annulée ne vous coûte rien." },
   { q: "Les frais de livraison sont-ils à ma charge ?", a: "Non : les frais de livraison sont payés par le client au moment de la commande (gratuits pour lui au-delà d'un certain montant ou avec Prime)." },
   { q: "Où voir le détail de ce que je paie ?", a: "Dans votre espace, la page « Commissions » détaille, commande par commande, le taux appliqué, le montant prélevé et ce que vous recevez." },
-  { q: "Les taux peuvent-ils changer ?", a: "Les taux sont fixés par catégorie par Amashia. Cette page affiche toujours les taux en vigueur, lus directement dans notre base." },
+  { q: "Les taux peuvent-ils changer ?", a: "Les taux sont fixés par catégorie par Amachia. Cette page affiche toujours les taux en vigueur, lus directement dans notre base." },
 ];
 
 function Page() {

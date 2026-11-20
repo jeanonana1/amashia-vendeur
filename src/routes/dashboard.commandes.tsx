@@ -13,10 +13,10 @@ import { X } from "lucide-react";
 
 export const Route = createFileRoute("/dashboard/commandes")({
   head: () => ({ meta: [
-    { title: "Commandes Marketplace — Amashia Seller" },
-    { name: "description", content: "Suivez les fiches Amashia publiées, leurs commandes et leurs ventes réelles." },
-    { property: "og:title", content: "Commandes Marketplace — Amashia Seller" },
-    { property: "og:description", content: "Suivi des publications et ventes réelles Amashia." },
+    { title: "Commandes Marketplace — Amachia Seller" },
+    { name: "description", content: "Suivez les fiches Amachia publiées, leurs commandes et leurs ventes réelles." },
+    { property: "og:title", content: "Commandes Marketplace — Amachia Seller" },
+    { property: "og:description", content: "Suivi des publications et ventes réelles Amachia." },
     { property: "og:type", content: "website" },
     { name: "twitter:card", content: "summary" },
   ] }),
@@ -81,7 +81,7 @@ function CommandesPage() {
     void load();
     // Actualisation automatique toutes les 30 secondes pour voir les nouvelles commandes
     const timer = window.setInterval(() => void load(), 10_000);
-    // statut changé par Amashia (admin) ou nouvelle commande : actualisation immédiate
+    // statut changé par Amachia (admin) ou nouvelle commande : actualisation immédiate
     const ch = supabase.channel("seller-order-items")
       .on("postgres_changes", { event: "*", schema: "public", table: "order_items" }, () => void load())
       .subscribe();
@@ -115,7 +115,7 @@ function CommandesPage() {
   const periodLabel = period === "all" ? "depuis le début" : period === "today" ? "aujourd'hui" : period === "custom" ? (from || to ? `du ${from ? new Date(from).toLocaleDateString("fr-FR") : "début"} au ${to ? new Date(to).toLocaleDateString("fr-FR") : "aujourd'hui"}` : "sur les dates choisies") : `sur ${period} jours`;
 
   return (
-    <DashboardLayout title="Commandes" subtitle="Publications Amashia et ventes enregistrées en temps réel">
+    <DashboardLayout title="Commandes" subtitle="Publications Amachia et ventes enregistrées en temps réel">
       {/* Chiffre d'affaires en premier (surtout sur mobile), puis les deux autres indicateurs */}
       <div className="mb-4 grid grid-cols-2 gap-3 md:grid-cols-3">
         <div className="relative col-span-2 overflow-hidden rounded-2xl border border-primary/30 bg-card p-4 md:order-3 md:col-span-1">
@@ -158,9 +158,9 @@ function CommandesPage() {
 
       <section className="mb-6 rounded-xl border border-border bg-card p-4 sm:p-6">
         <h2 className="mb-1 font-bold">Ventes reçues <span className="text-sm font-semibold text-muted-foreground">({filtered.length})</span></h2>
-        <p className="mb-5 text-xs text-muted-foreground">Touchez une commande pour voir son détail. Le statut est géré par Amashia et s'actualise ici en direct.</p>
+        <p className="mb-5 text-xs text-muted-foreground">Touchez une commande pour voir son détail. Le statut est géré par Amachia et s'actualise ici en direct.</p>
         {orders.length === 0 ? (
-          <p className="py-10 text-center text-sm text-muted-foreground">Les commandes passées par les clients sur Amashia apparaîtront ici.</p>
+          <p className="py-10 text-center text-sm text-muted-foreground">Les commandes passées par les clients sur Amachia apparaîtront ici.</p>
         ) : filtered.length === 0 ? (
           <div className="py-10 text-center text-sm text-muted-foreground">
             Aucune commande ne correspond à ces filtres.

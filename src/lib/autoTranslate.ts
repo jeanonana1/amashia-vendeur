@@ -2,7 +2,7 @@
 
 /**
  * Version anglaise du site : chaque texte français affiché (interface, fiches des
- * vendeurs, avis…) est traduit une fois par le service de traduction Amashia (Claude),
+ * vendeurs, avis…) est traduit une fois par le service de traduction Amachia (Claude),
  * puis gardé en cache (CDN + navigateur). Les éléments marqués translate="no"
  * (prix, noms, adresses, numéros de commande…) ne sont jamais traduits.
  */
@@ -150,7 +150,7 @@ function translateTextNode(node: Text) {
   void request(tpl).then((t) => {
     if (!active || texts.get(node) !== state || node.nodeValue !== value) return;
     const lead = value.match(/^\s*/)![0], trail = value.match(/\s*$/)![0];
-    // le nom « Prime » (abonnement Amashia Prime) ne se traduit jamais
+    // le nom « Prime » (abonnement Amachia Prime) ne se traduit jamais
     let out = fromTemplate(t, nums);
     if (/\bPrime\b/.test(trimmed)) out = out.replace(/\bPremium\b/g, "Prime").replace(/\bPRIME\b|\bPREMIUM\b/g, "PRIME");
     state.out = lead + out + trail;

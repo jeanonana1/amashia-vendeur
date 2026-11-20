@@ -1,6 +1,6 @@
 {
   "appId": "cm.amashia.seller",
-  "appName": "Amashia Seller",
+  "appName": "Amachia Seller",
   "webDir": "www",
   "server": {
     "url": "https://amashia-vendeur.vercel.app/dashboard?app=android",

@@ -12,8 +12,8 @@ export function Footer() {
     { title: "Vendeurs", links: [
       { label: "Se connecter", to: "/connexion" }, { label: "Tableau de bord", to: "/dashboard" },
     ] },
-    { title: "Amashia", links: [
-      { label: "Le site Amashia", href: CLIENT }, { label: "Nous contacter", href: `${CLIENT}/contact` }, { label: "Carrières", href: `${CLIENT}/careers` },
+    { title: "Amachia", links: [
+      { label: "Le site Amachia", href: CLIENT }, { label: "Nous contacter", href: `${CLIENT}/contact` }, { label: "Carrières", href: `${CLIENT}/careers` },
     ] },
     { title: "Légal", links: [
       { label: "Conditions d'utilisation", href: `${CLIENT}/legal/terms` }, { label: "Conditions de vente", href: `${CLIENT}/legal/sales` }, { label: "Confidentialité", href: `${CLIENT}/legal/privacy` },
@@ -24,8 +24,8 @@ export function Footer() {
       <div className="mx-auto max-w-[1200px] px-5 py-14 sm:px-8">
         <div className="grid gap-10 md:grid-cols-[1.3fr_repeat(4,1fr)]">
           <div>
-            <Link to="/" aria-label="Accueil amashia seller"><SellerLogo className="h-10" /></Link>
-            <p className="mt-4 max-w-xs text-sm leading-relaxed text-muted-foreground">La plateforme des vendeurs d'Amashia : vendez partout au Cameroun, nous nous occupons du paiement et de la livraison.</p>
+            <Link to="/" aria-label="Accueil amachia seller"><SellerLogo className="h-10" /></Link>
+            <p className="mt-4 max-w-xs text-sm leading-relaxed text-muted-foreground">La plateforme des vendeurs d'Amachia : vendez partout au Cameroun, nous nous occupons du paiement et de la livraison.</p>
           </div>
           {cols.map((c) => (
             <div key={c.title}>
@@ -39,11 +39,11 @@ export function Footer() {
           ))}
         </div>
         <div className="mt-12 flex flex-col items-center justify-between gap-3 border-t border-border pt-6 text-xs text-muted-foreground sm:flex-row">
-          <p>© {new Date().getFullYear()} Amashia. Tous droits réservés.</p>
+          <p>© {new Date().getFullYear()} Amachia. Tous droits réservés.</p>
           <p>Fait au Cameroun, pour les vendeurs du Cameroun.</p>
         </div>
       </div>
-      {/* grand logo Amashia : lettres et cercle à peine plus foncés que le fond (clair ou sombre), pouce et sourire orange */}
+      {/* grand logo Amachia : lettres et cercle à peine plus foncés que le fond (clair ou sombre), pouce et sourire orange */}
       <div className="mx-auto max-w-[1200px] px-5 pb-6 sm:px-8 sm:pb-10">
         <FooterWordmark ink="color-mix(in oklab, var(--foreground) 9%, var(--background))" />
       </div>

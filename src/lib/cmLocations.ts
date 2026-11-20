@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
-/** Villes où Amashia accepte les vendeurs pour le moment. */
+/** Villes où Amachia accepte les vendeurs pour le moment. */
 export const OPEN_CITIES = ["Yaoundé", "Douala"];
 export const isOpenCity = (c: string) => OPEN_CITIES.some((o) => o.localeCompare(c, "fr", { sensitivity: "base" }) === 0);
 

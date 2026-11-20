@@ -4,7 +4,7 @@ begin
   if new.birth_date is not null
      and (tg_op = 'INSERT' or new.birth_date is distinct from old.birth_date)
      and new.birth_date::date > (current_date - interval '18 years')::date then
-    raise exception 'Vous devez avoir au moins 18 ans pour ouvrir une boutique sur Amashia.' using errcode = 'check_violation';
+    raise exception 'Vous devez avoir au moins 18 ans pour ouvrir une boutique sur Amachia.' using errcode = 'check_violation';
   end if;
   return new;
 end $$;

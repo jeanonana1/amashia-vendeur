@@ -16,7 +16,7 @@ import { preferredLang, setSellerLang, type SellerLang } from "@/lib/sellerLang"
 import { Select } from "@/components/ui/app-select";
 
 export const Route = createFileRoute("/dashboard/parametres")({
-  head: () => ({ meta: [{ title: "Paramètres — Amashia Seller" }, { name: "description", content: "Paramètres de votre compte vendeur Amashia." }, { property: "og:title", content: "Paramètres — Amashia Seller" }, { name: "twitter:card", content: "summary" }] }),
+  head: () => ({ meta: [{ title: "Paramètres — Amachia Seller" }, { name: "description", content: "Paramètres de votre compte vendeur Amachia." }, { property: "og:title", content: "Paramètres — Amachia Seller" }, { name: "twitter:card", content: "summary" }] }),
   component: ParametresPage,
 });
 
@@ -31,7 +31,7 @@ const TABS = [
   { id: "securite", label: "Sécurité", icon: Lock },
   { id: "preferences", label: "Préférences", icon: SlidersHorizontal },
   { id: "facturation", label: "Paiements & facturation", icon: CreditCard },
-  { id: "avis", label: "Mon avis sur Amashia", icon: Star },
+  { id: "avis", label: "Mon avis sur Amachia", icon: Star },
   { id: "aide", label: "Aide", icon: HelpCircle },
 ] as const;
 
@@ -353,14 +353,14 @@ function HelpTab() {
     setBusy(false);
     if (error) return toast.error("Envoi impossible. Réessayez.");
     setF({ subject: "", message: "" });
-    toast.success("Demande envoyée à l'équipe Amashia");
+    toast.success("Demande envoyée à l'équipe Amachia");
     load();
   }
   const STATUS: Record<string, string> = { open: "Envoyée", answered: "Répondue", closed: "Clôturée" };
   return (
     <div className="space-y-6">
       <form onSubmit={submit} className="space-y-4">
-        <h3 className="font-bold text-lg">Contacter l'équipe Amashia</h3>
+        <h3 className="font-bold text-lg">Contacter l'équipe Amachia</h3>
         <label className="block"><span className="block text-sm mb-2">Sujet</span><input className={inputCls} value={f.subject} onChange={(e) => setF({ ...f, subject: e.target.value })} maxLength={150} placeholder="Ex. : question sur un retrait" /></label>
         <label className="block"><span className="block text-sm mb-2">Message</span><textarea className={inputCls} rows={5} value={f.message} onChange={(e) => setF({ ...f, message: e.target.value })} maxLength={4000} /></label>
         <button type="submit" disabled={busy} className={btn}>{busy ? <Loader2 size={15} className="animate-spin" /> : <Send size={15} />} Envoyer</button>
@@ -404,7 +404,7 @@ function methodLabel(m: unknown): string {
   return `${o.label || kinds[o.kind ?? ""] || o.bank_name || "Compte"}${num}`;
 }
 
-/** Avis du vendeur sur Amashia : affiché (prénom + initiale, ville, catégorie, photo de boutique) sur la page d'accueil vendeur. */
+/** Avis du vendeur sur Amachia : affiché (prénom + initiale, ville, catégorie, photo de boutique) sur la page d'accueil vendeur. */
 function PlatformReviewTab({ uid }: { uid: string }) {
   const [rating, setRating] = useState(0);
   const [body, setBody] = useState("");
@@ -427,7 +427,7 @@ function PlatformReviewTab({ uid }: { uid: string }) {
     setBusy(false);
     if (error) return toast.error("Enregistrement impossible. Réessayez.");
     setExisting(data);
-    toast.success(existing ? "Votre avis a été mis à jour" : "Merci ! Votre avis est publié sur la page d'accueil Amashia Seller");
+    toast.success(existing ? "Votre avis a été mis à jour" : "Merci ! Votre avis est publié sur la page d'accueil Amachia Seller");
   }
   async function remove() {
     if (!(await askConfirm({ title: "Retirer votre avis ?", message: "Il ne sera plus affiché sur la page d'accueil.", danger: true }))) return;
@@ -440,8 +440,8 @@ function PlatformReviewTab({ uid }: { uid: string }) {
   return (
     <form onSubmit={submit} className="space-y-5">
       <div>
-        <h3 className="text-lg font-bold">Mon avis sur Amashia</h3>
-        <p className="mt-1 text-sm text-muted-foreground">Racontez en quelques mots votre expérience de vendeur. Votre avis apparaît sur la page d'accueil Amashia Seller avec votre prénom et l'initiale de votre nom, votre ville, votre catégorie et la photo de votre boutique. Ni votre téléphone ni votre e-mail ne sont affichés.</p>
+        <h3 className="text-lg font-bold">Mon avis sur Amachia</h3>
+        <p className="mt-1 text-sm text-muted-foreground">Racontez en quelques mots votre expérience de vendeur. Votre avis apparaît sur la page d'accueil Amachia Seller avec votre prénom et l'initiale de votre nom, votre ville, votre catégorie et la photo de votre boutique. Ni votre téléphone ni votre e-mail ne sont affichés.</p>
       </div>
       <div>
         <p className="mb-2 text-sm font-semibold">Votre note</p>
@@ -453,10 +453,10 @@ function PlatformReviewTab({ uid }: { uid: string }) {
       </div>
       <label className="block">
         <span className="mb-2 block text-sm font-semibold">Votre avis</span>
-        <textarea value={body} onChange={(e) => setBody(e.target.value.slice(0, 240))} rows={4} placeholder="Ex. : Je publie mes produits le soir, je prépare les colis le matin, Amashia s'occupe de la livraison et du paiement." className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm focus:border-primary focus:outline-none" />
+        <textarea value={body} onChange={(e) => setBody(e.target.value.slice(0, 240))} rows={4} placeholder="Ex. : Je publie mes produits le soir, je prépare les colis le matin, Amachia s'occupe de la livraison et du paiement." className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm focus:border-primary focus:outline-none" />
         <span className={`mt-1 block text-right text-[11px] ${len < 15 ? "text-muted-foreground" : "text-emerald-400"}`}>{len}/240 · 15 caractères minimum</span>
       </label>
-      {existing && <p className="text-xs text-muted-foreground">{existing.is_published ? "✓ Publié sur la page d'accueil" : "En attente de validation par Amashia"} · mis à jour le {new Date(existing.updated_at).toLocaleDateString("fr-FR")}</p>}
+      {existing && <p className="text-xs text-muted-foreground">{existing.is_published ? "✓ Publié sur la page d'accueil" : "En attente de validation par Amachia"} · mis à jour le {new Date(existing.updated_at).toLocaleDateString("fr-FR")}</p>}
       <div className="flex flex-wrap gap-2">
         <button type="submit" disabled={busy} className={`${btn} cta-sweep`}>{busy ? "Enregistrement…" : existing ? "Mettre à jour mon avis" : "Publier mon avis"}</button>
         {existing && <button type="button" onClick={() => void remove()} className="rounded-full border border-border px-5 py-3 text-sm font-semibold text-muted-foreground hover:border-red-400 hover:text-red-400">Retirer mon avis</button>}

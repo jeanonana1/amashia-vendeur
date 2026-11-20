@@ -16,7 +16,7 @@ import com.google.firebase.messaging.RemoteMessage;
 import java.util.Map;
 
 /**
- * Alertes Firebase du vendeur : Amashia envoie un message à chaque nouvelle commande de sa boutique.
+ * Alertes Firebase du vendeur : Amachia envoie un message à chaque nouvelle commande de sa boutique.
  * Le téléphone sonne et vibre, même application fermée et écran verrouillé ; toucher la notification ouvre les commandes.
  */
 public class SellerMessagingService extends FirebaseMessagingService {
@@ -36,7 +36,7 @@ public class SellerMessagingService extends FirebaseMessagingService {
         ensureChannel(this);
         NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         String id = d.containsKey("order_id") ? d.get("order_id") : String.valueOf(System.currentTimeMillis());
-        String title = d.containsKey("title") ? d.get("title") : "🔔 Nouvelle commande — Amashia";
+        String title = d.containsKey("title") ? d.get("title") : "🔔 Nouvelle commande — Amachia";
         String body = d.containsKey("body") ? d.get("body") : "Ouvrez vos commandes pour la préparer.";
         Intent open = new Intent(this, MainActivity.class);
         open.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP);

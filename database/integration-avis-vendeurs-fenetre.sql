@@ -1,4 +1,4 @@
--- Fenêtre « Votre avis sur Amashia » : dernière fois qu'elle a été montrée au vendeur (toutes les 2 h tant qu'il n'a pas répondu)
+-- Fenêtre « Votre avis sur Amachia » : dernière fois qu'elle a été montrée au vendeur (toutes les 2 h tant qu'il n'a pas répondu)
 alter table public.seller_profiles add column if not exists review_prompted_at timestamptz;
 
 -- Lecture publique enrichie : nom de la boutique, logo, image de la catégorie (catégories / sous-catégories de la base)

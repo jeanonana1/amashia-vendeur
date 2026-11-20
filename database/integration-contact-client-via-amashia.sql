@@ -1,5 +1,5 @@
 -- Version sans fournisseur : le livreur ne reçoit jamais le numéro du client.
--- Il demande à Amashia d'appeler le client ; l'admin reçoit la demande en direct (avec le numéro), appelle et répond.
+-- Il demande à Amachia d'appeler le client ; l'admin reçoit la demande en direct (avec le numéro), appelle et répond.
 create table if not exists public.courier_contact_requests (
   id uuid primary key default gen_random_uuid(),
   order_id uuid not null references public.orders(id) on delete cascade,
@@ -18,7 +18,7 @@ revoke all on public.courier_contact_requests from anon, authenticated;
 alter table public.courier_feed drop constraint if exists courier_feed_kind_check;
 alter table public.courier_feed add constraint courier_feed_kind_check check (kind in ('new_order', 'assigned', 'taken', 'cancelled', 'contact'));
 
--- Le numéro du client n'est plus jamais transmis à l'application livreur (appel relayé Twilio si activé, sinon via Amashia).
+-- Le numéro du client n'est plus jamais transmis à l'application livreur (appel relayé Twilio si activé, sinon via Amachia).
 create or replace function public.courier_order_json(o public.orders, d public.deliveries, _full boolean) returns jsonb
 language sql stable security definer set search_path = public as $$
   select jsonb_build_object(
@@ -56,7 +56,7 @@ begin
   if d.id is null or d.status not in ('assigned', 'picked_up', 'in_transit') then raise exception 'Possible uniquement pendant une livraison en cours.'; end if;
   if length(btrim(coalesce(_reason, ''))) < 3 then raise exception 'Choisissez la raison de l''appel.'; end if;
   if exists (select 1 from courier_contact_requests q where q.order_id = _order and q.courier_id = c.id and q.status = 'pending') then
-    raise exception 'Une demande est déjà en cours pour ce client : Amashia l''appelle.';
+    raise exception 'Une demande est déjà en cours pour ce client : Amachia l''appelle.';
   end if;
   insert into courier_contact_requests (order_id, courier_id, reason, note) values (_order, c.id, left(btrim(_reason), 120), nullif(left(btrim(coalesce(_note, '')), 300), ''))
   returning id into rid;

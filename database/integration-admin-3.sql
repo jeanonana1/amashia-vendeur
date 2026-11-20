@@ -1,4 +1,4 @@
--- Amashia — Admin, étape 3 : tableau de bord sur une période libre, top 10 produits, performance vendeurs.
+-- Amachia — Admin, étape 3 : tableau de bord sur une période libre, top 10 produits, performance vendeurs.
 -- Lecture seule (aucune donnée modifiée). Heure du Cameroun (Africa/Douala) pour les regroupements.
 
 -- Tableau de bord sur une période [_from, _to[ choisie par l'admin.

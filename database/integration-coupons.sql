@@ -172,7 +172,7 @@ end $$;
 -- Vue des ventes du vendeur : montant net + réduction accordée
 create or replace view public.seller_orders with (security_invoker = true) as
  SELECT oi.id, o.order_number, oi.product_id AS listing_id, sp.id AS product_id, s.owner_id AS seller_id,
-    COALESCE(NULLIF(TRIM(BOTH FROM o.full_name), ''::text), 'Client Amashia'::text) AS customer_name,
+    COALESCE(NULLIF(TRIM(BOTH FROM o.full_name), ''::text), 'Client Amachia'::text) AS customer_name,
     concat_ws(', '::text, NULLIF(o.district, ''::text), NULLIF(o.city, ''::text)) AS delivery_area,
     oi.product_title, oi.quantity, oi.unit_price_fcfa AS unit_price,
     (oi.unit_price_fcfa * COALESCE(oi.quantity, 1) - oi.discount_fcfa) AS amount,
@@ -362,7 +362,7 @@ AS $function$
     select jsonb_build_object(
       'id', md5(l.user_id::text),
       'code', upper(left(md5(l.user_id::text), 6)),
-      'name', (array_agg(coalesce(nullif(trim(l.full_name), ''), 'Client Amashia') order by l.created_at desc))[1],
+      'name', (array_agg(coalesce(nullif(trim(l.full_name), ''), 'Client Amachia') order by l.created_at desc))[1],
       'area', (array_agg(concat_ws(', ', nullif(l.district, ''), nullif(l.city, '')) order by l.created_at desc))[1],
       'orders', count(distinct l.order_id) filter (where l.valid),
       'items', coalesce(sum(l.quantity) filter (where l.valid), 0),

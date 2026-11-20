@@ -104,7 +104,7 @@ export function PublishAmashiaModal({ product, onClose, onPublished }: {
     setPublishing(true);
     try {
       await publishProduct({ data: { productId: product.id, angles } });
-      toast.success("Publication réussie sur Amashia Marketplace");
+      toast.success("Publication réussie sur Amachia Marketplace");
       onPublished?.(product.id);
       onClose();
     } catch (error) {
@@ -119,7 +119,7 @@ export function PublishAmashiaModal({ product, onClose, onPublished }: {
       <div onClick={(e) => e.stopPropagation()} className="bg-card border border-border rounded-2xl w-full max-w-2xl max-h-[88vh] flex flex-col">
         <div className="flex items-start justify-between gap-3 p-5 border-b border-border">
           <div className="min-w-0">
-            <h3 className="font-bold flex items-center gap-2"><Rocket size={16} className="text-primary" /> Publier sur Amashia</h3>
+            <h3 className="font-bold flex items-center gap-2"><Rocket size={16} className="text-primary" /> Publier sur Amachia</h3>
             <p className="text-xs text-muted-foreground truncate">{product.name}</p>
           </div>
           <Button variant="ghost" size="icon" onClick={onClose} className="shrink-0" aria-label="Fermer"><X size={16} /></Button>
@@ -138,7 +138,7 @@ export function PublishAmashiaModal({ product, onClose, onPublished }: {
             {copied ? <Check size={14} /> : <Copy size={14} />} Copier la fiche
           </Button>
           <Button onClick={publish} disabled={publishing || loading} className="flex-1 rounded-full bg-gradient-primary">
-            <Rocket size={14} /> {publishing ? "Envoi…" : "Publier sur Amashia"}
+            <Rocket size={14} /> {publishing ? "Envoi…" : "Publier sur Amachia"}
           </Button>
         </div>
       </div>

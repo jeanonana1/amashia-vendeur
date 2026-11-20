@@ -1,5 +1,5 @@
 /**
- * Code-barres EAN-13 (SKU Amashia) dessiné en SVG, sans bibliothèque.
+ * Code-barres EAN-13 (SKU Amachia) dessiné en SVG, sans bibliothèque.
  * Le livreur le scanne chez le vendeur pour vérifier qu'il récupère le bon produit.
  */
 const L = ["0001101", "0011001", "0010011", "0111101", "0100011", "0110001", "0101111", "0111011", "0110111", "0001011"];
@@ -46,14 +46,14 @@ export function barcodeSvg(code: string, height = 64) {
 export function printLabels(items: { sku: string; title: string; qty: number }[], orderRef: string) {
   const esc = (t: string) => t.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]!);
   const labels = items.flatMap((it) => Array.from({ length: Math.max(1, it.qty) }, () => it)).map((it) => `
-    <div class="l"><p class="t">${esc(it.title)}</p>${barcodeSvg(it.sku)}<p class="o">Amashia · ${esc(orderRef)}</p></div>`).join("");
+    <div class="l"><p class="t">${esc(it.title)}</p>${barcodeSvg(it.sku)}<p class="o">Amachia · ${esc(orderRef)}</p></div>`).join("");
   const w = window.open("", "_blank", "width=720,height=900");
   if (!w) return false;
   w.document.write(`<!doctype html><html lang="fr"><head><meta charset="utf-8"><title>Étiquettes ${esc(orderRef)}</title><style>
     body{font-family:system-ui,sans-serif;margin:16px} .g{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
     .l{border:1px dashed #999;border-radius:8px;padding:10px;break-inside:avoid} .t{margin:0 0 6px;font-size:12px;font-weight:600;line-height:1.3;max-height:32px;overflow:hidden}
     .o{margin:4px 0 0;font-size:10px;color:#555} @media print{.n{display:none}}</style></head><body>
-    <p class="n">Collez chaque étiquette sur l'emballage du produit : le livreur Amashia la scanne avant d'emporter le colis.</p>
+    <p class="n">Collez chaque étiquette sur l'emballage du produit : le livreur Amachia la scanne avant d'emporter le colis.</p>
     <div class="g">${labels}</div><script>window.onload=function(){setTimeout(function(){window.print()},300)}</script></body></html>`);
   w.document.close();
   return true;

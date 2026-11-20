@@ -20,7 +20,7 @@ export const Route = createFileRoute("/inscription_/etapes")({
     type: s.type === "entreprise" ? "entreprise" : "particulier",
   }),
   head: () => ({
-    meta: [{ title: "Création de compte vendeur — Amashia Seller" }, { name: "description", content: "Création de compte vendeur : votre espace vendeur Amashia pour gérer votre activité." }, { property: "og:title", content: "Création de compte vendeur — Amashia Seller" }, { property: "og:description", content: "Création de compte vendeur : votre espace vendeur Amashia pour gérer votre activité." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }],
+    meta: [{ title: "Création de compte vendeur — Amachia Seller" }, { name: "description", content: "Création de compte vendeur : votre espace vendeur Amachia pour gérer votre activité." }, { property: "og:title", content: "Création de compte vendeur — Amachia Seller" }, { property: "og:description", content: "Création de compte vendeur : votre espace vendeur Amachia pour gérer votre activité." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }],
   }),
   component: Page,
 });
@@ -157,7 +157,7 @@ function Page() {
       }
       setOtpSent(true);
       if (!otpSent && "user" in result.data && result.data.user && result.data.user.identities?.length === 0) {
-        toast.info("Cet email a déjà un compte Amashia. Cliquez sur « J'ai confirmé mon email » pour continuer avec votre mot de passe.");
+        toast.info("Cet email a déjà un compte Amachia. Cliquez sur « J'ai confirmé mon email » pour continuer avec votre mot de passe.");
         return;
       }
       toast.success("Le lien de confirmation a été envoyé par email.");
@@ -327,7 +327,7 @@ function Page() {
                 if (!data.birthDate) return toast.error("Indiquez votre date de naissance complète");
                 { const age = (Date.now() - new Date(data.birthDate).getTime()) / (365.25 * 864e5); if (age < 18) return toast.error("Vous devez avoir au moins 18 ans pour ouvrir une boutique"); }
                 if (!data.country || !data.city) return toast.error("Pays et ville requis");
-                if (data.country !== "Cameroun" || !isOpenCity(data.city)) return toast.error("Pour le moment, Amashia accepte uniquement les vendeurs de Yaoundé et de Douala");
+                if (data.country !== "Cameroun" || !isOpenCity(data.city)) return toast.error("Pour le moment, Amachia accepte uniquement les vendeurs de Yaoundé et de Douala");
                 next();
               }} />
             </div>
@@ -445,7 +445,7 @@ function Page() {
                   <span className={`grid h-11 w-11 shrink-0 place-items-center rounded-xl ${data.shareLocation ? "bg-primary text-black" : "bg-primary/15 text-primary"}`}><LocateFixed size={20} /></span>
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-semibold">Position GPS de récupération</p>
-                    <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">Le livreur Amashia viendra récupérer vos colis à cette position exacte.</p>
+                    <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">Le livreur Amachia viendra récupérer vos colis à cette position exacte.</p>
                   </div>
                 </div>
                 {data.shareLocation && data.latitude && data.longitude && (
@@ -468,7 +468,7 @@ function Page() {
 
               <NavBtns back={back} next={() => {
                 if (!data.region || !data.shopCity || !data.neighborhood) return toast.error("Région, ville et quartier requis");
-                if (!isOpenCity(data.shopCity)) return toast.error("Pour le moment, Amashia accepte uniquement les boutiques de Yaoundé et de Douala");
+                if (!isOpenCity(data.shopCity)) return toast.error("Pour le moment, Amachia accepte uniquement les boutiques de Yaoundé et de Douala");
                 next();
               }} />
             </div>
@@ -517,7 +517,7 @@ function Page() {
                 <Check size={40} />
               </div>
               <h2 className="text-3xl font-extrabold mb-3">Compte créé avec succès !</h2>
-              <p className="text-muted-foreground mb-8">Bienvenue sur Amashia Seller, {data.firstName} ! Redirection vers votre tableau de bord…</p>
+              <p className="text-muted-foreground mb-8">Bienvenue sur Amachia Seller, {data.firstName} ! Redirection vers votre tableau de bord…</p>
               <button onClick={() => navigate({ to: "/dashboard" })} className="px-10 py-3.5 rounded-full bg-gradient-primary text-black font-semibold shadow-elegant hover:shadow-glow transition">
                 Accéder à mon compte
               </button>
@@ -607,7 +607,7 @@ function DocUpload({ label, file, onFile }: { label: string; file?: DocFile; onF
 const dateCls = "w-full bg-background border border-border rounded-xl px-2.5 py-3 text-sm focus:outline-none focus:border-primary sm:px-3";
 const MONTHS = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
 
-/** Date de naissance en trois menus Amashia : jour, mois, année. */
+/** Date de naissance en trois menus Amachia : jour, mois, année. */
 function BirthDate({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   const [y0, m0, d0] = value ? value.split("-") : ["", "", ""];
   const [parts, setParts] = useState({ d: d0 ? String(Number(d0)) : "", m: m0 ? String(Number(m0)) : "", y: y0 || "" });
@@ -641,7 +641,7 @@ function SoonNote({ place }: { place: string }) {
   return (
     <div className="flex items-start gap-3 rounded-xl border border-primary/30 bg-primary/10 p-3.5 text-sm">
       <Clock size={18} className="mt-0.5 shrink-0 text-primary" />
-      <p><b>Amashia arrive bientôt {/^(la|le|les) /i.test(place) ? "dans" : "à"} {place} !</b><br /><span className="text-muted-foreground">Pour le moment, nous accueillons uniquement les vendeurs de <b className="text-foreground">Yaoundé</b> et de <b className="text-foreground">Douala</b>.</span></p>
+      <p><b>Amachia arrive bientôt {/^(la|le|les) /i.test(place) ? "dans" : "à"} {place} !</b><br /><span className="text-muted-foreground">Pour le moment, nous accueillons uniquement les vendeurs de <b className="text-foreground">Yaoundé</b> et de <b className="text-foreground">Douala</b>.</span></p>
     </div>
   );
 }
@@ -670,7 +670,7 @@ function ExistingAccountModal({ hint, email, phone, password, onClose, onLogged 
             <p className="truncate text-xl font-extrabold">Bonjour {hint.name || ""} 👋</p>
           </div>
         </div>
-        <p className="mt-4 text-sm text-muted-foreground">Un compte Amashia Seller existe déjà avec {hint.via === "phone" ? "ce numéro de téléphone" : "cette adresse e-mail"}. Connectez-vous directement :</p>
+        <p className="mt-4 text-sm text-muted-foreground">Un compte Amachia Seller existe déjà avec {hint.via === "phone" ? "ce numéro de téléphone" : "cette adresse e-mail"}. Connectez-vous directement :</p>
         <div className="mt-4"><PasswordInput value={pwd} onChange={(e) => setPwd(e.target.value)} placeholder="Votre mot de passe" className={inputCls} onKeyDown={(e) => { if (e.key === "Enter") void login(); }} /></div>
         <button onClick={() => void login()} disabled={busy} className="cta-sweep mt-3 flex h-12 w-full items-center justify-center gap-2 rounded-full bg-primary font-bold text-black disabled:opacity-60">{busy ? <Loader2 size={16} className="animate-spin" /> : null}Me connecter</button>
         <div className="mt-3 flex items-center justify-between text-xs">
@@ -689,7 +689,7 @@ function LocationInfoModal({ onCancel, onConfirm }: { onCancel: () => void; onCo
       <div className="app-select-sheet w-full max-w-md rounded-t-3xl border border-border bg-card p-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] shadow-2xl sm:rounded-3xl" onClick={(e) => e.stopPropagation()}>
         <span className="grid h-14 w-14 place-items-center rounded-2xl bg-primary/15 text-primary"><MapPin size={26} /></span>
         <h3 className="mt-4 text-xl font-extrabold">Où sont vos produits ?</h3>
-        <p className="mt-2 text-sm text-muted-foreground">Votre position GPS sera l'adresse où <b className="text-foreground">le livreur Amashia viendra récupérer vos colis</b>.</p>
+        <p className="mt-2 text-sm text-muted-foreground">Votre position GPS sera l'adresse où <b className="text-foreground">le livreur Amachia viendra récupérer vos colis</b>.</p>
         <div className="mt-4 grid gap-2">
           <p className="flex items-center gap-3 rounded-xl bg-secondary/60 p-3 text-sm"><Store size={18} className="shrink-0 text-primary" /><span>Soyez dans votre <b>boutique</b>…</span></p>
           <p className="flex items-center gap-3 rounded-xl bg-secondary/60 p-3 text-sm"><Home size={18} className="shrink-0 text-primary" /><span>… ou <b>chez vous</b>, si vos produits y sont stockés.</span></p>

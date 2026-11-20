@@ -1,4 +1,4 @@
--- Appels masqués livreur ↔ client : Amashia appelle le livreur puis le relie au client (Twilio).
+-- Appels masqués livreur ↔ client : Amachia appelle le livreur puis le relie au client (Twilio).
 -- Ni le livreur ni le client ne voient le numéro de l'autre. Additif et rejouable.
 
 -- Réglages (identifiants du fournisseur) : table privée, lisible uniquement par le service.
@@ -74,7 +74,7 @@ begin
   select * into o from orders where id = _order;
   if coalesce(o.contact_phone, '') = '' then return jsonb_build_object('error', 'Le client n''a pas laissé de numéro.'); end if;
   select * into s from telephony_settings where id = 1;
-  if not masked_calls_enabled() then return jsonb_build_object('error', 'Les appels masqués ne sont pas encore activés par Amashia.'); end if;
+  if not masked_calls_enabled() then return jsonb_build_object('error', 'Les appels masqués ne sont pas encore activés par Amachia.'); end if;
   if (select count(*) from masked_calls m where m.courier_id = c.id and m.created_at > now() - interval '10 minutes') >= 6 then
     return jsonb_build_object('error', 'Trop d''appels en peu de temps : réessayez dans quelques minutes.');
   end if;

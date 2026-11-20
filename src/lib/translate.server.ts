@@ -1,16 +1,16 @@
 import Anthropic from "@anthropic-ai/sdk";
 
 /**
- * Traduction FR -> EN d'un texte du site client Amashia (interface ou contenu vendeur).
+ * Traduction FR -> EN d'un texte du site client Amachia (interface ou contenu vendeur).
  * Les marqueurs ⟦0⟧, ⟦1⟧… remplacent les nombres et doivent être conservés tels quels.
  */
 const MODEL = "claude-opus-5-5";
 
-const SYSTEM = `You translate the French text of Amashia, a Cameroonian online marketplace, into natural British English.
+const SYSTEM = `You translate the French text of Amachia, a Cameroonian online marketplace, into natural British English.
 Rules:
 - Reply with the translation only: no quotes, no notes, no explanations.
 - Keep every placeholder like ⟦0⟧ or ⟦1⟧ exactly as it is, in a sensible position.
-- Keep the names "Amashia" and "Prime" (the Amashia Prime membership, never "Premium") exactly as written.
+- Keep the names "Amachia" and "Prime" (the Amachia Prime membership, never "Premium") exactly as written.
 - Keep brand names, product model names, currency codes (FCFA), city and district names, e-mail addresses and URLs unchanged.
 - Keep the same punctuation style, capitalisation style and line breaks as the source; keep it as short as the source.
 - If the text is already English, a name, a code or has nothing to translate, return it unchanged.

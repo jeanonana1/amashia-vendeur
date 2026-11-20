@@ -1,5 +1,5 @@
--- Livraison : Amashia livre elle-même à Yaoundé et Douala (30 min à 4 h) ; ailleurs, le colis part par une agence
--- d'expédition choisie par le client. Les frais de l'agence vont à l'agence (pas à Amashia).
+-- Livraison : Amachia livre elle-même à Yaoundé et Douala (30 min à 4 h) ; ailleurs, le colis part par une agence
+-- d'expédition choisie par le client. Les frais de l'agence vont à l'agence (pas à Amachia).
 -- Les quartiers peuvent avoir leur propre prix de livraison.
 
 -- 1. Villes et régions du Cameroun (référence commune admin / client)

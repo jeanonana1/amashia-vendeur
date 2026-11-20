@@ -20,7 +20,7 @@ const isMobile = () => /android|iphone|ipad|ipod|mobile/i.test(navigator.userAge
 const isAndroid = () => /android/i.test(navigator.userAgent);
 
 /**
- * Tableau de bord du vendeur : invitation à installer l'application Amashia Seller
+ * Tableau de bord du vendeur : invitation à installer l'application Amachia Seller
  * - téléphone : application installée depuis le navigateur (Android : Chrome la transforme en vraie application),
  *   avec notifications, son et vibration à chaque nouvelle commande, même application fermée ;
  * - ordinateur : version PC (fenêtre à part, icône sur le bureau), notifications et sonnerie des nouvelles commandes.
@@ -68,7 +68,7 @@ export function InstallAppCard() {
       <div className="flex flex-wrap items-center gap-4 pr-8">
         <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-primary text-black"><Icon size={24} /></span>
         <div className="min-w-0 flex-1">
-          <p className="font-extrabold">{installed ? "Activez les alertes de commandes" : mobile ? "Téléchargez l'application Amashia Seller" : "Installez la version PC du tableau de bord"}</p>
+          <p className="font-extrabold">{installed ? "Activez les alertes de commandes" : mobile ? "Téléchargez l'application Amachia Seller" : "Installez la version PC du tableau de bord"}</p>
           <p className="text-sm text-muted-foreground">
             {mobile
               ? "Recevez chaque nouvelle commande en temps réel : notification, sonnerie et vibration, même application fermée."
@@ -90,16 +90,16 @@ export function InstallAppCard() {
       </div>
       {/* sans bouton d'installation automatique : marche à suivre selon l'appareil */}
       {!installed && mobile && isAndroid() && (
-        <p className="mt-3 rounded-xl bg-muted/60 p-3 text-xs text-muted-foreground">Une fois le fichier téléchargé, ouvrez-le et autorisez l'installation depuis cette source si Android le demande. L'application Amashia Seller vous demandera ensuite d'autoriser les notifications.</p>
+        <p className="mt-3 rounded-xl bg-muted/60 p-3 text-xs text-muted-foreground">Une fois le fichier téléchargé, ouvrez-le et autorisez l'installation depuis cette source si Android le demande. L'application Amachia Seller vous demandera ensuite d'autoriser les notifications.</p>
       )}
       {!installed && !deferred && !(mobile && isAndroid()) && (
         <div className="mt-3 rounded-xl bg-muted/60 p-3 text-xs text-muted-foreground">
           {isIos() ? (
-            <p className="flex flex-wrap items-center gap-1.5">Sur iPhone : dans Safari, touchez <Share size={14} className="text-primary" /> « Partager », puis <PlusSquare size={14} className="text-primary" /> « Sur l'écran d'accueil ». Ouvrez ensuite Amashia Seller depuis l'icône et activez les alertes.</p>
+            <p className="flex flex-wrap items-center gap-1.5">Sur iPhone : dans Safari, touchez <Share size={14} className="text-primary" /> « Partager », puis <PlusSquare size={14} className="text-primary" /> « Sur l'écran d'accueil ». Ouvrez ensuite Amachia Seller depuis l'icône et activez les alertes.</p>
           ) : mobile ? (
             <p>Ouvrez ce tableau de bord dans <b>Chrome</b>, touchez le menu ⋮ puis « Installer l'application » (ou « Ajouter à l'écran d'accueil »).</p>
           ) : (
-            <p>Dans <b>Chrome</b> ou <b>Edge</b>, cliquez sur l'icône d'installation à droite de la barre d'adresse (ou menu ⋮ → « Installer Amashia Seller »).</p>
+            <p>Dans <b>Chrome</b> ou <b>Edge</b>, cliquez sur l'icône d'installation à droite de la barre d'adresse (ou menu ⋮ → « Installer Amachia Seller »).</p>
           )}
         </div>
       )}

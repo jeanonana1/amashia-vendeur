@@ -105,7 +105,7 @@ export function AiSeoModal({ initialName = "", initialCategory = "", initialPric
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-gradient-primary grid place-items-center text-black"><Sparkles size={20} /></div>
             <div>
-              <h3 className="font-bold text-lg">Agent IA SEO Amashia</h3>
+              <h3 className="font-bold text-lg">Agent IA SEO Amachia</h3>
               <p className="text-xs text-muted-foreground">Rédaction par Claude · mots-clés du marché camerounais</p>
             </div>
           </div>
@@ -121,7 +121,7 @@ export function AiSeoModal({ initialName = "", initialCategory = "", initialPric
               <div className="grid md:grid-cols-2 gap-3">
                 <div><label className="block text-xs font-semibold mb-1.5">Nom du produit *</label><input value={form.productName} onChange={(e) => set("productName", e.target.value)} className={inp} placeholder="Ex : Égreneur de maïs manuel" /></div>
                 <div><label className="block text-xs font-semibold mb-1.5">Catégorie</label>
-                  {/* liste fermée : uniquement les catégories du site Amashia */}
+                  {/* liste fermée : uniquement les catégories du site Amachia */}
                   <Select value={form.category} onChange={(e) => set("category", e.target.value)} className={inp}>
                     <option value="">Choisir une catégorie</option>
                     {form.category && !SITE_CATEGORIES.includes(form.category) && <option value={form.category}>{form.category}</option>}

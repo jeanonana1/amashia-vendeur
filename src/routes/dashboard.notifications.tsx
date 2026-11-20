@@ -7,7 +7,7 @@ import { NOTIFS_SEEN_EVENT } from "@/lib/sellerStats";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/dashboard/notifications")({
-  head: () => ({ meta: [{ title: "Notifications — Amashia Seller" }, { name: "description", content: "Toutes les notifications de votre boutique Amashia." }] }),
+  head: () => ({ meta: [{ title: "Notifications — Amachia Seller" }, { name: "description", content: "Toutes les notifications de votre boutique Amachia." }] }),
   component: NotificationsPage,
 });
 

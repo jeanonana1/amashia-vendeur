@@ -47,7 +47,7 @@ Deno.serve(async (req) => {
     const { data: subs } = await db.rpc("push_order_recipients");
     const total = new Intl.NumberFormat("fr-FR").format(Math.round(Number(order.total_fcfa ?? 0)));
     const payload = JSON.stringify({
-      title: "🔔 Nouvelle commande — Amashia",
+      title: "🔔 Nouvelle commande — Amachia",
       body: `${order.order_number ?? "Commande"} · ${total} FCFA${order.city ? ` · ${order.city}` : ""}`,
       tag: `order-${order.id}`, url: "/commandes",
     });

@@ -1,5 +1,5 @@
 -- =====================================================================
--- Amashia : variantes des produits vendeurs visibles sur le site client
+-- Amachia : variantes des produits vendeurs visibles sur le site client
 -- Migration ADDITIVE : ajoute une colonne et met à jour la publication
 -- automatique. Aucune donnée existante n'est supprimée.
 --

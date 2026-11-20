@@ -9,7 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { dateTime, money } from "@/lib/sellerStats";
 
 export const Route = createFileRoute("/dashboard/commissions")({
-  head: () => ({ meta: [{ title: "Commissions — Amashia Seller" }, { name: "description", content: "Taux de commission Amashia, détail par vente et solde net du vendeur." }] }),
+  head: () => ({ meta: [{ title: "Commissions — Amachia Seller" }, { name: "description", content: "Taux de commission Amachia, détail par vente et solde net du vendeur." }] }),
   component: CommissionsPage,
 });
 
@@ -35,7 +35,7 @@ function CommissionsPage() {
   const n = (v: unknown) => Number(v) || 0;
 
   return (
-    <DashboardLayout title="Commissions" subtitle="Ce qu'Amashia prélève sur vos ventes, et ce qui vous revient">
+    <DashboardLayout title="Commissions" subtitle="Ce qu'Amachia prélève sur vos ventes, et ce qui vous revient">
       {err && <p className="mb-4 rounded-xl bg-destructive/10 p-4 text-sm text-destructive">{err}</p>}
       {!d && !err && <p className="text-sm text-muted-foreground">Chargement…</p>}
       {d && (
@@ -45,16 +45,16 @@ function CommissionsPage() {
             subtitle="Gains des ventes livrées, moins les retraits et les remboursements."
             actions={<Link to="/dashboard/paiements" className={primaryBtn}>Retirer mon argent <ArrowRight size={16} /></Link>}
             lines={[
-              { icon: BadgeCheck, tone: "text-emerald-400 bg-emerald-500/12", label: "Vos gains (ventes livrées)", hint: "Après commission Amashia", value: n(d.totals.delivered_net) },
+              { icon: BadgeCheck, tone: "text-emerald-400 bg-emerald-500/12", label: "Vos gains (ventes livrées)", hint: "Après commission Amachia", value: n(d.totals.delivered_net) },
               { icon: Clock, tone: "text-amber-400 bg-amber-500/12", label: "Gains à venir", hint: "Ventes en préparation ou en livraison", value: n(d.totals.pending_net) },
-              { icon: Percent, tone: "text-sky-400 bg-sky-500/12", label: "Commissions Amashia", hint: "Déjà prélevées sur vos ventes", value: n(d.totals.commission) },
+              { icon: Percent, tone: "text-sky-400 bg-sky-500/12", label: "Commissions Amachia", hint: "Déjà prélevées sur vos ventes", value: n(d.totals.commission) },
             ]}
-            note="Ce solde est le vôtre : les commissions Amashia ont déjà été prélevées. Vous pouvez le retirer en totalité depuis la page Paiements."
+            note="Ce solde est le vôtre : les commissions Amachia ont déjà été prélevées. Vous pouvez le retirer en totalité depuis la page Paiements."
           />
 
           <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
             <Kpi icon={ShoppingBag} label="Ventes (prix payé par les clients)" value={money(n(d.totals.gross))} />
-            <Kpi icon={Percent} label="Commissions Amashia" value={`− ${money(n(d.totals.commission))}`} />
+            <Kpi icon={Percent} label="Commissions Amachia" value={`− ${money(n(d.totals.commission))}`} />
             <Kpi icon={BadgeCheck} label="Vos gains (ventes livrées)" value={money(n(d.totals.delivered_net))} />
             <Kpi icon={Clock} label="Gains à venir (en livraison)" value={money(n(d.totals.pending_net))} />
           </div>
@@ -62,8 +62,8 @@ function CommissionsPage() {
           <div className="grid gap-6 lg:grid-cols-3">
             <div className="rounded-2xl border border-border bg-card p-5">
               <h2 className="mb-1 font-bold">Taux de commission</h2>
-              <p className="mb-4 text-xs text-muted-foreground">Fixé par Amashia pour chaque catégorie, appliqué au prix de vente (après réduction éventuelle).</p>
-              {d.enabled === false && <p className="mb-3 rounded-lg bg-green-50 p-2.5 text-xs font-medium text-green-700">Commissions suspendues par Amashia : vos nouvelles commandes n'ont aucune commission pour le moment.</p>}
+              <p className="mb-4 text-xs text-muted-foreground">Fixé par Amachia pour chaque catégorie, appliqué au prix de vente (après réduction éventuelle).</p>
+              {d.enabled === false && <p className="mb-3 rounded-lg bg-green-50 p-2.5 text-xs font-medium text-green-700">Commissions suspendues par Amachia : vos nouvelles commandes n'ont aucune commission pour le moment.</p>}
               <SpecTable head={["Catégorie", "Taux"]} minWidth={240} rows={d.rates.map((r) => ({ label: r.category, value: <span className="text-primary">{n(r.pct)} %</span> }))} />
             </div>
             <div className="min-w-0 rounded-2xl border border-border bg-card p-4 sm:p-5 lg:col-span-2">

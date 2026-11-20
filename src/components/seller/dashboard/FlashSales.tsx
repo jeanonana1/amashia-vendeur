@@ -58,7 +58,7 @@ export function FlashSales({ openSignal = 0 }: { openSignal?: number }) {
   // bouton « Nouvelle vente flash » de l'en-tête de la page
   useEffect(() => {
     if (!openSignal) return;
-    if (!products.length) { toast.info("Publiez d'abord un produit sur Amashia pour créer une vente flash."); return; }
+    if (!products.length) { toast.info("Publiez d'abord un produit sur Amachia pour créer une vente flash."); return; }
     openNew();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [openSignal]);
@@ -81,7 +81,7 @@ export function FlashSales({ openSignal = 0 }: { openSignal?: number }) {
     });
     setSaving(false);
     if (error) return toast.error(String(error.message || "Enregistrement impossible").replace(/^.*?ERROR:\s*/, ""));
-    toast.success("Vente flash créée : le prix réduit s'affiche sur Amashia");
+    toast.success("Vente flash créée : le prix réduit s'affiche sur Amachia");
     setForm(null);
     void load();
   }
@@ -176,7 +176,7 @@ export function FlashSales({ openSignal = 0 }: { openSignal?: number }) {
               </div>
               {product && (
                 <div className="rounded-xl bg-secondary/50 p-3 text-sm">
-                  Prix affiché sur Amashia : <s className="text-muted-foreground">{money(product.price)}</s> → <b className="text-primary">{money(preview)}</b>
+                  Prix affiché sur Amachia : <s className="text-muted-foreground">{money(product.price)}</s> → <b className="text-primary">{money(preview)}</b>
                   <p className="mt-1 text-[11px] text-muted-foreground">Le prix revient automatiquement à la normale à la fin. 31 jours au maximum.</p>
                 </div>
               )}

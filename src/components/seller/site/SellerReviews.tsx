@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { imgProps } from "@/lib/img";
 
 /**
- * Section « Ils vendent sur Amashia » (maquette Claude Design « section-avis »).
+ * Section « Ils vendent sur Amachia » (maquette Claude Design « section-avis »).
  * Uniquement de vrais avis : ceux que les vendeurs laissent depuis leur espace (Paramètres › Mon avis).
  */
 type Review = { name: string; collected?: boolean; shop?: string; logo?: string | null; city: string; category: string; rating: number; text: string; at: string; img: string | null };
@@ -41,15 +41,15 @@ export function SellerReviews() {
         <div className="avis__grid">
           <div className="avis__left">
             <div className="avis__eyebrow">04 — Avis vendeurs</div>
-            <h2 className="avis__title">Ils vendent <em>sur Amashia</em></h2>
+            <h2 className="avis__title">Ils vendent <em>sur Amachia</em></h2>
             <ScoreCard data={data} />
             {empty ? (
               <p className="avis__note-legal">
-                Les avis affichés ici sont laissés par de vrais vendeurs Amashia, depuis leur espace vendeur.{" "}
+                Les avis affichés ici sont laissés par de vrais vendeurs Amachia, depuis leur espace vendeur.{" "}
                 <Link to="/inscription" className="font-semibold text-[var(--orange-ink)] underline-offset-2 hover:underline">Ouvrez votre boutique</Link> et partagez le vôtre.
               </p>
             ) : (
-              <p className="avis__note-legal">Avis de vendeurs Amashia vérifiés, laissés depuis leur espace vendeur ou recueillis par l'équipe Amashia avec leur accord.</p>
+              <p className="avis__note-legal">Avis de vendeurs Amachia vérifiés, laissés depuis leur espace vendeur ou recueillis par l'équipe Amachia avec leur accord.</p>
             )}
           </div>
           {/* en face de la note : le cadre vidéo (lecture automatique en boucle, vidéo choisie dans l'admin) */}
@@ -136,7 +136,7 @@ function ReviewTextCard({ r, i, hidden }: { r: Review; i: number; hidden?: boole
         <div className="min-w-0">
           <div className="avis-card__name" translate="no">{r.name} <span>✓</span></div>
           {r.shop && <div className="avis-card__city font-semibold !text-[#2a2722]" translate="no">{r.shop}</div>}
-          <div className="avis-card__city">{[r.city, ago(r.at), r.collected ? "recueilli par Amashia" : ""].filter(Boolean).join(" · ")}</div>
+          <div className="avis-card__city">{[r.city, ago(r.at), r.collected ? "recueilli par Amachia" : ""].filter(Boolean).join(" · ")}</div>
         </div>
       </div>
     </article>
@@ -162,7 +162,7 @@ function ReviewsVideo({ url, poster }: { url?: string; poster?: string }) {
   return (
     <div className={`avis-video ${url ? "avis-video--fit" : "avis-video--empty"}`} style={ratio ? { aspectRatio: String(ratio), maxWidth: `min(560px, ${Math.round(80 * ratio)}vh)` } : undefined}>
       {url ? (
-        <video ref={ref} src={url} poster={poster} autoPlay muted loop playsInline preload="auto" controls={false} disablePictureInPicture aria-label="Vidéo : ils vendent sur Amashia" onLoadedMetadata={(e) => { const v = e.currentTarget; if (v.videoWidth && v.videoHeight) setRatio(v.videoWidth / v.videoHeight); }} onEnded={(e) => { e.currentTarget.currentTime = 0; void e.currentTarget.play().catch(() => {}); }} />
+        <video ref={ref} src={url} poster={poster} autoPlay muted loop playsInline preload="auto" controls={false} disablePictureInPicture aria-label="Vidéo : ils vendent sur Amachia" onLoadedMetadata={(e) => { const v = e.currentTarget; if (v.videoWidth && v.videoHeight) setRatio(v.videoWidth / v.videoHeight); }} onEnded={(e) => { e.currentTarget.currentTime = 0; void e.currentTarget.play().catch(() => {}); }} />
       ) : (
         <div className="avis-video__placeholder" aria-hidden>
           <span className="avis-video__play"><svg viewBox="0 0 24 24" width="30" height="30"><path d="M8 5.5v13l11-6.5z" fill="currentColor" /></svg></span>

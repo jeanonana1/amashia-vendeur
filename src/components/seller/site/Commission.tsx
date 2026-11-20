@@ -6,7 +6,7 @@ import { Select } from "@/components/ui/app-select";
 
 export type Rate = { slug: string; name: string; rate: number };
 
-/** Taux de commission réels (base Amashia), par catégorie. */
+/** Taux de commission réels (base Amachia), par catégorie. */
 export function useCommissionRates() {
   const [rates, setRates] = useState<Rate[] | null>(null);
   useEffect(() => {
@@ -45,7 +45,7 @@ export function CommissionCalculator({ rates }: { rates: Rate[] | null }) {
       <div className="mt-6">
         <SpecTable ops minWidth={280} rows={[
           { label: "Prix payé par le client", op: "+", value: fcfa(p) },
-          { label: `Commission Amashia (${rate} %)`, op: "−", value: fcfa(fee) },
+          { label: `Commission Amachia (${rate} %)`, op: "−", value: fcfa(fee) },
         ]} total={{ label: "Vous recevez", value: <span className="text-lg sm:text-xl">{Math.round(p - fee).toLocaleString("fr-FR")}<sup className="ml-1 text-[10px] font-bold">FCFA</sup></span> }} />
       </div>
       <p className="mt-3 text-xs text-muted-foreground">Taux réels de la catégorie, appliqués uniquement aux commandes livrées. Les frais de livraison sont payés par le client.</p>

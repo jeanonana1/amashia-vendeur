@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { Select } from "@/components/ui/app-select";
 
 export const Route = createFileRoute("/dashboard/applications")({
-  head: () => ({ meta: [{ title: "Applications — Amashia Seller" }, { name: "description", content: "Applications : votre espace vendeur Amashia pour gérer votre activité." }, { property: "og:title", content: "Applications — Amashia Seller" }, { property: "og:description", content: "Applications : votre espace vendeur Amashia pour gérer votre activité." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
+  head: () => ({ meta: [{ title: "Applications — Amachia Seller" }, { name: "description", content: "Applications : votre espace vendeur Amachia pour gérer votre activité." }, { property: "og:title", content: "Applications — Amachia Seller" }, { property: "og:description", content: "Applications : votre espace vendeur Amachia pour gérer votre activité." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   component: AppsPage,
 });
 
@@ -146,7 +146,7 @@ function AppsPage() {
         <Modal title={`Connecter ${connectingId === "facebook" ? "Facebook" : "TikTok"} Ads`} onClose={() => setConnectingId(null)}>
           <Field label="ID du compte publicitaire *"><input value={accId} onChange={(e) => setAccId(e.target.value)} placeholder="act_123456789" className={inputCls} /></Field>
           <Field label="ID du Pixel (tracking, optionnel)"><input value={pixelId} onChange={(e) => setPixelId(e.target.value)} placeholder="123456789012345" className={inputCls} /></Field>
-          <div className="text-xs text-muted-foreground bg-secondary rounded-xl p-3">En connectant votre compte, vous autorisez Amashia à créer des campagnes et à suivre les conversions via votre pixel.</div>
+          <div className="text-xs text-muted-foreground bg-secondary rounded-xl p-3">En connectant votre compte, vous autorisez Amachia à créer des campagnes et à suivre les conversions via votre pixel.</div>
           <button onClick={connect} className="w-full py-3 rounded-full bg-gradient-primary text-black font-semibold">Connecter le compte</button>
         </Modal>
       )}

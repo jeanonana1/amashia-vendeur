@@ -109,7 +109,7 @@ async function googleSuggestionsCameroon(queries: string[]) {
   return [...new Set(found)].slice(0, 30);
 }
 
-const RESEARCH_SYSTEM = `Tu es le chargé de recherche SEO d'Amashia, marketplace camerounaise.
+const RESEARCH_SYSTEM = `Tu es le chargé de recherche SEO d'Amachia, marketplace camerounaise.
 Ta mission : établir, à partir de SOURCES RÉELLES, les mots-clés que les acheteurs utilisent pour ce type de produit.
 
 Sources, par ordre d'importance :
@@ -121,7 +121,7 @@ Règles strictes :
 - N'invente ni volumes de recherche ni tendances chiffrées : tu n'as pas accès à Google Trends. Si une source ne donne rien d'utile, dis-le.
 - Réponds en français, en notes brèves : 1) mot-clé principal recommandé (et pourquoi, d'après les recherches Google Cameroun), 2) mots-clés secondaires et appellations locales, 3) requêtes longues / questions, 4) formulations de titres observées sur Jumia CI / SN, 5) ce qui n'a pas pu être vérifié.`;
 
-const WRITING_SYSTEM = `Tu es le rédacteur e-commerce officiel d'Amashia, marketplace du Cameroun : copywriter professionnel et expert SEO (Google et marketplaces).
+const WRITING_SYSTEM = `Tu es le rédacteur e-commerce officiel d'Amachia, marketplace du Cameroun : copywriter professionnel et expert SEO (Google et marketplaces).
 
 SOURCE DES FAITS — RÈGLE ABSOLUE
 - Les caractéristiques, matières, dimensions, compatibilités, contenus du colis, garanties, délais, origines et performances du produit viennent EXCLUSIVEMENT des « Données du vendeur ».
@@ -141,7 +141,7 @@ TITRES (5 propositions)
 
 DESCRIPTION ("description", HTML simple)
 - Balises autorisées uniquement : <h3>, <p>, <ul>, <li>, <strong>.
-- Structure : accroche (besoin du client) → présentation du produit → <ul> des bénéfices → <ul> des caractéristiques (uniquement celles fournies) → usages concrets → pourquoi le choisir sur Amashia (sans promesse non fournie) → phrase de conclusion qui invite à commander.
+- Structure : accroche (besoin du client) → présentation du produit → <ul> des bénéfices → <ul> des caractéristiques (uniquement celles fournies) → usages concrets → pourquoi le choisir sur Amachia (sans promesse non fournie) → phrase de conclusion qui invite à commander.
 - Intègre naturellement le mot-clé principal et plusieurs secondaires, sans bourrage.
 
 AUTRES CHAMPS
@@ -172,7 +172,7 @@ export async function writeProductSheet(data: SeoInput) {
       try {
         const messages: Anthropic.Beta.BetaMessageParam[] = [{
           role: "user",
-          content: `Produit à référencer sur Amashia (Cameroun) :
+          content: `Produit à référencer sur Amachia (Cameroun) :
 ${facts}
 
 Recherches Google au Cameroun (suggestions Google réelles, pays CM, pour : ${queries.map((q) => `« ${q} »`).join(", ") || "—"}) :

@@ -1,5 +1,5 @@
--- Amashia — Utiliser ses points récompense au paiement (1 point = 1 FCFA), au choix à la place d'un code promo.
--- La réduction est prise en charge par Amashia : le montant revenant aux vendeurs ne change pas.
+-- Amachia — Utiliser ses points récompense au paiement (1 point = 1 FCFA), au choix à la place d'un code promo.
+-- La réduction est prise en charge par Amachia : le montant revenant aux vendeurs ne change pas.
 
 alter table public.orders add column if not exists points_used integer not null default 0 check (points_used >= 0);
 
@@ -51,7 +51,7 @@ declare def text;
 begin
   def := pg_get_functiondef('public.admin_set_order_status(uuid,text)'::regprocedure);
   if position('redeem' in def) = 0 then
-    def := replace(def, $x$    perform public.add_order_event(_order, 'cancelled', 'Commande annulée par Amashia');$x$, $x$    perform public.add_order_event(_order, 'cancelled', 'Commande annulée par Amashia');
+    def := replace(def, $x$    perform public.add_order_event(_order, 'cancelled', 'Commande annulée par Amachia');$x$, $x$    perform public.add_order_event(_order, 'cancelled', 'Commande annulée par Amachia');
     insert into public.reward_transactions (user_id, points, type, description, order_id)
     select o.user_id, o.points_used, 'cancellation', 'Points rendus (commande annulée)', o.id
     where o.points_used > 0 and not exists (select 1 from public.reward_transactions r where r.order_id = o.id and r.type = 'cancellation');$x$);

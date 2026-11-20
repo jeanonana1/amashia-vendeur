@@ -1,4 +1,4 @@
--- Page Contact + assistant Amashia : messages clients et fonctions de lecture sûres pour l'assistant.
+-- Page Contact + assistant Amachia : messages clients et fonctions de lecture sûres pour l'assistant.
 
 create table if not exists public.support_messages (
   id uuid primary key default gen_random_uuid(),
@@ -98,7 +98,7 @@ language plpgsql stable security definer set search_path = public as $$
 declare q jsonb := delivery_quote_v2(_city, 20000, _district); s platform_settings;
 begin
   select * into s from platform_settings where id = 1;
-  return jsonb_build_object('ville', _city, 'quartier', _district, 'mode', case q->>'mode' when 'agency' then 'Expédition par agence de voyage' else 'Livraison à domicile par Amashia' end,
+  return jsonb_build_object('ville', _city, 'quartier', _district, 'mode', case q->>'mode' when 'agency' then 'Expédition par agence de voyage' else 'Livraison à domicile par Amachia' end,
     'frais_fcfa', q->'fee', 'delai', q->>'delay_label', 'livraison_gratuite_des_fcfa', nullif((q->>'free_threshold')::int, 0),
     'agences', (select jsonb_agg(jsonb_build_object('nom', a.name, 'depot', concat_ws(', ', a.depot_district, a.depot_city), 'adresse', a.address, 'delai', a.delay_text))
                 from shipping_agencies a where a.is_active and (_city = any(a.cities) or a.cities is null)),

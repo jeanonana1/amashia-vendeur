@@ -1,5 +1,5 @@
 -- =====================================================================
--- Amashia : attributs, boutiques publiques, abonnés, visites, statistiques
+-- Amachia : attributs, boutiques publiques, abonnés, visites, statistiques
 -- Migration ADDITIVE : rien n'est supprimé.
 -- =====================================================================
 begin;
@@ -101,7 +101,7 @@ select
   oi.product_id as listing_id,
   sp.id as product_id,
   s.owner_id as seller_id,
-  coalesce(nullif(trim(o.full_name), ''), 'Client Amashia') as customer_name,
+  coalesce(nullif(trim(o.full_name), ''), 'Client Amachia') as customer_name,
   concat_ws(', ', nullif(o.district, ''), nullif(o.city, '')) as delivery_area,
   oi.product_title,
   oi.quantity,

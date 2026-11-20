@@ -9,18 +9,18 @@ import { Store, Package, ShoppingBag, Wallet, BarChart3, Megaphone, Check } from
 export const Route = createFileRoute("/fonctionnalites")({
   head: () => ({
     meta: [
-      { title: "Fonctionnalités — Amashia Seller" }, { name: "description", content: "Boutique, produits, commandes, livraison Prime, paiements, analytique, promotions : tous les outils pour vendre sur Amashia." },
-      { property: "og:title", content: "Fonctionnalités — Amashia Seller" }, { property: "og:description", content: "Tous les outils pour vendre sur Amashia." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" },
+      { title: "Fonctionnalités — Amachia Seller" }, { name: "description", content: "Boutique, produits, commandes, livraison Prime, paiements, analytique, promotions : tous les outils pour vendre sur Amachia." },
+      { property: "og:title", content: "Fonctionnalités — Amachia Seller" }, { property: "og:description", content: "Tous les outils pour vendre sur Amachia." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" },
     ],
   }),
   component: Page,
 });
 
 const blocks = [
-  { icon: Store, tag: "Boutique", title: "Une vitrine à votre image", text: "Logo, bannière, description et catégories : votre boutique a sa propre page sur Amashia, avec un lien « Visiter la boutique » sur chacun de vos produits.", items: ["Page boutique publique", "Logo et bannière recadrables", "Point de retrait géolocalisé pour les livreurs", "Ancienneté et avis affichés"] },
+  { icon: Store, tag: "Boutique", title: "Une vitrine à votre image", text: "Logo, bannière, description et catégories : votre boutique a sa propre page sur Amachia, avec un lien « Visiter la boutique » sur chacun de vos produits.", items: ["Page boutique publique", "Logo et bannière recadrables", "Point de retrait géolocalisé pour les livreurs", "Ancienneté et avis affichés"] },
   { icon: Package, tag: "Produits", title: "Des fiches complètes en quelques minutes", text: "Ajoutez photos, variantes et prix par option. L'assistant IA rédige la fiche à partir de vos informations, et l'enregistrement automatique évite de tout perdre.", items: ["Couleurs, tailles et attributs", "Prix différent par option", "Photos par couleur", "Alertes de stock et réapprovisionnement"] },
   { icon: ShoppingBag, tag: "Commandes", title: "Chaque commande, suivie de bout en bout", text: "Sonnerie et notification à chaque commande, puis le même statut partout : Commande reçue, En préparation, En cours de livraison, Livrée.", items: ["Alerte même navigateur fermé", "Statut synchronisé avec le livreur", "Retours et remboursements", "Coordonnées clients protégées"] },
-  { icon: Wallet, tag: "Paiements", title: "Votre argent, en toute transparence", text: "Le client paie Amashia. Votre solde disponible et le montant en attente de livraison sont visibles en direct, commission comprise.", items: ["Paiement à la livraison", "Orange Money et MTN MoMo", "Détail des commissions par commande", "Historique des versements"] },
+  { icon: Wallet, tag: "Paiements", title: "Votre argent, en toute transparence", text: "Le client paie Amachia. Votre solde disponible et le montant en attente de livraison sont visibles en direct, commission comprise.", items: ["Paiement à la livraison", "Orange Money et MTN MoMo", "Détail des commissions par commande", "Historique des versements"] },
   { icon: BarChart3, tag: "Analytique", title: "Comprenez ce qui fait vendre", text: "Ventes, commandes, visiteurs en direct, conversion et sources de trafic : identifiez vos meilleurs produits et vos meilleures campagnes.", items: ["Visiteurs en temps réel", "Évolution des ventes", "Sources : Facebook, TikTok…", "Clients et produits les plus vendus"] },
   { icon: Megaphone, tag: "Croissance", title: "Des outils pour accélérer", text: "Ventes flash avec compte à rebours, coupons réservés à vos articles et campagnes sponsorisées avec statistiques détaillées.", items: ["Ventes flash", "Codes promo vendeur", "Produits sponsorisés", "Mesure des vues, clics et ventes"] },
 ];

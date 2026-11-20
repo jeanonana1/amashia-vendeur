@@ -27,7 +27,7 @@ const CH: Record<string, { label: string; color: string; icon: string }> = {
   email: { label: "E-mail", color: "#60A5FA", icon: "@" },
   sms: { label: "SMS", color: "#A78BFA", icon: "✉" },
   autre_site: { label: "Autres sites", color: "#94A3B8", icon: "↗" },
-  direct: { label: "Direct / Amashia", color: "#FF6800", icon: "A" },
+  direct: { label: "Direct / Amachia", color: "#FF6800", icon: "A" },
 };
 const ch = (c: string) => CH[c] ?? CH.autre_site;
 const rate = (a: number, b: number) => (b > 0 ? `${((a / b) * 100).toLocaleString("fr-FR", { maximumFractionDigits: 1 })} %` : "—");

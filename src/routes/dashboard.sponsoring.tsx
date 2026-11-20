@@ -10,7 +10,7 @@ import { askConfirm } from "@/lib/dialog";
 import { Select } from "@/components/ui/app-select";
 
 export const Route = createFileRoute("/dashboard/sponsoring")({
-  head: () => ({ meta: [{ title: "Sponsoring — Amashia Seller" }, { name: "description", content: "Mettez vos produits en avant sur Amashia et suivez les résultats." }] }),
+  head: () => ({ meta: [{ title: "Sponsoring — Amachia Seller" }, { name: "description", content: "Mettez vos produits en avant sur Amachia et suivez les résultats." }] }),
   component: SponsoringPage,
 });
 
@@ -77,7 +77,7 @@ function SponsoringPage() {
     });
     setSaving(false);
     if (error) return toast.error(String(error.message || "Création impossible").replace(/^.*?ERROR:\s*/, ""));
-    toast.success("Campagne lancée : votre produit est mis en avant sur Amashia");
+    toast.success("Campagne lancée : votre produit est mis en avant sur Amachia");
     setForm(null);
     void load();
   }
@@ -122,7 +122,7 @@ function SponsoringPage() {
         <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
           <div>
             <h3 className="font-bold">Mes campagnes</h3>
-            <p className="text-xs text-muted-foreground">Le produit sponsorisé apparaît avec la mention « Sponsorisé » sur l'accueil et/ou en tête des recherches d'Amashia.</p>
+            <p className="text-xs text-muted-foreground">Le produit sponsorisé apparaît avec la mention « Sponsorisé » sur l'accueil et/ou en tête des recherches d'Amachia.</p>
           </div>
           <button onClick={newCampaign} disabled={!products.length} className="hidden sm:flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-black disabled:opacity-50"><Plus size={14} /> Nouvelle campagne</button>
         </div>

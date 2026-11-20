@@ -55,7 +55,7 @@ export function PushAlertsButton({ className }: { className: string }) {
               <p className="font-semibold">Sur iPhone / iPad, les alertes nécessitent l'application installée :</p>
               <p className="flex items-center gap-2"><Share size={16} className="shrink-0 text-primary" />1. Dans Safari, touchez « Partager ».</p>
               <p className="flex items-center gap-2"><PlusSquare size={16} className="shrink-0 text-primary" />2. Choisissez « Sur l'écran d'accueil ».</p>
-              <p className="flex items-center gap-2"><BellRing size={16} className="shrink-0 text-primary" />3. Ouvrez Amashia Seller depuis l'icône, puis activez les alertes ici.</p>
+              <p className="flex items-center gap-2"><BellRing size={16} className="shrink-0 text-primary" />3. Ouvrez Amachia Seller depuis l'icône, puis activez les alertes ici.</p>
             </div>
           )}
           {state === "unsupported" && <p className="rounded-xl bg-muted p-3 text-sm">Ce navigateur ne permet pas les alertes en arrière-plan. Utilisez Chrome, Edge, Firefox ou Samsung Internet (Android / ordinateur), ou Safari avec l'application installée sur iPhone.</p>}

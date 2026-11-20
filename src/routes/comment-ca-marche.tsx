@@ -10,18 +10,18 @@ import { ShoppingCart, PackageCheck, Bike, Home, Wallet } from "lucide-react";
 export const Route = createFileRoute("/comment-ca-marche")({
   head: () => ({
     meta: [
-      { title: "Comment ça marche — Amashia Seller" }, { name: "description", content: "De l'inscription à votre premier versement : comment vendre sur Amashia, étape par étape." },
-      { property: "og:title", content: "Comment ça marche — Amashia Seller" }, { property: "og:description", content: "Vendre sur Amashia, étape par étape." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" },
+      { title: "Comment ça marche — Amachia Seller" }, { name: "description", content: "De l'inscription à votre premier versement : comment vendre sur Amachia, étape par étape." },
+      { property: "og:title", content: "Comment ça marche — Amachia Seller" }, { property: "og:description", content: "Vendre sur Amachia, étape par étape." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" },
     ],
   }),
   component: Page,
 });
 
 const journey = [
-  { icon: ShoppingCart, t: "Le client commande", d: "Sur le site Amashia, il choisit votre produit et paie à la livraison, par Mobile Money ou par carte." },
+  { icon: ShoppingCart, t: "Le client commande", d: "Sur le site Amachia, il choisit votre produit et paie à la livraison, par Mobile Money ou par carte." },
   { icon: PackageCheck, t: "Vous préparez", d: "Votre espace sonne. La commande passe « En préparation » dès qu'un livreur l'accepte." },
   { icon: Bike, t: "Le livreur récupère", d: "Un livreur Prime proche de votre boutique vient chercher le colis : « En cours de livraison »." },
-  { icon: Home, t: "Le client reçoit", d: "La commande est livrée ; le statut « Livrée » apparaît chez vous, chez le client et chez Amashia." },
+  { icon: Home, t: "Le client reçoit", d: "La commande est livrée ; le statut « Livrée » apparaît chez vous, chez le client et chez Amachia." },
   { icon: Wallet, t: "Vous êtes payé", d: "Le montant, moins la commission, passe dans votre solde disponible puis vous est versé." },
 ];
 
@@ -31,7 +31,7 @@ function Page() {
       <Header />
       <main>
         <PageHero eyebrow="Comment ça marche" title={<>Simple pour vous. <span className="text-gradient">Rassurant pour vos clients.</span></>}
-          text="Vous vous occupez de vos produits. Amashia s'occupe de l'encaissement, de la livraison et du suivi." />
+          text="Vous vous occupez de vos produits. Amachia s'occupe de l'encaissement, de la livraison et du suivi." />
         <section className="py-10">
           <Container>
             <h2 className="text-center text-2xl font-extrabold sm:text-3xl">Démarrer en 4 étapes</h2>
@@ -49,7 +49,7 @@ function Page() {
         <section className="py-20">
           <Container>
             <h2 className="text-center text-2xl font-extrabold sm:text-3xl">Le parcours d'une commande</h2>
-            <p className="mx-auto mt-3 max-w-xl text-center text-muted-foreground">Les mêmes étapes s'affichent dans votre espace, chez le client et dans l'admin Amashia.</p>
+            <p className="mx-auto mt-3 max-w-xl text-center text-muted-foreground">Les mêmes étapes s'affichent dans votre espace, chez le client et dans l'admin Amachia.</p>
             <div className="relative mx-auto mt-12 max-w-3xl">
               <div aria-hidden className="absolute bottom-6 left-[1.4rem] top-6 w-px bg-gradient-to-b from-primary via-primary/40 to-transparent sm:left-1/2" />
               {journey.map((j, i) => (

@@ -13,10 +13,10 @@ import { Select } from "@/components/ui/app-select";
 export const Route = createFileRoute("/dashboard/produits/")({
   head: () => ({
     meta: [
-      { title: "Mes produits — Amashia Seller" },
-      { name: "description", content: "Gérez votre catalogue Amashia en temps réel : stock, prix, statut et visibilité de chaque produit." },
-      { property: "og:title", content: "Mes produits — Amashia Seller" },
-      { property: "og:description", content: "Catalogue vendeur Amashia : stock, prix et statut en temps réel." },
+      { title: "Mes produits — Amachia Seller" },
+      { name: "description", content: "Gérez votre catalogue Amachia en temps réel : stock, prix, statut et visibilité de chaque produit." },
+      { property: "og:title", content: "Mes produits — Amachia Seller" },
+      { property: "og:description", content: "Catalogue vendeur Amachia : stock, prix et statut en temps réel." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -85,7 +85,7 @@ function ProduitsPage() {
   }, []);
 
   async function deleteProduct(id: string) {
-    if (!(await askConfirm({ title: "Supprimer ce produit ?", message: "Il disparaîtra aussi du site Amashia. Cette action est définitive.", danger: true }))) return;
+    if (!(await askConfirm({ title: "Supprimer ce produit ?", message: "Il disparaîtra aussi du site Amachia. Cette action est définitive.", danger: true }))) return;
     const prev = products;
     setProducts((p) => p.filter((x) => x.id !== id));
     const { error } = await supabase.from("seller_products").delete().eq("id", id);
@@ -247,7 +247,7 @@ function ProduitsPage() {
                       onClick={() => setPublishTarget(p)}
                       className="w-full py-2 rounded-full bg-gradient-primary text-black text-[11px] font-semibold inline-flex items-center justify-center gap-1.5"
                     >
-                      <Rocket size={12} /> Publier sur Amashia
+                      <Rocket size={12} /> Publier sur Amachia
                     </button>
 
                   </div>

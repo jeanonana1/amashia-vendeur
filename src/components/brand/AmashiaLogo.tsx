@@ -1,7 +1,7 @@
 import type { CSSProperties } from "react";
 
 /**
- * Logo officiel Amashia (référence : logo-amashia.html) : cercle avec pouce levé + « amashia » en Ubuntu Bold,
+ * Logo officiel Amachia (référence : logo-amashia.html) : cercle avec pouce levé + « amachia » en Ubuntu Bold,
  * sourire orange sous le 2ᵉ « a ». Toutes les proportions dépendent de la taille de police (em).
  * - variant « dark » : lettres et cercle de la couleur `ink` (teinte du pied de page), pouce et sourire orange ;
  * - variant « light » : lettres blanches, cercle orange, pouce blanc, sourire orange.
@@ -15,7 +15,7 @@ export function AmashiaLogo({ variant = "dark", size, ink, className = "", style
     <span
       className={`amashia-logo ${className}`}
       style={{ fontSize: size, color, display: "inline-flex", alignItems: "center", gap: ".14em", fontFamily: "'Ubuntu', system-ui, sans-serif", fontWeight: 700, letterSpacing: "-0.035em", lineHeight: 1, paddingBottom: ".26em", ...style }}
-      aria-label="Amashia"
+      aria-label="Amachia"
       role="img"
     >
       <svg viewBox="0 0 100 100" aria-hidden style={{ height: ".78em", width: ".75em", flexShrink: 0, display: "block", transform: "translateY(.12em)" }}>
@@ -33,7 +33,7 @@ export function AmashiaLogo({ variant = "dark", size, ink, className = "", style
             <path d="M8 6 Q50 34 92 6" fill="none" stroke={ORANGE} strokeWidth="9" strokeLinecap="round" />
           </svg>
         </span>
-        shia
+        chia
       </span>
     </span>
   );

@@ -1,5 +1,5 @@
 // Fonction Supabase « courier-activate » : premier accès (ou mot de passe oublié) d'un livreur dans l'application.
-// Le livreur saisit son numéro, le code à 6 chiffres donné par Amashia (admin → Livreurs) et son mot de passe.
+// Le livreur saisit son numéro, le code à 6 chiffres donné par Amachia (admin → Livreurs) et son mot de passe.
 // Le compte de connexion est créé (ou son mot de passe remplacé) avec la clé de service, jamais exposée à l'application.
 import { createClient } from "npm:@supabase/supabase-js@2.45.4";
 
@@ -25,7 +25,7 @@ Deno.serve(async (req) => {
       if (e) return json({ error: "Mise à jour du mot de passe impossible." }, 500);
     } else {
       const { data, error: e } = await db.auth.admin.createUser({ email, password, email_confirm: true, user_metadata: { role: "courier", full_name: chk.full_name } });
-      if (e || !data.user) return json({ error: "Création du compte impossible : contactez Amashia." }, 500);
+      if (e || !data.user) return json({ error: "Création du compte impossible : contactez Amachia." }, 500);
       userId = data.user.id;
     }
     await db.rpc("courier_link_account", { _courier: chk.courier_id, _user: userId });

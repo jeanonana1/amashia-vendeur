@@ -1,6 +1,6 @@
-# Amashia — version indépendante
+# Amachia — version indépendante
 
-Cette archive contient les sources d’Amashia, sans badge d’édition, outil de marquage, partage de session avec l’éditeur, dépendance de construction propriétaire ou appels IA à la plateforme d’origine. Le site conserve son interface et utilise votre propre projet de données et votre compte Google AI.
+Cette archive contient les sources d’Amachia, sans badge d’édition, outil de marquage, partage de session avec l’éditeur, dépendance de construction propriétaire ou appels IA à la plateforme d’origine. Le site conserve son interface et utilise votre propre projet de données et votre compte Google AI.
 
 ## 1. Préparer votre projet de données
 

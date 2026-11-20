@@ -1,4 +1,4 @@
--- Amashia — Admin, étape 5 : catégories, sous-catégories, marques et attributs gérés depuis l'admin
+-- Amachia — Admin, étape 5 : catégories, sous-catégories, marques et attributs gérés depuis l'admin
 -- et utilisés par le site client (bannières, cercles de sous-catégories) et l'espace vendeur (formulaire produit).
 -- Additif : les listes actuelles des deux sites sont reprises telles quelles au départ.
 

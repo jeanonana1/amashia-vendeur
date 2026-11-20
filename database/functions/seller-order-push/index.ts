@@ -9,7 +9,7 @@ const SUBJECT = "https://amashia-vendeur.vercel.app";
 const json = (b: unknown, status = 200) => new Response(JSON.stringify(b), { status, headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" } });
 type Sub = { endpoint: string; p256dh: string; auth: string };
 
-/* ---------- Application Android Amashia Seller : messages Firebase (FCM v1) ---------- */
+/* ---------- Application Android Amachia Seller : messages Firebase (FCM v1) ---------- */
 type SA = { client_email: string; private_key: string; project_id: string };
 let cachedFcm: { token: string; exp: number } | null = null;
 const b64url = (input: string | ArrayBuffer) => {
@@ -107,11 +107,11 @@ Deno.serve(async (req) => {
     const list = (items ?? []) as { product_title: string; quantity: number; unit_price_fcfa: number; discount_fcfa: number | null }[];
     const amount = list.reduce((n, i) => n + i.unit_price_fcfa * i.quantity - (i.discount_fcfa ?? 0), 0);
     const first = list[0]?.product_title ?? "Produit";
-    const title = "🔔 Nouvelle commande — Amashia";
+    const title = "🔔 Nouvelle commande — Amachia";
     const text = `${first.slice(0, 60)}${list.length > 1 ? ` + ${list.length - 1} autre${list.length > 2 ? "s" : ""}` : ""} · ${new Intl.NumberFormat("fr-FR").format(Math.round(amount))} FCFA${order?.city ? ` · ${[order.district, order.city].filter(Boolean).join(", ")}` : ""}`;
     const { data: subs } = await db.from("seller_push_subscriptions").select("endpoint, p256dh, auth").eq("user_id", seller.owner_id);
     const sent = await send((subs ?? []) as Sub[], JSON.stringify({ title, body: text, tag: `order-${orderId}`, url: "/dashboard/commandes" }));
-    // application Android Amashia Seller
+    // application Android Amachia Seller
     const { data: toks } = await db.from("seller_fcm_tokens").select("token").eq("user_id", seller.owner_id);
     const app = await sendFcm(((toks ?? []) as { token: string }[]).map((t) => t.token), { kind: "new_order", order_id: orderId, title, body: text });
     return json({ sent, app });

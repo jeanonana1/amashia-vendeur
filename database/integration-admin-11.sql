@@ -1,6 +1,6 @@
--- Amashia — Admin, étape 11 :
+-- Amachia — Admin, étape 11 :
 --   1. Les coupons / ventes flash / campagnes créés depuis l'admin sont acceptés (contrôles vendeur ignorés pour l'équipe admin)
---   2. Coupons « toute la marketplace » : valables sur tous les produits, réduction prise en charge par Amashia
+--   2. Coupons « toute la marketplace » : valables sur tous les produits, réduction prise en charge par Amachia
 --   3. Ventes flash : plusieurs produits d'un coup + rapport complet des ventes flash
 --   4. Verrouillage de la session admin après 1 heure d'inactivité (contrôlé aussi en base)
 
@@ -27,7 +27,7 @@ end $$;
 -- 2. Coupons marketplace ----------------------------------------------------------------------------
 alter table public.seller_coupons alter column seller_id drop not null;
 alter table public.seller_coupons add column if not exists created_by_admin boolean not null default false;
--- Réduction d'un coupon Amashia : à la charge d'Amashia, elle ne réduit pas le montant du vendeur
+-- Réduction d'un coupon Amachia : à la charge d'Amachia, elle ne réduit pas le montant du vendeur
 alter table public.order_items add column if not exists platform_discount_fcfa integer not null default 0;
 
 create or replace function public.recalc_order_totals()
@@ -49,7 +49,7 @@ begin
   select * into c from public.seller_coupons where upper(code) = upper(btrim(coalesce(_code, '')));
   if c.id is null then return jsonb_build_object('ok', false, 'message', 'Ce code promo n''existe pas.'); end if;
   mkt := c.seller_id is null;
-  if mkt then shop := 'Amashia'; else select name into shop from public.sellers where id = c.seller_id and is_active; end if;
+  if mkt then shop := 'Amachia'; else select name into shop from public.sellers where id = c.seller_id and is_active; end if;
   if shop is null or not c.is_active then return jsonb_build_object('ok', false, 'message', 'Ce coupon n''est plus actif.'); end if;
   if c.starts_at > now() then return jsonb_build_object('ok', false, 'message', 'Ce coupon n''est pas encore valable.'); end if;
   if c.ends_at is not null and c.ends_at < now() then return jsonb_build_object('ok', false, 'message', 'Ce coupon a expiré.'); end if;
@@ -86,7 +86,7 @@ begin
 end $$;
 revoke all on function public.coupon_eval(text, jsonb, uuid) from public, anon, authenticated;
 
--- Fiche produit : coupons de la boutique + coupons Amashia valables sur toute la marketplace
+-- Fiche produit : coupons de la boutique + coupons Amachia valables sur toute la marketplace
 create or replace function public.product_coupons(_product uuid)
 returns jsonb language sql stable security definer set search_path = public as $$
   select coalesce(jsonb_agg(jsonb_build_object(
@@ -102,7 +102,7 @@ returns jsonb language sql stable security definer set search_path = public as $
 $$;
 grant execute on function public.product_coupons(uuid) to anon, authenticated;
 
--- Paiement : la réduction d'un coupon Amashia va dans platform_discount_fcfa (le vendeur touche son prix plein)
+-- Paiement : la réduction d'un coupon Amachia va dans platform_discount_fcfa (le vendeur touche son prix plein)
 do $$ declare def text; begin
   def := pg_get_functiondef('public.customer_checkout'::regproc);
   if position('platform_discount_fcfa' in def) = 0 then

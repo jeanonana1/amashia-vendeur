@@ -81,11 +81,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Amashia Seller" },
-      { name: "description", content: "Gérez votre boutique et vos ventes sur Amashia." },
-      { name: "author", content: "Amashia" },
-      { property: "og:title", content: "Amashia Seller" },
-      { property: "og:description", content: "Gérez votre boutique et vos ventes sur Amashia." },
+      { title: "Amachia Seller" },
+      { name: "description", content: "Gérez votre boutique et vos ventes sur Amachia." },
+      { name: "author", content: "Amachia" },
+      { property: "og:title", content: "Amachia Seller" },
+      { property: "og:description", content: "Gérez votre boutique et vos ventes sur Amachia." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -94,8 +94,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "icon", type: "image/png", sizes: "32x32", href: "/favicon-32.png" },
       { rel: "icon", type: "image/png", sizes: "192x192", href: "/icon-192.png" },
       { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
-      // police du logo (Ubuntu Bold), limitée aux lettres de « amashia »
-      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Ubuntu:wght@700&text=amshi&display=swap" },
+      // police du logo (Ubuntu Bold), limitée aux lettres de « amachia »
+      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Ubuntu:wght@700&text=amchis&display=swap" },
       { rel: "manifest", href: "/manifest.webmanifest" },
       {
         rel: "stylesheet",

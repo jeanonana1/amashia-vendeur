@@ -1,5 +1,5 @@
 -- =====================================================================
--- Amashia : nouvelles commandes vendeur, avis réservés aux acheteurs,
+-- Amachia : nouvelles commandes vendeur, avis réservés aux acheteurs,
 -- points récompense accordés après un avis.
 -- =====================================================================
 begin;

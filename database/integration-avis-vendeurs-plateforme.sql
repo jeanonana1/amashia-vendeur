@@ -1,4 +1,4 @@
--- Avis des vendeurs sur Amashia (section « Ils vendent sur Amashia » de la page d'accueil vendeur)
+-- Avis des vendeurs sur Amachia (section « Ils vendent sur Amachia » de la page d'accueil vendeur)
 -- Un avis par vendeur, modifiable par lui ; seuls les avis publiés sont visibles publiquement.
 create table if not exists public.seller_platform_reviews (
   id uuid primary key default gen_random_uuid(),

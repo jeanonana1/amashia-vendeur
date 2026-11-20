@@ -14,10 +14,10 @@ import { SectionDivider } from "@/components/seller/site/motion";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Amashia Seller — Vendez partout au Cameroun" },
-      { name: "description", content: "Ouvrez votre boutique sur Amashia gratuitement : publiez vos produits, recevez vos commandes en temps réel. Paiement et livraison gérés par Amashia." },
-      { property: "og:title", content: "Amashia Seller — Vendez partout au Cameroun" },
-      { property: "og:description", content: "Créez votre boutique, gérez vos produits et développez votre activité sur Amashia." },
+      { title: "Amachia Seller — Vendez partout au Cameroun" },
+      { name: "description", content: "Ouvrez votre boutique sur Amachia gratuitement : publiez vos produits, recevez vos commandes en temps réel. Paiement et livraison gérés par Amachia." },
+      { property: "og:title", content: "Amachia Seller — Vendez partout au Cameroun" },
+      { property: "og:description", content: "Créez votre boutique, gérez vos produits et développez votre activité sur Amachia." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],

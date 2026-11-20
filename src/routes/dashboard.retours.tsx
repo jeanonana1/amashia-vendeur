@@ -9,7 +9,7 @@ import { imgProps } from "@/lib/img";
 import { askConfirm, askText } from "@/lib/dialog";
 
 export const Route = createFileRoute("/dashboard/retours")({
-  head: () => ({ meta: [{ title: "Retours — Amashia Seller" }, { name: "description", content: "Demandes de retour de vos clients Amashia." }] }),
+  head: () => ({ meta: [{ title: "Retours — Amachia Seller" }, { name: "description", content: "Demandes de retour de vos clients Amachia." }] }),
   component: ReturnsPage,
 });
 
@@ -26,7 +26,7 @@ const STATUS: Record<Ret["status"], { label: string; cls: string }> = {
   refunded: { label: "Remboursé / réglé", cls: "bg-emerald-500/15 text-emerald-400" },
   refused: { label: "Refusé", cls: "bg-red-500/15 text-red-400" },
 };
-const SOLUTION: Record<string, string> = { refund: "Remboursement", exchange: "Échange", credit: "Avoir Amashia" };
+const SOLUTION: Record<string, string> = { refund: "Remboursement", exchange: "Échange", credit: "Avoir Amachia" };
 const FILTERS = [["all", "Tous"], ["requested", "À traiter"], ["accepted", "Acceptés"], ["received", "Reçus"], ["refunded", "Réglés"], ["refused", "Refusés"]] as const;
 
 function ReturnsPage() {

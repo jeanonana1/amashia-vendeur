@@ -1,7 +1,7 @@
-# Compile l'application Android « Amashia Seller » (tableau de bord vendeur + alertes Firebase)
+# Compile l'application Android « Amachia Seller » (tableau de bord vendeur + alertes Firebase)
 # quand le message de commit contient [apk], ou sur lancement manuel. L'APK est publié sur le site :
 # https://amashia-vendeur.vercel.app/download/amashia-seller.apk
-name: APK Amashia Seller
+name: APK Amachia Seller
 
 on:
   push:
@@ -47,7 +47,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add public/download/amashia-seller.apk public/download/amashia-seller.json
-          git commit -m "APK Amashia Seller mis à jour (${GITHUB_SHA::7})" || exit 0
+          git commit -m "APK Amachia Seller mis à jour (${GITHUB_SHA::7})" || exit 0
           # fichiers régénérés par la compilation : on ne les envoie pas
           git stash --include-untracked || true
           for i in 1 2 3 4; do git pull --rebase origin main && git push origin HEAD:main && exit 0; sleep 5; done

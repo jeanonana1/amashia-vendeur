@@ -1,4 +1,4 @@
--- Amashia — Admin, étape 2 : réglages de livraison, zones, Prime, KYC vendeurs, administrateurs.
+-- Amachia — Admin, étape 2 : réglages de livraison, zones, Prime, KYC vendeurs, administrateurs.
 -- Additif : ne supprime aucune donnée. Les valeurs par défaut reprennent exactement les règles actuelles
 -- (1 500 FCFA, livraison gratuite au-dessus de 50 000 FCFA, livraison estimée à 5 jours).
 
@@ -186,7 +186,7 @@ create or replace function public.admin_cancel_prime(_id uuid) returns void
 language plpgsql security definer set search_path = public as $$
 begin perform public.admin_guard(); update public.prime_subscriptions set is_active = false where id = _id; end $$;
 
--- Statut Prime du client connecté (pour sa page « Amashia Prime »)
+-- Statut Prime du client connecté (pour sa page « Amachia Prime »)
 create or replace function public.customer_prime() returns jsonb
 language sql stable security definer set search_path = public as $$
   select jsonb_build_object(
@@ -218,7 +218,7 @@ declare uid uuid;
 begin
   perform public.admin_guard();
   select id into uid from auth.users where lower(email) = lower(btrim(_email));
-  if uid is null then raise exception 'Aucun compte avec cet e-mail. La personne doit d''abord créer un compte sur Amashia.'; end if;
+  if uid is null then raise exception 'Aucun compte avec cet e-mail. La personne doit d''abord créer un compte sur Amachia.'; end if;
   insert into public.user_roles (user_id, role) values (uid, 'admin') on conflict do nothing;
 end $$;
 

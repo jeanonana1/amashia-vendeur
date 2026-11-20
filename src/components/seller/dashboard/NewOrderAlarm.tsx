@@ -129,7 +129,7 @@ export function NewOrderAlarm({ uid }: { uid: string }) {
     let notif: Notification | null = null;
     if ("Notification" in window && Notification.permission === "granted" && document.hidden) {
       try {
-        notif = new Notification(count > 1 ? `${count} nouvelles commandes — Amashia` : "Nouvelle commande — Amashia", {
+        notif = new Notification(count > 1 ? `${count} nouvelles commandes — Amachia` : "Nouvelle commande — Amachia", {
           body: "Ouvrez vos commandes pour la préparer.", tag: "amashia-seller-new-order", requireInteraction: true,
         });
         notif.onclick = () => { window.focus(); void navigate({ to: ORDERS_PATH }); notif?.close(); };

@@ -4,10 +4,10 @@ import { Container, SectionHeading } from "@/components/seller/site/ui";
 import { Reveal, useInView } from "@/components/seller/site/motion";
 
 export const STEPS = [
-  { icon: UserPlus, title: "Créez votre compte", text: "Inscription gratuite : informations de la boutique, documents et moyen de versement. Amashia vérifie votre compte." },
+  { icon: UserPlus, title: "Créez votre compte", text: "Inscription gratuite : informations de la boutique, documents et moyen de versement. Amachia vérifie votre compte." },
   { icon: PackagePlus, title: "Publiez vos produits", text: "Photos, prix, variantes (couleurs, tailles) et stock. L'assistant IA rédige la fiche pour vous." },
   { icon: Bell, title: "Recevez les commandes", text: "Une sonnerie vous prévient. Préparez le colis : un livreur Prime vient le récupérer dans votre boutique." },
-  { icon: Wallet, title: "Encaissez", text: "Une fois la commande livrée, le montant (moins la commission) passe dans votre solde et vous est versé par Amashia." },
+  { icon: Wallet, title: "Encaissez", text: "Une fois la commande livrée, le montant (moins la commission) passe dans votre solde et vous est versé par Amachia." },
 ];
 
 export function HowItWorks() {

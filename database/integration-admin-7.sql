@@ -1,4 +1,4 @@
--- Amashia — Admin, étape 7 : logistique (transporteurs, livreurs, colis, incidents, paiements),
+-- Amachia — Admin, étape 7 : logistique (transporteurs, livreurs, colis, incidents, paiements),
 -- quartiers des zones, bannières d'accueil, messages aux clients, marketing créé par l'admin.
 
 -- 1. Transporteurs (entreprises logistiques partenaires) ---------------------------------------

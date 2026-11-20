@@ -1,4 +1,4 @@
--- Application Android Amashia Seller : jetons Firebase des téléphones des vendeurs (alertes de nouvelles commandes)
+-- Application Android Amachia Seller : jetons Firebase des téléphones des vendeurs (alertes de nouvelles commandes)
 create table if not exists public.seller_fcm_tokens (
   token text primary key,
   user_id uuid not null references auth.users(id) on delete cascade,

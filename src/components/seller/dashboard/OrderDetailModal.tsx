@@ -40,17 +40,17 @@ export const ORDER_STATUS: Record<string, { label: string; cls: string }> = {
 };
 
 /**
- * Suivi du statut, en lecture seule : le statut est décidé par Amashia depuis l'espace admin
+ * Suivi du statut, en lecture seule : le statut est décidé par Amachia depuis l'espace admin
  * et s'actualise ici en direct (rien n'est cliquable).
  */
 const STEPS = ["pending", "preparing", "shipped", "delivered"] as const;
 export function OrderStatusTrack({ status, compact = false }: { status: string; compact?: boolean }) {
-  if (status === "cancelled") return <span className="inline-flex items-center gap-1 rounded-full bg-red-500/15 px-2.5 py-1 text-xs font-semibold text-red-400"><X size={12} /> Annulée par Amashia</span>;
+  if (status === "cancelled") return <span className="inline-flex items-center gap-1 rounded-full bg-red-500/15 px-2.5 py-1 text-xs font-semibold text-red-400"><X size={12} /> Annulée par Amachia</span>;
   const cur = Math.max(0, STEPS.indexOf(status as (typeof STEPS)[number]));
   // dernière étape atteinte (livrée) : elle est terminée, donc cochée elle aussi
   const done = (i: number) => i < cur || (i === cur && cur === STEPS.length - 1);
   return (
-    <div aria-label={`Statut : ${ORDER_STATUS[status]?.label ?? status} (géré par Amashia)`} title="Statut géré par Amashia, mis à jour en direct" className="pointer-events-none select-none">
+    <div aria-label={`Statut : ${ORDER_STATUS[status]?.label ?? status} (géré par Amachia)`} title="Statut géré par Amachia, mis à jour en direct" className="pointer-events-none select-none">
       <div className="flex items-center">
         {STEPS.map((s, i) => (
           <div key={s} className="flex items-center">
@@ -59,7 +59,7 @@ export function OrderStatusTrack({ status, compact = false }: { status: string; 
           </div>
         ))}
       </div>
-      <p className={`mt-1 flex items-center gap-1 ${compact ? "text-[10px]" : "text-[11px]"} text-muted-foreground`}><Lock size={compact ? 9 : 10} /><b className="text-foreground">{ORDER_STATUS[status]?.label ?? status}</b> · géré par Amashia</p>
+      <p className={`mt-1 flex items-center gap-1 ${compact ? "text-[10px]" : "text-[11px]"} text-muted-foreground`}><Lock size={compact ? 9 : 10} /><b className="text-foreground">{ORDER_STATUS[status]?.label ?? status}</b> · géré par Amachia</p>
     </div>
   );
 }
@@ -68,7 +68,7 @@ export const colorName = (c: string | null) => (c ? c.replace(/\s*#[0-9a-f]{3,8}
 
 /**
  * Détail d'une commande pour le vendeur : tous ses articles de cette commande,
- * client (nom et quartier uniquement), paiement, date et heure, statut (décidé par Amashia, en lecture seule).
+ * client (nom et quartier uniquement), paiement, date et heure, statut (décidé par Amachia, en lecture seule).
  */
 export function OrderDetailModal({ line, onClose, onChanged }: { line: SellerOrderLine; onClose: () => void; onChanged?: () => void }) {
   const [lines, setLines] = useState<SellerOrderLine[]>([line]);
@@ -150,7 +150,7 @@ export function OrderDetailModal({ line, onClose, onChanged }: { line: SellerOrd
           ])} total={{ label: "Total pour votre boutique", value: money(total) }} />
         </div>
         <p className="px-5 pb-5 text-[11px] text-muted-foreground">
-          Le statut de la commande est géré par Amashia et se met à jour ici automatiquement. Les coordonnées du client ne sont pas communiquées : la livraison est organisée par Amashia.
+          Le statut de la commande est géré par Amachia et se met à jour ici automatiquement. Les coordonnées du client ne sont pas communiquées : la livraison est organisée par Amachia.
         </p>
       </div>
     </div>

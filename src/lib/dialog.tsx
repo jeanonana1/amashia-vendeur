@@ -3,7 +3,7 @@ import { AlertTriangle, HelpCircle, X } from "lucide-react";
 import { playSound } from "@/lib/sound";
 
 /**
- * Fenêtres de confirmation / saisie aux couleurs d'Amashia, à la place des
+ * Fenêtres de confirmation / saisie aux couleurs d'Amachia, à la place des
  * fenêtres du navigateur (confirm, prompt).
  *
  *   if (!(await askConfirm({ title: "Supprimer ce produit ?", danger: true }))) return;

@@ -9,10 +9,10 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/dashboard/reapprovisionnement")({
   head: () => ({
     meta: [
-      { title: "Réapprovisionnement — Amashia Seller" },
-      { name: "description", content: "Suivez le stock de vos produits Amashia et ajoutez directement les quantités réapprovisionnées." },
-      { property: "og:title", content: "Réapprovisionnement — Amashia Seller" },
-      { property: "og:description", content: "Gérez le stock et les commandes de réassort de votre boutique Amashia." },
+      { title: "Réapprovisionnement — Amachia Seller" },
+      { name: "description", content: "Suivez le stock de vos produits Amachia et ajoutez directement les quantités réapprovisionnées." },
+      { property: "og:title", content: "Réapprovisionnement — Amachia Seller" },
+      { property: "og:description", content: "Gérez le stock et les commandes de réassort de votre boutique Amachia." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],

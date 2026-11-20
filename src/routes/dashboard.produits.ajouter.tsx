@@ -37,7 +37,7 @@ const DEFAULT_ATTR_PRESETS: Record<string, { values: string[]; type: "text" | "c
 };
 
 export const Route = createFileRoute("/dashboard/produits/ajouter")({
-  head: () => ({ meta: [{ title: "Ajouter un produit — Amashia Seller" }, { name: "description", content: "Ajouter un produit : votre espace vendeur Amashia pour gérer votre activité." }, { property: "og:title", content: "Ajouter un produit — Amashia Seller" }, { property: "og:description", content: "Ajouter un produit : votre espace vendeur Amashia pour gérer votre activité." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
+  head: () => ({ meta: [{ title: "Ajouter un produit — Amachia Seller" }, { name: "description", content: "Ajouter un produit : votre espace vendeur Amachia pour gérer votre activité." }, { property: "og:title", content: "Ajouter un produit — Amachia Seller" }, { property: "og:description", content: "Ajouter un produit : votre espace vendeur Amachia pour gérer votre activité." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   validateSearch: (search: Record<string, unknown>): ProductSearch => ({
     id: typeof search.id === "string" ? search.id : undefined,
   }),
@@ -187,7 +187,7 @@ const DRAFT_KEY = (id?: string) => `amashia-product-draft-${id || "new"}`;
 const STEP_KEY = (id: string) => `amashia-product-step-${id}`;
 
 function AddProductPage() {
-  // Catégories, marques et attributs définis dans l'espace admin Amashia
+  // Catégories, marques et attributs définis dans l'espace admin Amachia
   const { taxonomy, groups: SITE_CATEGORY_GROUPS, categories: SITE_CATEGORIES } = useTaxonomy();
   const ATTR_PRESETS: Record<string, { values: string[]; type: "text" | "color" | "size" }> = taxonomy?.attributes.length
     ? { ...Object.fromEntries(taxonomy.attributes.map((a) => [a.name, { values: a.values, type: a.kind }])), "Personnalisé": { values: [], type: "text" } }
@@ -598,7 +598,7 @@ function AddProductPage() {
         price: priceNum, compare_at_price: form.compare_at_price ? Number(form.compare_at_price) : null,
         purchase_price: costNum, stock: Number(form.stock || 0),
         category: form.category || null,
-        // « Publier sur Amashia » met le produit en ligne directement
+        // « Publier sur Amachia » met le produit en ligne directement
         status: asDraft ? "draft" : "active", images: urls,
         product_type: type, attributes: attrs, specifications: specs.filter((s) => s.name && s.value),
         bundle_items: bundleItems, virtual_files: virtualFiles, variant_images: variantImages,
@@ -612,11 +612,11 @@ function AddProductPage() {
       if (targetId) {
         const { error } = await supabase.from("seller_products").update(payload).eq("id", targetId);
         if (error) throw error;
-        toast.success(asDraft ? "Brouillon enregistré" : "Produit publié sur Amashia !");
+        toast.success(asDraft ? "Brouillon enregistré" : "Produit publié sur Amachia !");
       } else {
         const { error } = await supabase.from("seller_products").insert(payload);
         if (error) throw error;
-        toast.success(asDraft ? "Brouillon enregistré" : "Produit publié sur Amashia !");
+        toast.success(asDraft ? "Brouillon enregistré" : "Produit publié sur Amachia !");
       }
       try { localStorage.removeItem(DRAFT_KEY()); } catch { /* ignore */ }
       // retour automatique à « Mes produits » (rechargement complet en secours)
@@ -705,7 +705,7 @@ function AddProductPage() {
                   type="button"
                   onClick={() => setAiOpen(true)}
                   className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-primary text-black text-xs font-bold shadow-elegant hover:opacity-90"
-                  title="Générer une fiche SEO optimisée par l'agent IA Amashia"
+                  title="Générer une fiche SEO optimisée par l'agent IA Amachia"
                 >
                   <Sparkles size={14} /> Générer avec l'IA
                 </button>
@@ -738,14 +738,14 @@ function AddProductPage() {
                   </Select>
                   {catAuto && form.category && <p className="mt-1.5 inline-flex items-center gap-1.5 rounded-full bg-primary/12 px-2.5 py-1 text-[11px] font-semibold text-primary">✨ Détectée d'après le titre — modifiable</p>}
                   {!form.category && catNoMatch && <p className="mt-1 text-[11px] text-amber-400">{parentCat ? `Aucune sous-catégorie de « ${parentCat} » ne correspond au titre : choisissez-la dans la liste.` : "Titre non reconnu : choisissez la catégorie dans la liste."}</p>}
-                  {form.category && <p className="mt-1 text-[11px] text-muted-foreground">Publié sur Amashia dans : <b className="text-foreground">{parentCat || "—"} › {form.category}</b></p>}
+                  {form.category && <p className="mt-1 text-[11px] text-muted-foreground">Publié sur Amachia dans : <b className="text-foreground">{parentCat || "—"} › {form.category}</b></p>}
                 </div>
                 <div className="md:col-span-2">
                   <p className="mb-2 text-sm">SKU (code-barres) <span className="text-xs text-muted-foreground">— généré automatiquement</span></p>
                   {/* non modifiable : le livreur scanne ce code chez vous pour vérifier qu'il récupère le bon produit */}
                   <div aria-readonly="true" className="pointer-events-none flex select-none items-center gap-4 rounded-xl border border-dashed border-border bg-secondary/40 p-3">
                     {form.sku ? <Barcode code={form.sku} className="h-16 w-44 shrink-0 rounded bg-white p-1" /> : <div className="grid h-16 w-44 shrink-0 place-items-center rounded bg-white/5 text-[11px] text-muted-foreground">En cours de création…</div>}
-                    <p className="text-xs text-muted-foreground">{form.sku ? <>Le livreur Amashia scanne ce code-barres chez vous avant d'emporter le colis : collez l'étiquette (Commandes › détail) sur l'emballage.</> : <>Le code-barres est créé automatiquement dès le premier enregistrement du produit.</>}</p>
+                    <p className="text-xs text-muted-foreground">{form.sku ? <>Le livreur Amachia scanne ce code-barres chez vous avant d'emporter le colis : collez l'étiquette (Commandes › détail) sur l'emballage.</> : <>Le code-barres est créé automatiquement dès le premier enregistrement du produit.</>}</p>
                   </div>
                 </div>
               </div>
@@ -1007,7 +1007,7 @@ function AddProductPage() {
                 <div className="bg-card border border-border rounded-2xl p-6">
                   <h3 className="font-bold mb-1">Images par couleur</h3>
                   <p className="text-xs text-muted-foreground mb-4">
-                    Ajoutez les photos du produit dans chaque couleur. Sur Amashia, le client verra une vignette par couleur
+                    Ajoutez les photos du produit dans chaque couleur. Sur Amachia, le client verra une vignette par couleur
                     et les photos changeront quand il choisit une couleur. Sans photo, la couleur s'affiche en pastille ronde.
                   </p>
                   <div className="space-y-3">
@@ -1143,7 +1143,7 @@ function AddProductPage() {
                 </div>
               )}
               {type !== "virtual" && <div><label className="block text-sm mb-2">Quantité en stock</label><input type="number" value={form.stock} onChange={(e) => set("stock", e.target.value)} className={inp} /></div>}
-              <p className="text-[11px] text-muted-foreground">À la dernière étape, « Publier sur Amashia » met le produit en ligne ; « Enregistrer en brouillon » le garde hors ligne.</p>
+              <p className="text-[11px] text-muted-foreground">À la dernière étape, « Publier sur Amachia » met le produit en ligne ; « Enregistrer en brouillon » le garde hors ligne.</p>
             </div>
           )}
 
@@ -1157,7 +1157,7 @@ function AddProductPage() {
               </div>
               <div className="flex flex-col sm:flex-row gap-3">
                 <button onClick={() => submit(false)} disabled={saving || !!compareError} className="cta-sweep flex-1 py-3.5 rounded-full bg-gradient-primary text-black font-semibold shadow-elegant disabled:opacity-50">
-                  {saving ? "Publication…" : "Publier sur Amashia"}
+                  {saving ? "Publication…" : "Publier sur Amachia"}
                 </button>
                 <button onClick={() => submit(true)} disabled={saving} className="flex-1 py-3.5 rounded-full bg-secondary font-semibold disabled:opacity-50">Enregistrer en brouillon</button>
               </div>

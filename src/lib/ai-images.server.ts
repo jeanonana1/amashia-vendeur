@@ -10,7 +10,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
  *     description, puis choisit les prises de vue les plus utiles pour vendre ce produit.
  *  2. Higgsfield (Marketing Studio Image) génère chaque prise de vue en partant des vraies
  *     photos comme référence : le produit reste le même, seul l'angle / la mise en scène change.
- *  3. Les images terminées sont copiées dans le stockage Amashia du vendeur (Higgsfield
+ *  3. Les images terminées sont copiées dans le stockage Amachia du vendeur (Higgsfield
  *     les supprime au bout de 7 jours).
  */
 
@@ -29,7 +29,7 @@ function higgsfieldAuth() {
   return `Key ${secret ? `${key}:${secret}` : key}`;
 }
 
-/** Seules les photos du vendeur lui-même, dans le stockage Amashia, servent de référence. */
+/** Seules les photos du vendeur lui-même, dans le stockage Amachia, servent de référence. */
 export function isOwnImage(url: string, userId: string) {
   const base = process.env.SUPABASE_URL?.replace(/\/$/, "");
   return !!base && url.startsWith(`${base}/storage/v1/object/public/product-images/${userId}/`);
@@ -55,7 +55,7 @@ const ShotsSchema = z.object({
   })),
 });
 
-const PLAN_SYSTEM = `Tu es le directeur artistique e-commerce d'Amashia, marketplace du Cameroun.
+const PLAN_SYSTEM = `Tu es le directeur artistique e-commerce d'Amachia, marketplace du Cameroun.
 Tu reçois les VRAIES photos d'un produit prises par le vendeur, son titre, sa catégorie et sa description.
 Tu choisis entre 4 et 6 prises de vue qui feront le mieux vendre CE produit sur une marketplace, puis tu écris pour chacune la consigne envoyée à un modèle de génération d'images qui recevra ces mêmes photos comme référence.
 
@@ -155,7 +155,7 @@ function hfError(status: number, detail?: unknown) {
   return "La génération n'a pas pu démarrer. Réessayez.";
 }
 
-// ---------------------------------------------------------------- 3. Suivi + copie dans le stockage Amashia
+// ---------------------------------------------------------------- 3. Suivi + copie dans le stockage Amachia
 
 export const CheckInput = z.object({
   jobs: z.array(z.object({ id: z.string().max(40), requestId: z.string().uuid() })).min(1).max(6),

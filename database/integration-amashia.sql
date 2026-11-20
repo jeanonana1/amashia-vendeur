@@ -1,5 +1,5 @@
 -- =====================================================================
--- Amashia : branchement du site vendeur sur la base du site client
+-- Amachia : branchement du site vendeur sur la base du site client
 -- ---------------------------------------------------------------------
 -- Migration ADDITIVE uniquement : aucune table, colonne ou donnée
 -- existante n'est supprimée ni modifiée. Le site client continue de
@@ -110,7 +110,7 @@ begin
   shop := coalesce(
     nullif(trim(sp.shop_name), ''),
     nullif(trim(concat_ws(' ', sp.first_name, sp.last_name)), ''),
-    'Boutique Amashia'
+    'Boutique Amachia'
   );
 
   select id into sid from public.sellers where owner_id = _uid;
@@ -356,7 +356,7 @@ select
   oi.product_id as listing_id,
   sp.id as product_id,
   s.owner_id as seller_id,
-  coalesce(nullif(trim(o.full_name), ''), 'Client Amashia') as customer_name,
+  coalesce(nullif(trim(o.full_name), ''), 'Client Amachia') as customer_name,
   concat_ws(', ', nullif(o.district, ''), nullif(o.city, '')) as delivery_area,
   oi.product_title,
   oi.quantity,

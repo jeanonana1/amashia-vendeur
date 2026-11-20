@@ -8,7 +8,7 @@ import { SpecTable } from "@/components/seller/ui/SpecTable";
 import { Select } from "@/components/ui/app-select";
 
 export const Route = createFileRoute("/dashboard/clients")({
-  head: () => ({ meta: [{ title: "Clients — Amashia Seller" }, { name: "description", content: "Clients : votre espace vendeur Amashia pour gérer votre activité." }, { property: "og:title", content: "Clients — Amashia Seller" }, { property: "og:description", content: "Clients : votre espace vendeur Amashia pour gérer votre activité." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
+  head: () => ({ meta: [{ title: "Clients — Amachia Seller" }, { name: "description", content: "Clients : votre espace vendeur Amachia pour gérer votre activité." }, { property: "og:title", content: "Clients — Amachia Seller" }, { property: "og:description", content: "Clients : votre espace vendeur Amachia pour gérer votre activité." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   component: ClientsPage,
 });
 

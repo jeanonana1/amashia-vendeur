@@ -24,7 +24,7 @@ async function friendly<T>(run: () => Promise<T>): Promise<T> {
 }
 
 function checkRefs(urls: string[], userId: string, isOwnImage: (u: string, id: string) => boolean) {
-  if (!urls.every((u) => isOwnImage(u, userId))) throw new Error("Les photos de référence doivent être vos propres photos Amashia.");
+  if (!urls.every((u) => isOwnImage(u, userId))) throw new Error("Les photos de référence doivent être vos propres photos Amachia.");
 }
 
 /** Claude choisit les prises de vue à partir des vraies photos, du titre et de la description. */
@@ -49,7 +49,7 @@ export const startProductShots = createServerFn({ method: "POST" })
     return friendly(() => m.startShots(input));
   });
 
-/** Suit l'avancement ; une image terminée est copiée dans le stockage Amashia du vendeur. */
+/** Suit l'avancement ; une image terminée est copiée dans le stockage Amachia du vendeur. */
 export const checkProductShots = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => input as Record<string, unknown>)

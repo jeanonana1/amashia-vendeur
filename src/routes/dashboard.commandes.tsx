@@ -80,7 +80,7 @@ function CommandesPage() {
   useEffect(() => {
     void load();
     // Actualisation automatique toutes les 30 secondes pour voir les nouvelles commandes
-    const timer = window.setInterval(() => void load(), 30_000);
+    const timer = window.setInterval(() => void load(), 10_000);
     // statut changé par Amashia (admin) ou nouvelle commande : actualisation immédiate
     const ch = supabase.channel("seller-order-items")
       .on("postgres_changes", { event: "*", schema: "public", table: "order_items" }, () => void load())

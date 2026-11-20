@@ -94,7 +94,7 @@ export function NewOrderAlarm({ uid }: { uid: string }) {
       } catch { /* hors ligne : on réessaie */ }
     };
     void poll();
-    const t = window.setInterval(() => void poll(), 15_000);
+    const t = window.setInterval(() => void poll(), 10_000);
     const channel = supabase
       .channel(`seller-new-orders-${uid}`)
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "order_items" }, () => void poll())

@@ -6,7 +6,7 @@ import { createFileRoute } from "@tanstack/react-router";
  * qu'une fois : la réponse est gardée en cache par le CDN de Vercel (1 an) puis
  * par le navigateur du visiteur.
  */
-const ALLOWED = new Set(["https://amashia-client.vercel.app", "http://localhost:3000", "https://amashia-vendeur.vercel.app", "http://localhost:8082"]);
+const ALLOWED = new Set(["https://amashia-client.vercel.app", "https://amachia.com", "https://www.amachia.com", "http://localhost:3000", "https://amashia-vendeur.vercel.app", "https://seller.amachia.com", "http://localhost:8082"]);
 const MAX = 1500;
 
 function cors(origin: string | null) {

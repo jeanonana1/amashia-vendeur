@@ -136,8 +136,8 @@ function Page() {
           </div>
           <p className="text-center mt-6 text-xs text-muted-foreground">
             En vous connectant, vous acceptez nos{" "}
-            <a href="https://amashia-client.vercel.app/legal/terms" className="text-primary hover:underline">conditions d'utilisation</a> et notre{" "}
-            <a href="https://amashia-client.vercel.app/legal/privacy" className="text-primary hover:underline">politique de confidentialité</a>
+            <a href="https://amachia.com/legal/terms" className="text-primary hover:underline">conditions d'utilisation</a> et notre{" "}
+            <a href="https://amachia.com/legal/privacy" className="text-primary hover:underline">politique de confidentialité</a>
           </p>
         </div>
     </AuthSplit>

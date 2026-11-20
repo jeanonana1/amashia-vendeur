@@ -43,7 +43,7 @@ function ProductMock() {
         {/* barre de fenêtre */}
         <div className="flex items-center gap-2 border-b border-border px-4 py-3">
           <span className="h-3 w-3 rounded-full bg-[#ff5f57]" /><span className="h-3 w-3 rounded-full bg-[#febc2e]" /><span className="h-3 w-3 rounded-full bg-[#28c840]" />
-          <div className="mx-auto hidden rounded-full bg-secondary px-4 py-1 text-[11px] text-muted-foreground sm:block">amashia-vendeur.vercel.app/dashboard</div>
+          <div className="mx-auto hidden rounded-full bg-secondary px-4 py-1 text-[11px] text-muted-foreground sm:block">seller.amachia.com/dashboard</div>
         </div>
         <div className="grid md:grid-cols-[200px_1fr]">
           <aside className="hidden border-r border-border p-4 md:block">

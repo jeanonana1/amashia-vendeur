@@ -2,7 +2,7 @@ import type { User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
 /** Adresse publique du site client (marketplace). */
-export const MARKETPLACE_URL = (import.meta.env.VITE_MARKETPLACE_URL as string | undefined)?.replace(/\/$/, "") || "https://amashia-client.vercel.app";
+export const MARKETPLACE_URL = (import.meta.env.VITE_MARKETPLACE_URL as string | undefined)?.replace(/\/$/, "") || "https://amachia.com";
 
 /** Lien vers la fiche d'un produit publié sur le site client. */
 export function marketplaceProductUrl(marketplaceProductId: string) {

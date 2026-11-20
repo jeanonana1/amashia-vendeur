@@ -2,7 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { SellerLogo } from "@/components/seller/SellerLogo";
 import { FooterWordmark } from "@/components/brand/AmashiaLogo";
 
-const CLIENT = "https://amashia-client.vercel.app";
+const CLIENT = "https://amachia.com";
 
 export function Footer() {
   const cols = [

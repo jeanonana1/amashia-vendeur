@@ -32,7 +32,7 @@ export interface SellerStats {
 }
 
 /** Adresse publique du site client (marketplace). */
-export const MARKETPLACE_URL = ((import.meta.env.VITE_MARKETPLACE_URL as string | undefined) || "https://amashia-client.vercel.app").replace(/\/$/, "");
+export const MARKETPLACE_URL = ((import.meta.env.VITE_MARKETPLACE_URL as string | undefined) || "https://amachia.com").replace(/\/$/, "");
 
 export const money = (n: number) => `${Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ")} FCFA`;
 export const num = (n: number) => Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");

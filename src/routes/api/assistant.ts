@@ -4,7 +4,7 @@ import { createFileRoute } from "@tanstack/react-router";
  * POST /api/assistant — assistant du service client (page Contact du site client).
  * Corps : { messages: [{ role: "user" | "assistant", content: string }] }
  */
-const ALLOWED = new Set(["https://amashia-client.vercel.app", "http://localhost:3000"]);
+const ALLOWED = new Set(["https://amashia-client.vercel.app", "https://amachia.com", "https://www.amachia.com", "http://localhost:3000"]);
 const cors = (origin: string | null) => ({ Vary: "Origin", ...(origin && ALLOWED.has(origin) ? { "Access-Control-Allow-Origin": origin, "Access-Control-Allow-Headers": "content-type", "Access-Control-Allow-Methods": "POST, OPTIONS" } : {}) });
 // limite simple par adresse IP (par instance du serveur)
 const hits = new Map<string, number[]>();

@@ -173,7 +173,7 @@ export function DashboardLayout({ title, subtitle, actions, children }: { title:
           {avatar ? <img src={avatar} alt="" className="h-9 w-9 rounded-full object-cover" /> : <div className="grid h-9 w-9 place-items-center rounded-full bg-primary text-sm font-bold text-black">{name[0]}</div>}
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-semibold">{name}</p>
-            <a href="https://amashia-client.vercel.app" target="_blank" rel="noreferrer" className="text-[11px] text-muted-foreground hover:text-primary">Voir Amachia ↗</a>
+            <a href="https://amachia.com" target="_blank" rel="noreferrer" className="text-[11px] text-muted-foreground hover:text-primary">Voir Amachia ↗</a>
           </div>
           <button onClick={logout} className="grid h-8 w-8 place-items-center rounded-lg text-muted-foreground transition hover:bg-destructive/10 hover:text-destructive" title="Déconnexion" aria-label="Déconnexion"><LogOut size={16} /></button>
         </div>

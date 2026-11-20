@@ -121,7 +121,8 @@ export function OrderDetailModal({ line, onClose, onChanged }: { line: SellerOrd
           {lines.map((l) => {
             const st = ORDER_STATUS[l.status] ?? ORDER_STATUS.pending;
             return (
-              <div key={l.id} className="flex gap-3 rounded-xl border border-border p-3">
+              <div key={l.id} className="rounded-xl border border-border p-3">
+              <div className="flex gap-3">
                 <div className="h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-white">
                   {l.product_image ? <img {...imgProps(l.product_image, { width: 128 })} alt="" className="h-full w-full object-cover" /> : <div className="grid h-full w-full place-items-center text-muted-foreground"><Package size={18} /></div>}
                 </div>
@@ -130,13 +131,11 @@ export function OrderDetailModal({ line, onClose, onChanged }: { line: SellerOrd
                   {(l.color || l.options) && <p className="text-xs text-primary">{[l.color ? `Couleur : ${colorName(l.color)}` : "", l.options ?? ""].filter(Boolean).join(" · ")}</p>}
                   <p className="mt-0.5 text-xs text-muted-foreground">{l.quantity} × {money(Number(l.unit_price))}{Number(l.discount) > 0 && <> − coupon {l.coupon_code} {money(Number(l.discount))}</>} = <b className="text-foreground">{money(Number(l.amount))}</b></p>
                   <div className="mt-2"><OrderStatusTrack status={l.status} /></div>
-                  {l.sku && (
-                    <div className="mt-2 flex items-center gap-2 rounded-lg bg-white p-1.5">
-                      <Barcode code={l.sku} className="h-12 w-36 shrink-0" />
-                      <p className="text-[10px] leading-snug text-neutral-600">Le livreur scanne ce code-barres avant d'emporter le produit.</p>
-                    </div>
-                  )}
+                  {l.sku && <SkuBlock sku={l.sku} className="mt-2 hidden sm:flex" />}
                 </div>
+              </div>
+              {/* mobile : le bloc du code-barres prend toute la largeur, aligné sur l'image */}
+              {l.sku && <SkuBlock sku={l.sku} className="mt-3 flex sm:hidden" />}
               </div>
             );
           })}
@@ -158,3 +157,12 @@ export function OrderDetailModal({ line, onClose, onChanged }: { line: SellerOrd
   );
 }
 
+/** Code-barres (SKU) du produit, scanné par le livreur avant d'emporter le colis. */
+function SkuBlock({ sku, className }: { sku: string; className: string }) {
+  return (
+    <div className={`${className} flex-col items-stretch gap-2 rounded-xl bg-white p-3 sm:flex-row sm:items-center`}>
+      <Barcode code={sku} className="h-20 w-full shrink-0 sm:h-16 sm:w-52" />
+      <p className="text-xs leading-snug text-neutral-700">Le livreur scanne ce code-barres avant d'emporter le produit. Collez l'étiquette sur l'emballage.</p>
+    </div>
+  );
+}

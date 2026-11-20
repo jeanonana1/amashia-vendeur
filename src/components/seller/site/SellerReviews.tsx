@@ -214,7 +214,7 @@ function CardMedia({ src, fallback, category }: { src: string | null; fallback: 
   return (
     <div className={`avis-card__media ${ratio ? "avis-card__media--fit" : ""}`} style={ratio ? { aspectRatio: String(ratio) } : undefined}>
       {url && (src
-        ? <img {...imgProps(src, { width: 640, sizes: "(max-width: 560px) 74vw, 400px" })} alt={`Catégorie ${category}`} loading="lazy" decoding="async" onLoad={onLoad} />
+        ? <img src={src} alt={`Catégorie ${category}`} loading="lazy" decoding="async" onLoad={onLoad} />
         : <img src={url} alt="" loading="lazy" decoding="async" onLoad={onLoad} onError={(e) => { e.currentTarget.style.display = "none"; }} />)}
       {category && <span className="avis-card__cat">{category.toUpperCase()}</span>}
     </div>

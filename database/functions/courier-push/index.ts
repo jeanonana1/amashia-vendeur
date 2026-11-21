@@ -72,7 +72,17 @@ Deno.serve(async (req) => {
         method: "POST", headers: { Authorization: `Bearer ${tok}`, "Content-Type": "application/json" },
         body: JSON.stringify({ validate_only: true, message: { topic: "prime-selftest", data: { kind: "selftest" } } }),
       });
-      return json({ google_auth: true, project: sa.project_id, fcm_status: r.status, fcm: (await r.text()).slice(0, 200) });
+      // validité des jetons enregistrés (envoi « à blanc », aucune notification affichée)
+      const { data: toks } = await db.from("courier_push_tokens").select("token, updated_at");
+      const tokens = [];
+      for (const t of (toks ?? []) as { token: string; updated_at: string }[]) {
+        const v = await fetch(`https://fcm.googleapis.com/v1/projects/${sa.project_id}/messages:send`, {
+          method: "POST", headers: { Authorization: `Bearer ${tok}`, "Content-Type": "application/json" },
+          body: JSON.stringify({ validate_only: true, message: { token: t.token, data: { kind: "selftest" }, android: { priority: "HIGH" } } }),
+        });
+        tokens.push({ updated_at: t.updated_at, status: v.status, detail: v.ok ? "ok" : (await v.text()).slice(0, 160) });
+      }
+      return json({ google_auth: true, project: sa.project_id, fcm_status: r.status, fcm: (await r.text()).slice(0, 200), tokens });
     } catch (e) { return json({ google_auth: false, error: String((e as Error).message).slice(0, 300) }); }
   }
 

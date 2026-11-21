@@ -25,9 +25,9 @@ export function Header() {
   }, []);
   return (
     <header className="sticky top-0 z-50 px-3 pt-3 sm:px-5">
-      <div className={`mx-auto flex h-[4.5rem] max-w-[1200px] items-center justify-between gap-4 rounded-2xl border px-4 transition-all sm:px-5 ${scrolled || open ? "border-border bg-background shadow-card" : "border-transparent"}`}>
+      <div className={`mx-auto flex h-[4.5rem] max-w-[1200px] items-center justify-between gap-4 border px-4 transition-all duration-300 sm:px-5 ${scrolled || open ? "rounded-full border-border bg-background/85 pl-5 pr-2.5 shadow-card backdrop-blur-xl sm:pl-6 sm:pr-3" : "rounded-2xl border-transparent"}`}>
         <Link to="/" className="flex shrink-0 items-center" aria-label="Accueil amachia seller">
-          <SellerLogo className="h-11 sm:h-11" />
+          <SellerLogo className="h-[22px] sm:h-[26px]" />
         </Link>
         <nav className="hidden items-center gap-1 md:flex">
           {links.map((l) => (

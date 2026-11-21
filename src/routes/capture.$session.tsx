@@ -75,7 +75,7 @@ function CapturePage() {
   return (
     <main className="min-h-screen bg-background text-foreground grid place-items-center p-6">
       <div className="w-full max-w-sm bg-card border border-border rounded-3xl p-6 text-center">
-        <div className="mb-4 flex justify-center"><SellerLogo className="h-8" /></div>
+        <div className="mb-4 flex justify-center"><SellerLogo className="h-5" /></div>
         <h1 className="text-xl font-extrabold">Photos du produit</h1>
         <p className="text-sm text-muted-foreground mt-2">Chaque photo part directement sur votre ordinateur, dans la fiche produit. Conseil : fond simple, bonne lumière, plusieurs angles.</p>
 

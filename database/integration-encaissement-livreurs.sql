@@ -88,3 +88,14 @@ begin
       'cash', (select coalesce(sum(d.cash_collected), 0) from deliveries d where d.courier_id = c.id and d.status = 'delivered'),
       'received', (select coalesce(sum(r.amount), 0) from courier_cash_receipts r where r.courier_id = c.id))) from couriers c), '{}'::jsonb);
 end $$;
+create or replace function public.admin_pay_courier(_courier uuid, _amount integer, _method text, _ref text, _note text)
+returns void language plpgsql security definer set search_path = public as $$
+declare due int;
+begin
+  perform public.admin_guard('admin_pay_courier');
+  if _amount is null or _amount <= 0 then raise exception 'Montant invalide.'; end if;
+  select coalesce((select sum(d.courier_pay) from deliveries d where d.courier_id = _courier and d.status = 'delivered'), 0)
+       - coalesce((select sum(p.amount) from courier_payouts p where p.courier_id = _courier), 0) into due;
+  if _amount > due then raise exception 'Ce livreur est déjà payé : reste à payer % FCFA.', greatest(due, 0); end if;
+  insert into courier_payouts (courier_id, amount, method, reference, note) values (_courier, _amount, nullif(_method, ''), nullif(btrim(_ref), ''), nullif(btrim(_note), ''));
+end $$;

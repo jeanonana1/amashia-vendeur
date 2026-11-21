@@ -26,6 +26,13 @@ begin
       'earned', (select coalesce(sum(x.courier_pay), 0) from deliveries x where x.courier_id = c.id and x.status = 'delivered'),
       'paid', (select coalesce(sum(p.amount), 0) from courier_payouts p where p.courier_id = c.id),
       'ongoing', (select count(*) from deliveries x where x.courier_id = c.id and x.status in ('assigned', 'picked_up', 'in_transit'))),
+    -- historique des courses (les 150 dernières), avec le montant perçu et le gain
+    'history', (select coalesce(jsonb_agg(h order by h->>'at' desc), '[]'::jsonb) from (
+        select jsonb_build_object('order_number', o.order_number, 'customer', o.full_name, 'district', o.district, 'city', o.city, 'status', x.status,
+          'total', o.total_fcfa, 'cash', x.cash_collected, 'pay', x.courier_pay, 'at', coalesce(x.delivered_at, x.failed_at, x.assigned_at),
+          'day', cm_day(coalesce(x.delivered_at, x.failed_at, x.assigned_at))) h
+        from deliveries x join orders o on o.id = x.order_id where x.courier_id = c.id
+        order by coalesce(x.delivered_at, x.failed_at, x.assigned_at) desc limit 150) t),
     -- journées où il reste des espèces à reverser (pour encaisser directement depuis la fiche)
     'unpaid_days', (select coalesce(jsonb_agg(x order by x->>'day' desc), '[]'::jsonb) from jsonb_array_elements(public.admin_courier_daily(d - 90, d, c.id)) x where (x->>'to_remit')::int > 0)
   );

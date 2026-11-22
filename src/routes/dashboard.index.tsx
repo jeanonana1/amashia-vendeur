@@ -143,7 +143,7 @@ function DashboardOverview() {
                 <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-primary" /> Visites</span>
                 <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-emerald-500" /> Ajouts au panier</span>
                 <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-sky-400" /> Commandes</span>
-                <span className="flex items-center gap-1.5"><span className="h-2 w-3 rounded-sm" style={{ background: "oklch(0.72 0.14 85 / .6)" }} /> Ventes (FCFA, axe gauche)</span>
+                <span className="flex items-center gap-1.5"><span className="h-2 w-3 rounded-sm" style={{ background: "oklch(0.72 0.14 85 / .6)" }} /> Ventes (FCFA, axe droit)</span>
               </div>
             </div>
             <div className="flex rounded-full bg-secondary p-1 text-xs">
@@ -313,6 +313,14 @@ function niceScale(max: number, steps = 4) {
   const step = [1, 2, 2.5, 5, 10].map((m) => m * p).find((v) => v >= raw)!;
   return { top: step * steps, step };
 }
+/** Graduation en nombres entiers pour les visites, ajouts au panier et commandes (9 visites → 0, 3, 6, 9, 12). */
+function countScale(max: number, steps = 4) {
+  if (max <= 0) return { top: steps, step: 1 };
+  const raw = max / steps;
+  const p = 10 ** Math.max(0, Math.floor(Math.log10(raw)));
+  const step = Math.max(1, Math.ceil([1, 2, 2.5, 5, 10].map((m) => m * p).find((v) => v >= raw)!));
+  return { top: step * steps, step };
+}
 /** 1 500 → « 1,5 k » ; 2 300 000 → « 2,3 M ». */
 function fcfaShort(v: number) {
   if (v >= 1_000_000) return `${(v / 1_000_000).toLocaleString("fr-FR", { maximumFractionDigits: 1 })} M`;
@@ -324,12 +332,16 @@ function Chart({ stats }: { stats: SellerStats }) {
   const [hover, setHover] = useState<number | null>(null);
   const s = stats.series;
   // axe des ventes en FCFA, gradué selon les montants de la période
-  const scale = niceScale(Math.max(0, ...s.map((p) => Number(p.revenue) || 0)));
+  const revMax = Math.max(0, ...s.map((p) => Number(p.revenue) || 0));
+  const scale = niceScale(revMax);
   const ticks = Array.from({ length: 5 }, (_, i) => scale.step * (4 - i));
-  const max = Math.max(1, ...s.map((p) => Math.max(p.views, p.carts, p.orders)));
+  // axe de gauche : visites / paniers / commandes réels de la période (nombres entiers)
+  const cScale = countScale(Math.max(0, ...s.map((p) => Math.max(p.views, p.carts, p.orders))));
+  const cTicks = Array.from({ length: 5 }, (_, i) => cScale.step * (4 - i));
+  const max = cScale.top;
   const w = 100, h = 60;
   const x = (i: number) => (s.length <= 1 ? w / 2 : (i / (s.length - 1)) * w);
-  const y = (v: number) => h - (v / max) * (h - 4);
+  const y = (v: number) => h - (v / max) * h;
   const path = (k: "views" | "carts" | "orders") => s.map((p, i) => `${i === 0 ? "M" : "L"}${x(i)},${y(p[k])}`).join(" ");
   const empty = s.every((p) => !p.views && !p.carts && !p.orders && !p.revenue);
   const yRev = (v: number) => h - (v / scale.top) * h;
@@ -338,12 +350,19 @@ function Chart({ stats }: { stats: SellerStats }) {
   const hp = hover !== null ? s[hover] : null;
 
   return (
-    <div className="relative h-64 pl-14">
-      {/* graduation FCFA */}
-      <div className="pointer-events-none absolute left-0 top-0 flex h-[85%] w-12 flex-col justify-between text-right text-[10px] text-muted-foreground">
-        {ticks.map((t) => <span key={t} className="-translate-y-1/2 first:translate-y-0 last:translate-y-0 leading-none">{fcfaShort(t)}</span>)}
+    <div className={`relative h-64 pl-10 ${revMax > 0 ? "pr-12" : ""}`}>
+      {/* axe de gauche : nombre de visites, ajouts au panier et commandes */}
+      <div className="pointer-events-none absolute left-0 top-0 flex h-[85%] w-8 flex-col justify-between text-right text-[10px] text-muted-foreground tabular-nums">
+        {cTicks.map((t) => <span key={t} className="-translate-y-1/2 first:translate-y-0 last:translate-y-0 leading-none">{t.toLocaleString("fr-FR")}</span>)}
       </div>
-      <span className="pointer-events-none absolute -top-5 left-0 text-[10px] font-semibold text-muted-foreground">FCFA</span>
+      <span className="pointer-events-none absolute -top-5 left-0 text-[10px] font-semibold text-muted-foreground">Nombre</span>
+      {/* axe de droite : ventes en FCFA (seulement s'il y a des ventes sur la période) */}
+      {revMax > 0 && <>
+        <div className="pointer-events-none absolute right-0 top-0 flex h-[85%] w-11 flex-col justify-between text-left text-[10px] text-muted-foreground tabular-nums">
+          {ticks.map((t) => <span key={t} className="-translate-y-1/2 first:translate-y-0 last:translate-y-0 leading-none">{fcfaShort(t)}</span>)}
+        </div>
+        <span className="pointer-events-none absolute -top-5 right-0 text-[10px] font-semibold text-muted-foreground">FCFA</span>
+      </>}
       <svg
         viewBox={`0 0 ${w} ${h}`}
         preserveAspectRatio="none"

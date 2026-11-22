@@ -2,7 +2,7 @@ import { createPortal } from "react-dom";
 import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { askConfirm } from "@/lib/dialog";
 import { imgProps } from "@/lib/img";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import { DashboardLayout } from "@/components/seller/dashboard/DashboardLayout";
 import { ArrowLeft, ArrowRight, Upload, X, Check, Package, Layers, Cloud, Boxes, Plus, Trash2, FileText, TrendingUp, ChevronLeft, ChevronRight, Star, Sparkles } from "lucide-react";
 import { toast } from "sonner";
@@ -421,38 +421,53 @@ function AddProductPage() {
   }, [form.category, SITE_CATEGORY_GROUPS.length]);
   const subOptions = SITE_CATEGORY_GROUPS.find((g) => g.group === parentCat)?.categories ?? [];
 
-  // Détection automatique, d'après le titre et uniquement avec les catégories / sous-catégories de la base :
-  // 1) si le vendeur n'a pas choisi la catégorie, on la détecte (avec sa sous-catégorie) ;
-  // 2) s'il l'a choisie, on cherche la sous-catégorie seulement dans cette catégorie.
+  // Détection automatique dynamique, d'après le titre et uniquement avec les catégories / sous-catégories de la base.
+  // À chaque nouveau titre (effacé puis réécrit, ou modifié), la catégorie et la sous-catégorie sont recalculées.
   const parentManual = useRef(false);
   const [parentAuto, setParentAuto] = useState(false);
   const [catNoMatch, setCatNoMatch] = useState(false);
+  const catKey = SITE_CATEGORIES.join("|");
+  const expected = useMemo(() => {
+    const title = form.name.trim();
+    if (title.length < 3 || !SITE_CATEGORIES.length) return null;
+    const g = detectSubcategory(title, SITE_CATEGORIES);
+    const grp = g ? SITE_CATEGORY_GROUPS.find((x) => x.categories.includes(g.sub)) : undefined;
+    return g && grp ? { group: grp.group, sub: g.sub } : null;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form.name, catKey]);
+  const lastTitle = useRef<string | null>(null);
   useEffect(() => {
-    if (catManual.current || !SITE_CATEGORY_GROUPS.length) return;
+    const title = form.name.trim();
     const t = window.setTimeout(() => {
-      const title = form.name.trim();
-      if (!parentManual.current) {
-        if (!title) return;
-        const g = detectSubcategory(title, SITE_CATEGORIES);
-        const grp = g ? SITE_CATEGORY_GROUPS.find((x) => x.categories.includes(g.sub)) : undefined;
-        setCatNoMatch(!g);
-        if (g && grp) {
-          if (grp.group !== parentCat) setParentCat(grp.group);
-          setParentAuto(true);
-          if (g.sub !== form.category) setForm((f) => ({ ...f, category: g.sub }));
-          setCatAuto(true);
-        }
-        return;
-      }
-      if (!parentCat || !subOptions.length) return;
-      const g = title ? detectSubcategory(title, subOptions) : null;
-      const sub = g?.sub ?? (subOptions.length === 1 ? subOptions[0] : "");
-      setCatNoMatch(!sub && !!title);
-      if (sub && sub !== form.category) { setForm((f) => ({ ...f, category: sub })); setCatAuto(true); }
-    }, 300);
+      if (!SITE_CATEGORIES.length) return;
+      const first = lastTitle.current === null;
+      if (title === (lastTitle.current ?? "")) return;
+      lastTitle.current = title;
+      // produit déjà classé qu'on ouvre en modification : on garde son classement tant que le titre ne change pas
+      if (first && form.category) return;
+      if (!title) { setCatNoMatch(false); return; }
+      setCatNoMatch(!expected);
+      if (!expected) return;
+      parentManual.current = false; catManual.current = false;
+      if (expected.group !== parentCat) setParentCat(expected.group);
+      if (expected.sub !== form.category) setForm((f) => ({ ...f, category: expected.sub }));
+      setParentAuto(true); setCatAuto(true);
+    }, 350);
     return () => window.clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [form.name, parentCat, subOptions.length, SITE_CATEGORY_GROUPS.length]);
+  }, [form.name, catKey, expected?.sub]);
+
+  // Choix du vendeur incompatible avec le titre : bloqué, avec la bonne catégorie / sous-catégorie à utiliser
+  const catMismatch = (() => {
+    if (!expected) return false;
+    if (form.category) return form.category !== expected.sub && !detectSubcategory(form.name, [form.category]);
+    return !!parentCat && parentCat !== expected.group;
+  })();
+  const applyExpected = () => {
+    if (!expected) return;
+    parentManual.current = false; catManual.current = false;
+    setParentCat(expected.group); setForm((f) => ({ ...f, category: expected.sub })); setParentAuto(true); setCatAuto(true);
+  };
 
   // Specs presets when category changes
   function suggestSpecs(silent = false) {
@@ -587,6 +602,7 @@ function AddProductPage() {
   async function submit(asDraft = false) {
     if (!form.name || !form.price) return toast.error("Nom et prix requis");
     if (!form.category) { setStep(1); return toast.error("Choisissez la catégorie du produit (étape Infos)."); }
+    if (catMismatch && expected) { setStep(1); return toast.error(`Catégorie incorrecte pour ce produit. Choisissez : ${expected.group} › ${expected.sub}`); }
     if (compareError) { setStep(4); return toast.error("Le prix normal ne peut pas être inférieur ou égal au prix de vente."); }
     if (finalSavingRef.current) return; // double-clic sur « Publier »
     finalSavingRef.current = true;
@@ -649,7 +665,7 @@ function AddProductPage() {
   }
 
   const canNext = () => {
-    if (step === 1) return !!form.name && !!form.category;
+    if (step === 1) return !!form.name && !!form.category && !catMismatch;
     if (step === 4) return !!form.price && !compareError;
     return true;
   };
@@ -754,8 +770,17 @@ function AddProductPage() {
                   </Select>
                   {catAuto && form.category && <p className="mt-1.5 inline-flex items-center gap-1.5 rounded-full bg-primary/12 px-2.5 py-1 text-[11px] font-semibold text-primary">✨ Détectée d'après le titre — modifiable</p>}
                   {!form.category && catNoMatch && <p className="mt-1 text-[11px] text-amber-400">{parentCat ? `Aucune sous-catégorie de « ${parentCat} » ne correspond au titre : choisissez-la dans la liste.` : "Titre non reconnu : choisissez la catégorie dans la liste."}</p>}
-                  {form.category && <p className="mt-1 text-[11px] text-muted-foreground">Publié sur Amachia dans : <b className="text-foreground">{parentCat || "—"} › {form.category}</b></p>}
+                  {form.category && !catMismatch && <p className="mt-1 text-[11px] text-muted-foreground">Publié sur Amachia dans : <b className="text-foreground">{parentCat || "—"} › {form.category}</b></p>}
                 </div>
+                {catMismatch && expected && (
+                  <div role="alert" className="md:col-span-2 flex flex-wrap items-center gap-3 rounded-xl border border-red-500/50 bg-red-500/10 p-3">
+                    <div className="min-w-0 flex-1 text-sm">
+                      <p className="font-bold text-red-400">Catégorie incorrecte : impossible de continuer</p>
+                      <p className="mt-0.5 text-foreground/90">« {form.name.trim()} » ne correspond pas à {form.category ? <b>{parentCat} › {form.category}</b> : <b>{parentCat}</b>}. La catégorie qui correspond à ce produit est : <b className="text-primary">{expected.group} › {expected.sub}</b>.</p>
+                    </div>
+                    <button type="button" onClick={applyExpected} className="shrink-0 rounded-full bg-primary px-4 py-2 text-xs font-bold text-black">Utiliser {expected.group} › {expected.sub}</button>
+                  </div>
+                )}
                 <div className="md:col-span-2">
                   <p className="mb-2 text-sm">SKU (code-barres) <span className="text-xs text-muted-foreground">— généré automatiquement</span></p>
                   {/* non modifiable : le livreur scanne ce code chez vous pour vérifier qu'il récupère le bon produit */}

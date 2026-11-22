@@ -78,6 +78,22 @@ const SPEC_PRESETS: Record<string, string[]> = {
   "Services": ["Durée", "Disponibilité", "Zone couverte"],
   "default": ["Marque", "Modèle", "Couleur", "Poids", "Dimensions", "Garantie"],
 };
+// sous-catégories de la nouvelle arborescence (mêmes caractéristiques que leur famille)
+const ALIAS: Record<string, string> = {
+  "Smartphones": "Téléphones & Tablettes", "Tablettes": "Téléphones & Tablettes", "Téléphones basiques": "Téléphones & Tablettes",
+  "Ordinateurs portables": "Ordinateurs", "Ordinateurs de bureau": "Ordinateurs",
+  "Réfrigérateurs & congélateurs": "Électroménager", "Cuisinières & fours": "Électroménager", "Machines à laver": "Électroménager",
+  "Climatiseurs": "Électroménager", "Ventilateurs": "Électroménager", "Fontaines à eau": "Électroménager", "Petit électroménager": "Électroménager", "Fers à repasser": "Électroménager",
+  "Vêtements Femme": "Mode", "Vêtements Homme": "Mode", "Mode Enfant": "Mode", "Mode africaine & pagne": "Mode", "Lingerie & sous-vêtements": "Mode",
+  "Chaussures Femme": "Chaussures", "Chaussures Homme": "Chaussures", "Bijoux": "Bijoux & Accessoires", "Montres": "Bijoux & Accessoires",
+  "Maquillage": "Beauté", "Soins du visage": "Beauté", "Soins du corps": "Beauté", "Soins des cheveux": "Beauté", "Parfums": "Beauté", "Hygiène": "Beauté",
+  "Ustensiles de cuisine": "Cuisine & Ustensiles", "Vaisselle": "Cuisine & Ustensiles", "Décoration": "Maison & Décoration", "Meubles": "Maison & Décoration",
+  "Épicerie": "Alimentation", "Boissons": "Alimentation", "Alimentation bébé": "Alimentation",
+  "Puériculture": "Bébé & Enfants", "Vêtements bébé": "Bébé & Enfants", "Jouets & jeux": "Bébé & Enfants", "Couches & lingettes": "Bébé & Enfants",
+  "Fitness & musculation": "Sport & Loisirs", "Football & sports collectifs": "Sport & Loisirs", "Vêtements de sport": "Sport & Loisirs", "Vélos & trottinettes": "Sport & Loisirs", "Camping & plein air": "Sport & Loisirs",
+  "Accessoires auto": "Automobile & Moto", "Pièces auto": "Automobile & Moto", "Huiles & entretien": "Automobile & Moto", "Électronique auto": "Automobile & Moto", "Motos & accessoires moto": "Automobile & Moto",
+};
+for (const [k, v] of Object.entries(ALIAS)) if (!SPEC_PRESETS[k] && SPEC_PRESETS[v]) SPEC_PRESETS[k] = SPEC_PRESETS[v];
 
 // Detect the product family from the TITLE to propose the right technical specs
 const TITLE_SPECS: { re: RegExp; specs: string[] }[] = [

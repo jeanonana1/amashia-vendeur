@@ -160,7 +160,7 @@ begin
   return coalesce((select jsonb_agg(x order by x->>'at' desc nulls last) from (
     -- connexion admin depuis une adresse IP jamais vue pour ce compte
     select jsonb_build_object('kind', 'admin_new_ip', 'level', 'warning', 'at', l.created_at, 'title', 'Connexion admin depuis une nouvelle adresse IP',
-      'detail', coalesce(l.email, '?') || ' · IP ' || coalesce(l.ip, '?'), 'link', '/admin/equipe/connexions') x
+      'detail', coalesce(l.email, '?') || ' · IP ' || coalesce(l.ip, '?'), 'link', '/admin/securite/connexions') x
     from admin_login_log l
     where l.created_at > now() - interval '14 days' and l.ip is not null
       and not exists (select 1 from admin_login_log p where p.user_id = l.user_id and p.ip = l.ip and p.created_at < l.created_at)
@@ -168,7 +168,7 @@ begin
     union all
     -- suppressions faites dans l'admin
     select jsonb_build_object('kind', 'admin_delete', 'level', 'info', 'at', a.created_at, 'title', 'Suppression dans l''admin',
-      'detail', coalesce(st.full_name, st.email, '?') || ' · ' || replace(a.target, 'admin_', '') || coalesce(' · ' || a.page, ''), 'link', '/admin/equipe/activite')
+      'detail', coalesce(st.full_name, st.email, '?') || ' · ' || replace(a.target, 'admin_', '') || coalesce(' · ' || a.page, ''), 'link', '/rapport')
     from admin_activity a left join admin_staff st on st.user_id = a.user_id
     where a.created_at > now() - interval '7 days' and a.target ~ '^admin_(delete|remove)'
     union all
@@ -179,19 +179,19 @@ begin
     union all
     -- visiteur qui consulte un nombre anormal de fiches (robot de copie de catalogue)
     select jsonb_build_object('kind', 'scraper', 'level', 'warning', 'at', max(e.created_at), 'title', 'Navigation anormale (possible robot)',
-      'detail', count(*) || ' fiches produits vues en 24 h par le même visiteur', 'link', '/admin/live')
+      'detail', count(*) || ' fiches produits vues en 24 h par le même visiteur', 'link', '/activite')
     from shop_events e where e.created_at > now() - interval '24 hours' and e.kind = 'product' and e.visitor_id is not null
     group by e.visitor_id having count(*) >= 150
     union all
     -- retours à répétition
     select jsonb_build_object('kind', 'many_returns', 'level', 'warning', 'at', max(r.created_at), 'title', count(*) || ' demandes de retour du même client en 30 jours',
-      'detail', coalesce(max(p.full_name), max(p.email), 'Client'), 'link', '/admin/commandes/retours')
+      'detail', coalesce(max(p.full_name), max(p.email), 'Client'), 'link', '/admin/commandes/remboursements')
     from return_requests r left join profiles p on p.id = r.user_id where r.created_at > now() - interval '30 days' and r.user_id is not null
     group by r.user_id having count(*) >= 3
     union all
     -- produit signalé plusieurs fois
     select jsonb_build_object('kind', 'reported', 'level', case when count(*) >= 3 then 'critical' else 'warning' end, 'at', max(r.created_at),
-      'title', count(*) || ' signalement(s) en attente sur un produit', 'detail', coalesce(max(pr.title), 'Produit'), 'link', '/admin/produits/signalements')
+      'title', count(*) || ' signalement(s) en attente sur un produit', 'detail', coalesce(max(pr.title), 'Produit'), 'link', '/admin/produits/signales')
     from product_reports r left join products pr on pr.id = coalesce(r.listing_id, r.product_id)
     where r.status = 'pending' group by coalesce(r.listing_id, r.product_id)
   ) t), '[]'::jsonb);
@@ -225,11 +225,11 @@ begin
   select count(*) into n from sellers where coalesce(kyc_status, '') = 'pending';
   if n > 0 then out := out || jsonb_build_object('priority', 2, 'icon', 'seller', 'title', n || ' vendeur(s) en attente de vérification d''identité', 'detail', 'Validez leurs documents pour qu''ils puissent vendre sereinement.', 'link', '/admin/vendeurs/kyc'); end if;
   select count(*) into n from product_reports where status = 'pending';
-  if n > 0 then out := out || jsonb_build_object('priority', 1, 'icon', 'report', 'title', n || ' signalement(s) de produit à traiter', 'detail', 'Un produit signalé non traité nuit à la confiance des clients.', 'link', '/admin/produits/signalements'); end if;
+  if n > 0 then out := out || jsonb_build_object('priority', 1, 'icon', 'report', 'title', n || ' signalement(s) de produit à traiter', 'detail', 'Un produit signalé non traité nuit à la confiance des clients.', 'link', '/admin/produits/signales'); end if;
   select count(*) into n from return_requests where status in ('pending', 'requested', 'open');
-  if n > 0 then out := out || jsonb_build_object('priority', 2, 'icon', 'return', 'title', n || ' demande(s) de retour en attente', 'detail', 'Traitez-les rapidement : un retour bien géré fidélise le client.', 'link', '/admin/commandes/retours'); end if;
+  if n > 0 then out := out || jsonb_build_object('priority', 2, 'icon', 'return', 'title', n || ' demande(s) de retour en attente', 'detail', 'Traitez-les rapidement : un retour bien géré fidélise le client.', 'link', '/admin/commandes/remboursements'); end if;
   select count(*) into n from subcategories sc where sc.is_active and not exists (select 1 from products p where p.subcategory_slug = sc.slug and p.is_published);
-  if n > 0 then out := out || jsonb_build_object('priority', 4, 'icon', 'catalog', 'title', n || ' sous-catégorie(s) sans aucun produit', 'detail', 'Recrutez des vendeurs sur ces rayons : chaque rayon rempli est une page de plus dans Google.', 'link', '/admin/catalogue/sous-categories'); end if;
+  if n > 0 then out := out || jsonb_build_object('priority', 4, 'icon', 'catalog', 'title', n || ' sous-catégorie(s) sans aucun produit', 'detail', 'Recrutez des vendeurs sur ces rayons : chaque rayon rempli est une page de plus dans Google.', 'link', '/admin/produits/sous-categories'); end if;
   select count(*) into n from categories c where c.parent_id is null and c.image_url is null;
   if n > 0 then out := out || jsonb_build_object('priority', 4, 'icon', 'image', 'title', n || ' catégorie(s) sans bannière', 'detail', 'Ajoutez une bannière dans Catalogue › Catégories.', 'link', '/categories'); end if;
   return coalesce((select jsonb_agg(e order by (e->>'priority')::int) from jsonb_array_elements(out) e), '[]'::jsonb);

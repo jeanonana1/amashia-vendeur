@@ -17,10 +17,10 @@ type Data = {
   balance: number;
   enabled?: boolean;
   rates: { category: string; pct: number }[];
-  totals: { gross: number; commission: number; delivered_net: number; pending_net: number };
+  totals: { gross: number; delivered_net: number; pending_net: number };
   withdrawn: number;
   refunds: number;
-  items: { order_number: string; title: string; qty: number; status: string; category: string; image: string | null; created_at: string; gross: number; pct: number; commission: number; net: number }[];
+  items: { order_number: string; title: string; qty: number; status: string; category: string; image: string | null; created_at: string; gross: number; pct: number; net: number }[];
 };
 
 const STATUS: Record<string, string> = { pending: "Commande reçue", preparing: "En préparation", shipped: "En cours de livraison", delivered: "Livrée" };
@@ -47,14 +47,12 @@ function CommissionsPage() {
             lines={[
               { icon: BadgeCheck, tone: "text-emerald-400 bg-emerald-500/12", label: "Vos gains (ventes livrées)", hint: "Après commission Amachia", value: n(d.totals.delivered_net) },
               { icon: Clock, tone: "text-amber-400 bg-amber-500/12", label: "Gains à venir", hint: "Ventes en préparation ou en livraison", value: n(d.totals.pending_net) },
-              { icon: Percent, tone: "text-sky-400 bg-sky-500/12", label: "Commissions Amachia", hint: "Déjà prélevées sur vos ventes", value: n(d.totals.commission) },
             ]}
             note="Ce solde est le vôtre : les commissions Amachia ont déjà été prélevées. Vous pouvez le retirer en totalité depuis la page Paiements."
           />
 
-          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
             <Kpi icon={ShoppingBag} label="Ventes (prix payé par les clients)" value={money(n(d.totals.gross))} />
-            <Kpi icon={Percent} label="Commissions Amachia" value={`− ${money(n(d.totals.commission))}`} />
             <Kpi icon={BadgeCheck} label="Vos gains (ventes livrées)" value={money(n(d.totals.delivered_net))} />
             <Kpi icon={Clock} label="Gains à venir (en livraison)" value={money(n(d.totals.pending_net))} />
           </div>
@@ -84,14 +82,14 @@ function CommissionsPage() {
               <div className="max-h-[520px] overflow-auto p-3 [scrollbar-width:thin] sm:p-4">
                 <table className="amx-table min-w-[720px] text-sm">
                   <thead className="text-left text-xs text-muted-foreground"><tr className="border-b border-border">
-                    <th className="p-3">Vente</th><th className="p-3">Catégorie</th><th className="p-3 text-right">Prix de vente</th><th className="p-3 text-right">Commission</th><th className="p-3 text-right">Vous recevez</th><th className="p-3">Statut</th>
+                    <th className="p-3">Vente</th><th className="p-3">Catégorie</th><th className="p-3 text-right">Prix de vente</th><th className="p-3 text-right">Taux de commission</th><th className="p-3 text-right">Vous recevez</th><th className="p-3">Statut</th>
                   </tr></thead>
                   <tbody>{d.items.map((it, i) => (
                     <tr key={i} className="border-b border-border last:border-0">
                       <td className="p-3"><div className="flex items-center gap-3">{it.image ? <img {...imgProps(it.image, { width: 64 })} loading="lazy" alt="" className="h-10 w-10 shrink-0 rounded-lg border border-border bg-white object-cover" /> : <div className="h-10 w-10 rounded-lg bg-secondary" />}<div className="min-w-0"><p className="max-w-[240px] truncate font-medium">{it.qty} × {it.title}</p><p className="text-xs text-muted-foreground">{it.order_number} · {dateTime(it.created_at)}</p></div></div></td>
                       <td className="p-3 text-xs">{it.category}</td>
                       <td className="p-3 whitespace-nowrap text-right">{money(n(it.gross))}</td>
-                      <td className="whitespace-nowrap p-3 text-right text-muted-foreground">− {money(n(it.commission))} <span className="text-[11px]">({n(it.pct)} %)</span></td>
+                      <td className="whitespace-nowrap p-3 text-right text-muted-foreground">{n(it.pct)} %</td>
                       <td className="p-3 whitespace-nowrap text-right font-bold">{money(n(it.net))}</td>
                       <td className="p-3 text-xs">{STATUS[it.status] ?? it.status}</td>
                     </tr>

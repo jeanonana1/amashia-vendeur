@@ -69,7 +69,7 @@ function DashboardOverview() {
   // Salutation selon l'heure du téléphone/ordinateur du vendeur (calculée côté navigateur)
   const [greeting, setGreeting] = useState("Bonjour");
   useEffect(() => {
-    const update = () => setGreeting(greetingFor(new Date().getHours()));
+    const update = () => setGreeting(greetingFor(new Date()));
     update();
     const t = window.setInterval(update, 60_000);
     return () => window.clearInterval(t);
@@ -442,9 +442,10 @@ function Conversions({ stats, period }: { stats: SellerStats; period: string }) 
   );
 }
 
-/** Bonjour de 3 h à 12 h 59 · Bon après-midi de 13 h à 15 h 59 · Bonsoir de 16 h à 2 h 59 */
-function greetingFor(hour: number) {
-  if (hour >= 3 && hour < 13) return "Bonjour";
-  if (hour >= 13 && hour < 16) return "Bon après-midi";
+/** Bonjour de 4 h à midi · Bon après-midi de midi passé à 15 h 59 · Bonsoir de 16 h jusqu'à la fin de la nuit */
+function greetingFor(d: Date) {
+  const h = d.getHours(), m = d.getMinutes();
+  if (h >= 4 && (h < 12 || (h === 12 && m === 0))) return "Bonjour";
+  if (h >= 12 && h < 16) return "Bon après-midi";
   return "Bonsoir";
 }

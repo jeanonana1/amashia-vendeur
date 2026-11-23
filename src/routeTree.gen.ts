@@ -16,6 +16,7 @@ import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as FonctionnalitesRouteImport } from './routes/fonctionnalites'
 import { Route as InscriptionRouteImport } from './routes/inscription'
 import { Route as TarificationRouteImport } from './routes/tarification'
+import { Route as ApiAdminAiRouteImport } from './routes/api/admin-ai'
 import { Route as ApiAiStatusRouteImport } from './routes/api/ai-status'
 import { Route as ApiAssistantRouteImport } from './routes/api/assistant'
 import { Route as ApiTranslateRouteImport } from './routes/api/translate'
@@ -74,6 +75,11 @@ const InscriptionRoute = InscriptionRouteImport.update({
 const TarificationRoute = TarificationRouteImport.update({
   id: '/tarification',
   path: '/tarification',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAdminAiRoute = ApiAdminAiRouteImport.update({
+  id: '/api/admin-ai',
+  path: '/api/admin-ai',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiAiStatusRoute = ApiAiStatusRouteImport.update({
@@ -207,6 +213,7 @@ export interface FileRoutesByFullPath {
   '/fonctionnalites': typeof FonctionnalitesRoute
   '/inscription': typeof InscriptionRoute
   '/tarification': typeof TarificationRoute
+  '/api/admin-ai': typeof ApiAdminAiRoute
   '/api/ai-status': typeof ApiAiStatusRoute
   '/api/assistant': typeof ApiAssistantRoute
   '/api/translate': typeof ApiTranslateRoute
@@ -239,6 +246,7 @@ export interface FileRoutesByTo {
   '/fonctionnalites': typeof FonctionnalitesRoute
   '/inscription': typeof InscriptionRoute
   '/tarification': typeof TarificationRoute
+  '/api/admin-ai': typeof ApiAdminAiRoute
   '/api/ai-status': typeof ApiAiStatusRoute
   '/api/assistant': typeof ApiAssistantRoute
   '/api/translate': typeof ApiTranslateRoute
@@ -273,6 +281,7 @@ export interface FileRoutesById {
   '/fonctionnalites': typeof FonctionnalitesRoute
   '/inscription': typeof InscriptionRoute
   '/tarification': typeof TarificationRoute
+  '/api/admin-ai': typeof ApiAdminAiRoute
   '/api/ai-status': typeof ApiAiStatusRoute
   '/api/assistant': typeof ApiAssistantRoute
   '/api/translate': typeof ApiTranslateRoute
@@ -308,6 +317,7 @@ export interface FileRouteTypes {
     | '/fonctionnalites'
     | '/inscription'
     | '/tarification'
+    | '/api/admin-ai'
     | '/api/ai-status'
     | '/api/assistant'
     | '/api/translate'
@@ -340,6 +350,7 @@ export interface FileRouteTypes {
     | '/fonctionnalites'
     | '/inscription'
     | '/tarification'
+    | '/api/admin-ai'
     | '/api/ai-status'
     | '/api/assistant'
     | '/api/translate'
@@ -373,6 +384,7 @@ export interface FileRouteTypes {
     | '/fonctionnalites'
     | '/inscription'
     | '/tarification'
+    | '/api/admin-ai'
     | '/api/ai-status'
     | '/api/assistant'
     | '/api/translate'
@@ -407,6 +419,7 @@ export interface RootRouteChildren {
   FonctionnalitesRoute: typeof FonctionnalitesRoute
   InscriptionRoute: typeof InscriptionRoute
   TarificationRoute: typeof TarificationRoute
+  ApiAdminAiRoute: typeof ApiAdminAiRoute
   ApiAiStatusRoute: typeof ApiAiStatusRoute
   ApiAssistantRoute: typeof ApiAssistantRoute
   ApiTranslateRoute: typeof ApiTranslateRoute
@@ -463,6 +476,13 @@ declare module '@tanstack/react-router' {
       path: '/tarification'
       fullPath: '/tarification'
       preLoaderRoute: typeof TarificationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/admin-ai': {
+      id: '/api/admin-ai'
+      path: '/api/admin-ai'
+      fullPath: '/api/admin-ai'
+      preLoaderRoute: typeof ApiAdminAiRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/ai-status': {
@@ -692,6 +712,7 @@ const rootRouteChildren: RootRouteChildren = {
   FonctionnalitesRoute: FonctionnalitesRoute,
   InscriptionRoute: InscriptionRoute,
   TarificationRoute: TarificationRoute,
+  ApiAdminAiRoute: ApiAdminAiRoute,
   ApiAiStatusRoute: ApiAiStatusRoute,
   ApiAssistantRoute: ApiAssistantRoute,
   ApiTranslateRoute: ApiTranslateRoute,

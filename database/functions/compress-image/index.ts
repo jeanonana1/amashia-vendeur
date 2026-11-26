@@ -5,6 +5,7 @@
 // L'image compressée remplace l'originale au même emplacement : même adresse, aucune mise à jour à faire ailleurs.
 // Clé : secret TINIFY_API_KEY des fonctions Supabase (jamais dans le code).
 import { createClient } from "npm:@supabase/supabase-js@2.45.4";
+import decodeWebp, { init as initWebp } from "npm:@jsquash/webp@1.5.0/decode.js";
 
 const db = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, { auth: { persistSession: false } });
 const KEY = Deno.env.get("TINIFY_API_KEY") ?? "";
@@ -13,6 +14,53 @@ const MIN_BYTES = 8 * 1024; // en dessous, le gain ne vaut pas une compression d
 const json = (b: unknown, status = 200) => new Response(JSON.stringify(b), { status, headers: { "Content-Type": "application/json" } });
 
 type Job = { id: number; bucket: string; name: string };
+const PUBLIC = "https://oawobzuyjkcnmaorqfmh.supabase.co/storage/v1/object/public/";
+
+// ---------------------------------------------------------------- Cadrage automatique des photos
+// Même méthode que l'ancien calcul fait dans le navigateur des visiteurs : on repère la zone occupée
+// par le produit (en ignorant le fond uni des coins) sur une petite version (128 px) de la photo.
+let webpReady: Promise<void> | null = null;
+function loadWebp() {
+  webpReady ??= (async () => {
+    const wasm = await (await fetch("https://cdn.jsdelivr.net/npm/@jsquash/webp@1.5.0/codec/dec/webp_dec.wasm")).arrayBuffer();
+    await initWebp(await WebAssembly.compile(wasm));
+  })();
+  return webpReady;
+}
+
+async function computeFraming(url: string) {
+  // petite version WebP produite (et mise en cache) par l'optimiseur d'images du site client
+  const res = await fetch(`https://amashia-client.vercel.app/_vercel/image?url=${encodeURIComponent(url)}&w=128&q=75`, { headers: { Accept: "image/webp" } });
+  if (!res.ok || !(res.headers.get("content-type") ?? "").includes("webp")) throw new Error(`miniature indisponible (${res.status})`);
+  await loadWebp();
+  const img = await decodeWebp(await res.arrayBuffer());
+  const W = img.width, H = img.height, data = img.data;
+  const corner = (x: number, y: number) => { const i = (y * W + x) * 4; return [data[i], data[i + 1], data[i + 2], data[i + 3]]; };
+  const corners = [corner(0, 0), corner(W - 1, 0), corner(0, H - 1), corner(W - 1, H - 1)];
+  const bgc = [0, 1, 2, 3].map((k) => corners.reduce((sum, c) => sum + c[k], 0) / 4);
+  const transparent = bgc[3] < 40;
+  let x0 = W, y0 = H, x1 = -1, y1 = -1;
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    const i = (y * W + x) * 4, a = data[i + 3];
+    const content = transparent ? a > 40 : a > 40 && Math.max(Math.abs(data[i] - bgc[0]), Math.abs(data[i + 1] - bgc[1]), Math.abs(data[i + 2] - bgc[2])) > 26;
+    if (content) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+  }
+  const white = bgc[0] > 247 && bgc[1] > 247 && bgc[2] > 247;
+  // aucune zone distincte (image unie) : box négative = pas de recadrage
+  const box = x1 < 0 ? [-1, -1, -1, -1] : [x0 / W, y0 / H, (x1 + 1) / W, (y1 + 1) / H];
+  const { error } = await db.from("image_framing").upsert({ url, ar: W / H, box, bg: transparent ? 2 : white ? 1 : 0, updated_at: new Date().toISOString() });
+  if (error) throw new Error(error.message);
+}
+
+async function framingSweep(urls: string[] | null) {
+  let list = urls;
+  if (!list) { const { data } = await db.rpc("framing_missing", { _limit: 40 }); list = (data ?? []) as string[]; }
+  let done = 0; const errors: string[] = [];
+  for (const u of list) {
+    try { await computeFraming(u); done++; } catch (e) { errors.push(`${u.slice(-40)} : ${e instanceof Error ? e.message : e}`); }
+  }
+  return { framed: done, errors: errors.slice(0, 5) };
+}
 class Pause extends Error {} // quota atteint / clé absente : on s'arrête, la file reprendra plus tard
 
 async function finish(id: number, patch: Record<string, unknown>) {
@@ -58,22 +106,33 @@ async function run(ids: number[] | null, limit: number) {
   let done = 0;
   for (const job of (jobs ?? []) as Job[]) {
     try { await compress(job); done++; }
-    catch (e) {
+    catch (e) { await handleError(job, e); if (e instanceof Pause) return { done, paused: e.message }; }
+    // cadrage calculé sur l'image définitive (après compression), sans bloquer en cas d'échec
+    try { await computeFraming(PUBLIC + job.bucket + "/" + job.name); } catch (e) { console.error("cadrage", job.name, e); }
+  }
+  return { done };
+}
+
+async function handleError(job: Job, e: unknown) {
+  {
       const msg = e instanceof Error ? e.message : String(e);
       if (e instanceof Pause) {
         // remise en attente de tout ce qui a été réservé, sans compter d'échec
         await db.from("image_compression_jobs").update({ status: "pending", error: msg }).eq("status", "processing");
-        return { done, paused: msg };
+        return;
       }
       await finish(job.id, { status: "failed", error: msg.slice(0, 500) });
-    }
   }
-  return { done };
 }
 
 Deno.serve(async (req) => {
   if (req.method !== "POST") return json({ error: "POST uniquement" }, 405);
   const body = await req.json().catch(() => ({}));
+  // cadrage seul : images publiques sans cadrage (rattrapage), ou liste d'adresses de notre stockage
+  if (body?.framing) {
+    const urls = Array.isArray(body.urls) ? (body.urls as unknown[]).filter((u): u is string => typeof u === "string" && u.startsWith(PUBLIC + "product-images/")).slice(0, 40) : null;
+    return json(await framingSweep(urls));
+  }
   const id = Number(body?.id);
   const ids = Number.isInteger(id) && id > 0 ? [id] : null;
   // réponse immédiate : la compression continue en arrière-plan

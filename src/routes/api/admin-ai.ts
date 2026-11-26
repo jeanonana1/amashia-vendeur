@@ -6,7 +6,7 @@ import { createFileRoute } from "@tanstack/react-router";
  * administrateur actif avec double authentification et accès à la section IA.
  * Corps : { action: "chat", messages: [...] } | { action: "optimize", product_id: string }
  */
-const ALLOWED = new Set(["https://amashia-admin.vercel.app", "https://admin.amachia.com", "http://localhost:8090"]);
+const ALLOWED = new Set(["https://amashia-admin.vercel.app", "https://monadmincest.amachia.com", "https://admin.amachia.com", "http://localhost:8090"]);
 const cors = (origin: string | null) => ({ Vary: "Origin", ...(origin && ALLOWED.has(origin) ? { "Access-Control-Allow-Origin": origin, "Access-Control-Allow-Headers": "content-type, authorization", "Access-Control-Allow-Methods": "POST, OPTIONS" } : {}) });
 const hits = new Map<string, number[]>();
 

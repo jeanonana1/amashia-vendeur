@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import QRCode from "qrcode";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
-import { compressImage } from "@/lib/imageCompress";
+import { compressImage, MAX_IMAGE_BYTES, tooHeavyMessage } from "@/lib/imageCompress";
 import { imgProps } from "@/lib/img";
 import { planProductShots, startProductShots, checkProductShots, aiImagesStatus } from "@/lib/ai-images.functions";
 
@@ -42,6 +42,7 @@ function dataUrlToFile(dataUrl: string, name: string) {
 async function uploadPhoto(file: File): Promise<string> {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Connectez-vous");
+  if (file.size > MAX_IMAGE_BYTES) throw new Error(tooHeavyMessage(file.name));
   const small = await compressImage(file, 1600);
   const ext = small.name.split(".").pop() || "jpg";
   const path = `${user.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;

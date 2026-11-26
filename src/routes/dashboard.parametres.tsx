@@ -6,7 +6,7 @@ import { User, Bell, Lock, SlidersHorizontal, CreditCard, HelpCircle, Loader2, C
 import { toast } from "sonner";
 import { PasswordInput } from "@/components/ui/password-input";
 import { supabase } from "@/integrations/supabase/client";
-import { compressImage } from "@/lib/imageCompress";
+import { compressImage, MAX_IMAGE_BYTES, tooHeavyMessage } from "@/lib/imageCompress";
 import { soundEnabled, setSoundEnabled } from "@/lib/sound";
 import { money } from "@/lib/sellerStats";
 import { PhoneInput } from "@/components/seller/PhoneInput";
@@ -151,6 +151,7 @@ function ProfileTab({ uid, email, p, save, setP }: { uid: string; email: string;
   async function uploadAvatar(file?: File) {
     if (!file) return;
     if (!file.type.startsWith("image/")) return toast.error("Choisissez une image");
+    if (file.size > MAX_IMAGE_BYTES) return toast.error(tooHeavyMessage());
     setUploading(true);
     try {
       const small = await compressImage(file, 400);

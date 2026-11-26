@@ -9,7 +9,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { RichTextEditor } from "@/components/seller/dashboard/RichTextEditor";
 import { ColorPicker, ColorSwatch, colorParts } from "@/components/seller/dashboard/ColorPicker";
-import { compressImage } from "@/lib/imageCompress";
+import { compressImage, MAX_IMAGE_BYTES, tooHeavyMessage } from "@/lib/imageCompress";
 import { AiSeoModal } from "@/components/seller/dashboard/AiSeoModal";
 import { AiImageModal } from "@/components/seller/dashboard/AiImageModal";
 import { PriceTipModal, charmPrice } from "@/components/seller/dashboard/PriceTipModal";
@@ -484,7 +484,8 @@ function AddProductPage() {
 
   function addImages(files: FileList | null) {
     if (!files) return;
-    const items = Array.from(files).slice(0, 5).map((file) => ({ file, preview: URL.createObjectURL(file) }));
+    const ok = Array.from(files).filter((f) => { if (f.size <= MAX_IMAGE_BYTES) return true; toast.error(tooHeavyMessage(f.name)); return false; });
+    const items = ok.slice(0, 5).map((file) => ({ file, preview: URL.createObjectURL(file) }));
     setImages((prev) => [...prev, ...items].slice(0, 8));
   }
 
@@ -521,7 +522,7 @@ function AddProductPage() {
       const urls: string[] = [];
       for (const f of files.slice(0, 6)) {
         if (!f.type.startsWith("image/")) continue;
-        if (f.size > 30 * 1024 * 1024) { toast.error(`${f.name} dépasse 30 Mo`); continue; }
+        if (f.size > MAX_IMAGE_BYTES) { toast.error(tooHeavyMessage(f.name)); continue; }
         const small = await compressImage(f, 1600);
         const ext = small.name.split(".").pop() || "jpg";
         const path = `${user.id}/variant-${groupId}-${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;

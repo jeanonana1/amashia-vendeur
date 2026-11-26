@@ -4,6 +4,10 @@
  * 5 à 15 Mo deviennent quelques centaines de Ko, sans perte visible.
  * Si le navigateur ne sait pas lire le format, le fichier d'origine est renvoyé.
  */
+/** Limite de sécurité : au-delà, le fichier est refusé (une photo de téléphone, même 108 Mpx, reste en dessous). */
+export const MAX_IMAGE_BYTES = 20 * 1024 * 1024;
+export const tooHeavyMessage = (name?: string) => `${name ? `${name} : ` : ""}image trop lourde (20 Mo maximum).`;
+
 export async function compressImage(file: File, maxSide = 1600, quality = 0.85): Promise<File> {
   if (!file.type.startsWith("image/") || file.type === "image/gif" || file.type === "image/svg+xml") return file;
   try {

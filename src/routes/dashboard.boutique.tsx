@@ -6,7 +6,7 @@ import { Store, MapPin, Phone, Mail, Star, Eye, Heart, Edit, Camera, Loader2, Ch
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { ensureSellerProfile } from "@/lib/sellerProfile";
-import { compressImage } from "@/lib/imageCompress";
+import { compressImage, MAX_IMAGE_BYTES, tooHeavyMessage } from "@/lib/imageCompress";
 import { MARKETPLACE_URL, num, useSellerStats } from "@/lib/sellerStats";
 
 export const Route = createFileRoute("/dashboard/boutique")({
@@ -85,7 +85,7 @@ function BoutiquePage() {
   async function uploadAsset(file: File, kind: "logo" | "banner") {
     if (!profile) return;
     if (!file.type.startsWith("image/")) { toast.error("Choisissez une image (JPG, PNG, WebP…)."); return; }
-    if (file.size > 30 * 1024 * 1024) { toast.error("Image trop lourde (30 Mo max)."); return; }
+    if (file.size > MAX_IMAGE_BYTES) { toast.error(tooHeavyMessage()); return; }
     setUploading(kind);
     try {
       // redimensionnée et compressée avant l'envoi (couverture large, logo carré plus petit)

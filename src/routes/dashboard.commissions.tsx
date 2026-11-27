@@ -3,11 +3,12 @@ import { imgProps } from "@/lib/img";
 import { SpecTable } from "@/components/seller/ui/SpecTable";
 import { BalanceCard, primaryBtn } from "@/components/seller/ui/BalanceCard";
 import { useEffect, useState } from "react";
-import { BadgeCheck, Percent, Wallet, Clock, ShoppingBag, Info, ArrowRight } from "lucide-react";
+import { IconVerifie as BadgeCheck, IconPourcentage as Percent, IconPortefeuille as Wallet, IconHorloge as Clock, IconSac as ShoppingBag, IconInfo as Info, IconSuivant as ArrowRight } from "@/components/icons/AmachiaIcons";
 import { DashboardLayout } from "@/components/seller/dashboard/DashboardLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { dateTime, money } from "@/lib/sellerStats";
 
+import type { AnyIcon } from "@/components/icons/AmachiaIcons";
 export const Route = createFileRoute("/dashboard/commissions")({
   head: () => ({ meta: [{ title: "Commissions — Amachia Seller" }, { name: "description", content: "Taux de commission Amachia, détail par vente et solde net du vendeur." }] }),
   component: CommissionsPage,
@@ -105,7 +106,7 @@ function CommissionsPage() {
   );
 }
 
-function Kpi({ icon: Icon, label, value }: { icon: typeof Wallet; label: string; value: string }) {
+function Kpi({ icon: Icon, label, value }: { icon: AnyIcon; label: string; value: string }) {
   return (
     <div className="min-w-0 rounded-2xl border border-border bg-card p-3.5 sm:p-4">
       <div className="mb-2 flex items-start gap-2 text-[11px] leading-snug text-muted-foreground sm:text-xs"><Icon size={14} className="mt-px shrink-0" />{label}</div>

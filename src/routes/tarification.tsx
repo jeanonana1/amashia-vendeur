@@ -5,7 +5,8 @@ import { FinalCTA } from "@/components/seller/FinalCTA";
 import { Faq } from "@/components/seller/site/Faq";
 import { CommissionCalculator, useCommissionRates } from "@/components/seller/site/Commission";
 import { Container, PageHero } from "@/components/seller/site/ui";
-import { Check, X } from "lucide-react";
+import { Check } from "lucide-react";
+import { IconFermer as X } from "@/components/icons/AmachiaIcons";
 
 export const Route = createFileRoute("/tarification")({
   head: () => ({

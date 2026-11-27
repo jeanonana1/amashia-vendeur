@@ -1,11 +1,13 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { DashboardLayout } from "@/components/seller/dashboard/DashboardLayout";
-import { ShoppingCart, Star, Wallet, AlertCircle, Bell, CheckCheck, XCircle, Flag, Rocket, UserPlus, RotateCcw, Trash2 } from "lucide-react";
+import { AlertCircle, CheckCheck, XCircle, Flag, Rocket, UserPlus } from "lucide-react";
+import { IconPanier as ShoppingCart, IconEtoile as Star, IconPortefeuille as Wallet, IconNotifications as Bell, IconRetourProduit as RotateCcw, IconSupprimer as Trash2 } from "@/components/icons/AmachiaIcons";
 import { supabase } from "@/integrations/supabase/client";
 import { NOTIFS_SEEN_EVENT } from "@/lib/sellerStats";
 import { toast } from "sonner";
 
+import type { AnyIcon } from "@/components/icons/AmachiaIcons";
 export const Route = createFileRoute("/dashboard/notifications")({
   head: () => ({ meta: [{ title: "Notifications — Amachia Seller" }, { name: "description", content: "Toutes les notifications de votre boutique Amachia." }] }),
   component: NotificationsPage,
@@ -13,7 +15,7 @@ export const Route = createFileRoute("/dashboard/notifications")({
 
 type Notif = { id: string; kind: string; title: string; body: string | null; link: string | null; read_at: string | null; created_at: string };
 
-const KINDS: Record<string, { icon: typeof Bell; color: string }> = {
+const KINDS: Record<string, { icon: AnyIcon; color: string }> = {
   order: { icon: ShoppingCart, color: "bg-emerald-500/20 text-emerald-400" },
   cancel: { icon: XCircle, color: "bg-red-500/15 text-red-400" },
   review: { icon: Star, color: "bg-violet-500/20 text-violet-400" },

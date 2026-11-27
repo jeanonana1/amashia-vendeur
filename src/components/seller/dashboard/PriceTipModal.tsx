@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Sparkles, X, TrendingUp, Check } from "lucide-react";
+import { Sparkles, TrendingUp, Check } from "lucide-react";
+import { IconFermer as X } from "@/components/icons/AmachiaIcons";
 
 /**
  * Prix psychologique : un prix rond (5 000) est proposé juste en dessous (4 999).

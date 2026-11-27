@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
-import { ArrowLeft, Check } from "lucide-react";
+import { Check } from "lucide-react";
+import { IconRetour as ArrowLeft } from "@/components/icons/AmachiaIcons";
 
 const STEPS = ["Infos", "Détails", "Documents", "Paiement", "Localisation", "Vérif.", "Fini"];
 

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouterState } from "@tanstack/react-router";
-import { X, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
+import { IconFermer as X } from "@/components/icons/AmachiaIcons";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 

@@ -2,14 +2,15 @@ import { createFileRoute } from "@tanstack/react-router";
 import { imgProps } from "@/lib/img";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { DashboardLayout } from "@/components/seller/dashboard/DashboardLayout";
-import { CalendarDays, ExternalLink, Filter, PackageCheck, Search, ShoppingBag, TrendingUp } from "lucide-react";
+import { ExternalLink, PackageCheck, TrendingUp } from "lucide-react";
+import { IconCalendrier as CalendarDays, IconFiltres as Filter, IconRecherche as Search, IconSac as ShoppingBag } from "@/components/icons/AmachiaIcons";
 import { supabase } from "@/integrations/supabase/client";
 import { marketplaceProductUrl } from "@/lib/sellerProfile";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { ORDER_FIELDS, ORDER_STATUS, OrderDetailModal, OrderStatusTrack, colorName, type SellerOrderLine } from "@/components/seller/dashboard/OrderDetailModal";
 import { ORDERS_SEEN_EVENT, dateTime } from "@/lib/sellerStats";
-import { X } from "lucide-react";
+import { IconFermer as X } from "@/components/icons/AmachiaIcons";
 
 export const Route = createFileRoute("/dashboard/commandes")({
   head: () => ({ meta: [

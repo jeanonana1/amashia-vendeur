@@ -7,14 +7,12 @@ import { useEffect, useState, ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { ensureSellerProfile } from "@/lib/sellerProfile";
 import { money, useNavBadges, useSellerStats } from "@/lib/sellerStats";
-import {
-  LayoutDashboard, Store, Package, ShoppingCart, Users, CreditCard, Truck,
-  BarChart3, Megaphone, Star, Bell, MessageSquare, Settings, LogOut,
-  RotateCcw, Sun, Moon, Volume2, VolumeX, Wallet, ChevronDown, AppWindow, Menu, X, AlertTriangle, PackagePlus, Percent } from "lucide-react";
+import { Users, Megaphone, Sun, Moon, Volume2, VolumeX, AppWindow, PackagePlus } from "lucide-react";
+import { IconTableauDeBord as LayoutDashboard, IconBoutique as Store, IconColis as Package, IconPanier as ShoppingCart, IconCarteBancaire as CreditCard, IconLivraison as Truck, IconStatistiques as BarChart3, IconEtoile as Star, IconNotifications as Bell, IconMessages as MessageSquare, IconParametres as Settings, IconDeconnexion as LogOut, IconRetourProduit as RotateCcw, IconPortefeuille as Wallet, IconChevronBas as ChevronDown, IconMenu as Menu, IconFermer as X, IconAlerte as AlertTriangle, IconPourcentage as Percent } from "@/components/icons/AmachiaIcons";
 import { useTheme } from "@/components/theme-provider";
 import { SellerLogo } from "@/components/seller/SellerLogo";
 
-type NavItem = { icon: typeof LayoutDashboard; label: string; to: string };
+type NavItem = { icon: AnyIcon; label: string; to: string };
 /** Menu regroupé par usage. */
 const GROUPS: { title: string; items: NavItem[] }[] = [
   { title: "Boutique", items: [
@@ -51,6 +49,7 @@ const NAV = GROUPS.flatMap((g) => g.items);
 import { NewOrderAlarm } from "@/components/seller/dashboard/NewOrderAlarm";
 import { PushAlertsButton } from "@/components/seller/dashboard/PushAlertsButton";
 import { registerAppPush } from "@/lib/nativeApp";
+import type { AnyIcon } from "@/components/icons/AmachiaIcons";
 /** Application Android Amachia Seller : enregistre ce téléphone pour les alertes de commandes. */
 function AppPushRegister({ uid }: { uid: string }) {
   useEffect(() => { void registerAppPush(); }, [uid]);

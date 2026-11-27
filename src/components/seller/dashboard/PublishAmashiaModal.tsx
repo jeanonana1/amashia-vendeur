@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { X, Copy, Check, Sparkles, Rocket } from "lucide-react";
+import { Check, Sparkles, Rocket } from "lucide-react";
+import { IconFermer as X, IconCopier as Copy } from "@/components/icons/AmachiaIcons";
 import { toast } from "sonner";
 import { publishToMarketplace } from "@/lib/marketplace.functions";
 import { Button } from "@/components/ui/button";

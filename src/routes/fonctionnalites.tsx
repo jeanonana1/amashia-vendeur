@@ -4,7 +4,8 @@ import { Footer } from "@/components/seller/Footer";
 import { FinalCTA } from "@/components/seller/FinalCTA";
 import { Features } from "@/components/seller/Features";
 import { Container, PageHero, PrimaryCta, GhostCta } from "@/components/seller/site/ui";
-import { Store, Package, ShoppingBag, Wallet, BarChart3, Megaphone, Check } from "lucide-react";
+import { Megaphone, Check } from "lucide-react";
+import { IconBoutique as Store, IconColis as Package, IconSac as ShoppingBag, IconPortefeuille as Wallet, IconStatistiques as BarChart3 } from "@/components/icons/AmachiaIcons";
 
 export const Route = createFileRoute("/fonctionnalites")({
   head: () => ({

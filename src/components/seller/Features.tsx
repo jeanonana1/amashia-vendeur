@@ -1,4 +1,5 @@
-import { Sparkles, Bell, Bike, Wallet, BarChart3, Zap, Megaphone, RotateCcw, Star, Check, Banknote, Smartphone, CreditCard, Lock, User } from "lucide-react";
+import { Sparkles, Zap, Megaphone, Check } from "lucide-react";
+import { IconNotifications as Bell, IconLivreurMoto as Bike, IconPortefeuille as Wallet, IconStatistiques as BarChart3, IconRetourProduit as RotateCcw, IconEtoile as Star, IconEspeces as Banknote, IconMobileMoney as Smartphone, IconCarteBancaire as CreditCard, IconCadenas as Lock, IconCompte as User } from "@/components/icons/AmachiaIcons";
 import { useEffect, useState } from "react";
 import { Container, SectionHeading } from "@/components/seller/site/ui";
 import { Reveal } from "@/components/seller/site/motion";

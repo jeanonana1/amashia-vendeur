@@ -1,4 +1,4 @@
-import { Plus } from "lucide-react";
+import { IconPlus as Plus } from "@/components/icons/AmachiaIcons";
 import { Container, SectionHeading } from "@/components/seller/site/ui";
 import { Reveal } from "@/components/seller/site/motion";
 

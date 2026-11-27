@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Smartphone, Monitor, Download, BellRing, CheckCircle2, X, Share, PlusSquare, Loader2 } from "lucide-react";
+import { Smartphone, Monitor, BellRing, Loader2 } from "lucide-react";
+import { IconTelecharger as Download, IconValide as CheckCircle2, IconFermer as X, IconPartager as Share, IconAjouterProduit as PlusSquare } from "@/components/icons/AmachiaIcons";
 import { enablePush, pushState, registerSW, type PushState } from "@/lib/push";
 import { APK_URL, isSellerApp } from "@/lib/nativeApp";
 

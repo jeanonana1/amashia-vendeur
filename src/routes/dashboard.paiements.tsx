@@ -2,7 +2,8 @@ import { Link, createFileRoute } from "@tanstack/react-router";
 import { askConfirm } from "@/lib/dialog";
 import { useCallback, useEffect, useState } from "react";
 import { DashboardLayout } from "@/components/seller/dashboard/DashboardLayout";
-import { Wallet, ArrowDownToLine, Smartphone, Landmark, Plus, X, Trash2, Pencil, History, Clock, CheckCircle2, XCircle, Star, ArrowUpRight, BadgeCheck } from "lucide-react";
+import { ArrowDownToLine, Landmark, History, XCircle, ArrowUpRight } from "lucide-react";
+import { IconPortefeuille as Wallet, IconMobileMoney as Smartphone, IconPlus as Plus, IconFermer as X, IconSupprimer as Trash2, IconModifier as Pencil, IconHorloge as Clock, IconValide as CheckCircle2, IconEtoile as Star, IconVerifie as BadgeCheck } from "@/components/icons/AmachiaIcons";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { dateTime, money, useSellerStats } from "@/lib/sellerStats";
@@ -11,6 +12,7 @@ import { cmDigits, cmPhoneError, formatCm, toE164 } from "@/lib/phone";
 import { Select } from "@/components/ui/app-select";
 import { BalanceCard, primaryBtn, ghostBtn } from "@/components/seller/ui/BalanceCard";
 
+import type { AnyIcon } from "@/components/icons/AmachiaIcons";
 export const Route = createFileRoute("/dashboard/paiements")({
   head: () => ({ meta: [{ title: "Paiements — Amachia Seller" }, { name: "description", content: "Paiements : votre espace vendeur Amachia pour gérer votre activité." }, { property: "og:title", content: "Paiements — Amachia Seller" }, { property: "og:description", content: "Paiements : votre espace vendeur Amachia pour gérer votre activité." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   component: PaiementsPage,
@@ -21,7 +23,7 @@ type Method = { id: string; kind: Kind; label: string | null; account_name: stri
 type Withdrawal = { id: string; amount: number; method: { kind: Kind; label?: string | null; account_number?: string; bank_name?: string | null }; status: "pending" | "paid" | "rejected"; note: string | null; created_at: string; processed_at: string | null };
 type Sale = { id: string; order_number: string; product_title: string; amount: number; created_at: string };
 
-const KIND: Record<Kind, { label: string; icon: typeof Smartphone; cls: string }> = {
+const KIND: Record<Kind, { label: string; icon: AnyIcon; cls: string }> = {
   orange_money: { label: "Orange Money", icon: Smartphone, cls: "bg-orange-500/15 text-orange-400" },
   mtn_momo: { label: "MTN Mobile Money", icon: Smartphone, cls: "bg-yellow-500/15 text-yellow-400" },
   bank: { label: "Virement bancaire", icon: Landmark, cls: "bg-blue-500/15 text-blue-400" },

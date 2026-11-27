@@ -3,7 +3,8 @@ import { useEffect, useState } from "react";
 import { imgProps } from "@/lib/img";
 import { SpecTable } from "@/components/seller/ui/SpecTable";
 import { Barcode, printLabels } from "@/components/seller/Barcode";
-import { X, MapPin, CreditCard, Clock, User, Package, Lock, Check, Printer } from "lucide-react";
+import { Check, Printer } from "lucide-react";
+import { IconFermer as X, IconLocalisation as MapPin, IconCarteBancaire as CreditCard, IconHorloge as Clock, IconCompte as User, IconColis as Package, IconCadenas as Lock } from "@/components/icons/AmachiaIcons";
 import { supabase } from "@/integrations/supabase/client";
 import { dateTime, money } from "@/lib/sellerStats";
 

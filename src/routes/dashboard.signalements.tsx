@@ -3,7 +3,8 @@ import { imgProps } from "@/lib/img";
 import { useEffect, useState } from "react";
 import { DashboardLayout } from "@/components/seller/dashboard/DashboardLayout";
 import { supabase } from "@/integrations/supabase/client";
-import { AlertTriangle, X, Check, Trash2, Package } from "lucide-react";
+import { Check } from "lucide-react";
+import { IconAlerte as AlertTriangle, IconFermer as X, IconSupprimer as Trash2, IconColis as Package } from "@/components/icons/AmachiaIcons";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/dashboard/signalements")({

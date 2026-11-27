@@ -1,4 +1,5 @@
-import { Bike, Bell, Sparkles, Smartphone, ShieldCheck, Truck, Wallet, BadgeCheck } from "lucide-react";
+import { Sparkles } from "lucide-react";
+import { IconLivreurMoto as Bike, IconNotifications as Bell, IconMobileMoney as Smartphone, IconPaiementSecurise as ShieldCheck, IconLivraison as Truck, IconPortefeuille as Wallet, IconVerifie as BadgeCheck } from "@/components/icons/AmachiaIcons";
 import { useEffect, useState } from "react";
 import { Backdrop, Container, Eyebrow, GhostCta, PrimaryCta } from "@/components/seller/site/ui";
 import { HomePhoto, useHasHomeImage, useHomeImages, useHomePreview, type HomeImageSlot } from "@/components/seller/site/homeImages";

@@ -1,7 +1,8 @@
 import type { ReactNode } from "react";
-import { BadgeCheck, Wallet } from "lucide-react";
+import { IconVerifie as BadgeCheck, IconPortefeuille as Wallet } from "@/components/icons/AmachiaIcons";
 
-type Line = { icon: typeof Wallet; tone: string; label: string; hint: string; value: number };
+import type { AnyIcon } from "@/components/icons/AmachiaIcons";
+type Line = { icon: AnyIcon; tone: string; label: string; hint: string; value: number };
 
 /** Carte « Solde disponible » (pages Paiements et Commissions) : même design partout. */
 export function BalanceCard({ amount, loading, subtitle, chip, actions, footer, lines, note }: {

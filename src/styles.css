@@ -1,6 +1,7 @@
 @import "tailwindcss" source(none);
 @source "../src";
 @import "tw-animate-css";
+@import "./components/icons/amachia-icons.css";
 /* Police de marque Amachia (voir docs/TYPOGRAPHY.md) — 4 graisses : Regular 400, Medium 500, SemiBold 600, Bold 700 */
 /* size-adjust : lettres dessinées un peu plus petites que la police précédente → même taille visible à l'écran */
 @font-face {

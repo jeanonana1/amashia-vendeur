@@ -1,0 +1,5 @@
+/* Icônes Amachia — couleur adaptative (currentColor). */
+.amachia-icon { color: inherit; flex-shrink: 0; }
+.fond-clair  { color: #2B2B2B; }
+.fond-sombre, .fond-orange { color: #FFFFFF; }
+@media (prefers-color-scheme: dark) { .icones-auto { color: #FFFFFF; } }

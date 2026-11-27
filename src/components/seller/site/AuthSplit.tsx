@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
-import { Bell, Bike, Wallet, Sparkles } from "lucide-react";
+import { Sparkles } from "lucide-react";
+import { IconNotifications as Bell, IconLivreurMoto as Bike, IconPortefeuille as Wallet } from "@/components/icons/AmachiaIcons";
 import { SellerLogo } from "@/components/seller/SellerLogo";
 
 /** Mise en page des écrans de connexion / inscription : formulaire à gauche, panneau de marque à droite. */

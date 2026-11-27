@@ -5,7 +5,8 @@ import { FinalCTA } from "@/components/seller/FinalCTA";
 import { Faq } from "@/components/seller/site/Faq";
 import { STEPS } from "@/components/seller/HowItWorks";
 import { Container, PageHero, PrimaryCta } from "@/components/seller/site/ui";
-import { ShoppingCart, PackageCheck, Bike, Home, Wallet } from "lucide-react";
+import { PackageCheck } from "lucide-react";
+import { IconPanier as ShoppingCart, IconLivreurMoto as Bike, IconAccueil as Home, IconPortefeuille as Wallet } from "@/components/icons/AmachiaIcons";
 
 export const Route = createFileRoute("/comment-ca-marche")({
   head: () => ({

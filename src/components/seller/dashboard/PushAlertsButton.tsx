@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { BellRing, BellOff, Smartphone, Share, PlusSquare, Loader2, CheckCircle2, Volume2 } from "lucide-react";
+import { BellRing, BellOff, Smartphone, Loader2, Volume2 } from "lucide-react";
+import { IconPartager as Share, IconAjouterProduit as PlusSquare, IconValide as CheckCircle2 } from "@/components/icons/AmachiaIcons";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { enablePush, disablePush, pushState, testPush, type PushState } from "@/lib/push";
 import { testOrderSound } from "@/components/seller/dashboard/NewOrderAlarm";

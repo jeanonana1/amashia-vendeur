@@ -1,5 +1,5 @@
 import { useState, InputHTMLAttributes } from "react";
-import { Eye, EyeOff } from "lucide-react";
+import { IconVoir as Eye, IconMasquer as EyeOff } from "@/components/icons/AmachiaIcons";
 
 type Props = Omit<InputHTMLAttributes<HTMLInputElement>, "type">;
 

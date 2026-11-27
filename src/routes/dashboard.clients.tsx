@@ -1,12 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { DashboardLayout } from "@/components/seller/dashboard/DashboardLayout";
-import { Search, X, MapPin, ShoppingBag, Wallet, Calendar, Users, Repeat } from "lucide-react";
+import { Users, Repeat } from "lucide-react";
+import { IconRecherche as Search, IconFermer as X, IconLocalisation as MapPin, IconSac as ShoppingBag, IconPortefeuille as Wallet, IconCalendrier as Calendar } from "@/components/icons/AmachiaIcons";
 import { supabase } from "@/integrations/supabase/client";
 import { dateTime, money, num } from "@/lib/sellerStats";
 import { SpecTable } from "@/components/seller/ui/SpecTable";
 import { Select } from "@/components/ui/app-select";
 
+import type { AnyIcon } from "@/components/icons/AmachiaIcons";
 export const Route = createFileRoute("/dashboard/clients")({
   head: () => ({ meta: [{ title: "Clients — Amachia Seller" }, { name: "description", content: "Clients : votre espace vendeur Amachia pour gérer votre activité." }, { property: "og:title", content: "Clients — Amachia Seller" }, { property: "og:description", content: "Clients : votre espace vendeur Amachia pour gérer votre activité." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   component: ClientsPage,
@@ -218,7 +220,7 @@ function initials(n: string) {
   return n.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]?.toUpperCase()).join("") || "C";
 }
 
-function Kpi({ icon: Icon, label, value }: { icon: typeof Users; label: string; value: string }) {
+function Kpi({ icon: Icon, label, value }: { icon: AnyIcon; label: string; value: string }) {
   return (
     <div className="min-w-0 rounded-2xl border border-border bg-card p-3.5 sm:p-4">
       <Icon size={18} className="mb-2 text-primary" />

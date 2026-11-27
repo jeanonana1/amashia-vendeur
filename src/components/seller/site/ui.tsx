@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
-import { ArrowRight } from "lucide-react";
+import { IconSuivant as ArrowRight } from "@/components/icons/AmachiaIcons";
 
 /** Éléments communs des pages publiques du site vendeur. */
 export function Container({ children, className = "" }: { children: ReactNode; className?: string }) {

@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { X, Sparkles, Loader2, Check, TrendingUp, Copy, Wand2 } from "lucide-react";
+import { Sparkles, Loader2, Check, TrendingUp, Wand2 } from "lucide-react";
+import { IconFermer as X, IconCopier as Copy } from "@/components/icons/AmachiaIcons";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
 import { generateSeoContent } from "@/lib/ai-seo.functions";

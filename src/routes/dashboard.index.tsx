@@ -3,15 +3,14 @@ import { imgProps } from "@/lib/img";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { DashboardLayout, useSellerName } from "@/components/seller/dashboard/DashboardLayout";
 import { InstallAppCard } from "@/components/seller/dashboard/InstallAppCard";
-import {
-  Wallet, Package, ShoppingCart, Users, TrendingUp, TrendingDown, ArrowUpRight, Eye, Radio, MousePointerClick, ExternalLink, Minus,
-  Plus,
-} from "lucide-react";
+import { Users, TrendingUp, TrendingDown, ArrowUpRight, Radio, MousePointerClick, ExternalLink } from "lucide-react";
+import { IconPortefeuille as Wallet, IconColis as Package, IconPanier as ShoppingCart, IconVoir as Eye, IconMoins as Minus, IconPlus as Plus } from "@/components/icons/AmachiaIcons";
 import { supabase } from "@/integrations/supabase/client";
 import { MARKETPLACE_URL, dateTime, money, num, trend, useLiveVisitors, useSellerStats, type SellerStats } from "@/lib/sellerStats";
 import { TrafficSources } from "@/components/seller/dashboard/TrafficSources";
 import { ORDER_FIELDS, OrderDetailModal, type SellerOrderLine } from "@/components/seller/dashboard/OrderDetailModal";
 
+import type { AnyIcon } from "@/components/icons/AmachiaIcons";
 export const Route = createFileRoute("/dashboard/")({
   head: () => ({ meta: [{ title: "Tableau de bord — Amachia Seller" }, { name: "description", content: "Tableau de bord : votre espace vendeur Amachia pour gérer votre activité." }, { property: "og:title", content: "Tableau de bord — Amachia Seller" }, { property: "og:description", content: "Tableau de bord : votre espace vendeur Amachia pour gérer votre activité." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   component: DashboardOverview,
@@ -288,7 +287,7 @@ function VisitsSection({ stats, live, period }: { stats: SellerStats; live: numb
   );
 }
 
-function Mini({ icon: Icon, label, value, extra }: { icon: typeof Eye; label: string; value: string; extra?: React.ReactNode }) {
+function Mini({ icon: Icon, label, value, extra }: { icon: AnyIcon; label: string; value: string; extra?: React.ReactNode }) {
   return (
     <div className="rounded-[1.25rem] border border-border bg-card p-4 shadow-card">
       <div className="mb-2 flex items-center justify-between"><Icon size={16} className="text-primary" />{extra}</div>

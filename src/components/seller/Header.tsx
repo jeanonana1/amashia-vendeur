@@ -1,6 +1,7 @@
 import { Link, useLocation } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Sun, Moon, Menu, X, ArrowRight } from "lucide-react";
+import { Sun, Moon } from "lucide-react";
+import { IconMenu as Menu, IconFermer as X, IconSuivant as ArrowRight } from "@/components/icons/AmachiaIcons";
 import { useTheme } from "@/components/theme-provider";
 import { LangToggle } from "@/components/seller/LangToggle";
 import { SellerLogo } from "@/components/seller/SellerLogo";

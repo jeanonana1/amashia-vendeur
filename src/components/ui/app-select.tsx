@@ -1,6 +1,7 @@
 import { Children, Fragment, isValidElement, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
-import { Check, ChevronDown, Search, X } from "lucide-react";
+import { Check } from "lucide-react";
+import { IconChevronBas as ChevronDown, IconRecherche as Search, IconFermer as X } from "@/components/icons/AmachiaIcons";
 
 /**
  * Menu déroulant Amachia : remplace le <Select> du navigateur partout sur le site vendeur.

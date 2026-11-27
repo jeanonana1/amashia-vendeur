@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Check, Plus } from "lucide-react";
+import { Check } from "lucide-react";
+import { IconPlus as Plus } from "@/components/icons/AmachiaIcons";
 
 /** Couleurs proposées d'office au vendeur (nom affiché aux clients + teinte). */
 export const COLOR_PALETTE: { name: string; hex: string }[] = [

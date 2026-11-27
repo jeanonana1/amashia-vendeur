@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { X, Sparkles, Loader2, Camera, QrCode, Check, Upload, ImagePlus, Smartphone, RefreshCw, AlertTriangle } from "lucide-react";
+import { Sparkles, Loader2, QrCode, Check, ImagePlus, Smartphone } from "lucide-react";
+import { IconFermer as X, IconAppareilPhoto as Camera, IconImporter as Upload, IconRafraichir as RefreshCw, IconAlerte as AlertTriangle } from "@/components/icons/AmachiaIcons";
 import { toast } from "sonner";
 import QRCode from "qrcode";
 import { useServerFn } from "@tanstack/react-start";

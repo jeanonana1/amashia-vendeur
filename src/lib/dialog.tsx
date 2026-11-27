@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { AlertTriangle, HelpCircle, X } from "lucide-react";
+import { IconAlerte as AlertTriangle, IconAide as HelpCircle, IconFermer as X } from "@/components/icons/AmachiaIcons";
 import { playSound } from "@/lib/sound";
 
 /**

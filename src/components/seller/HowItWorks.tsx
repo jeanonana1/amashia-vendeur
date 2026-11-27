@@ -1,4 +1,5 @@
-import { UserPlus, PackagePlus, Bell, Wallet } from "lucide-react";
+import { UserPlus, PackagePlus } from "lucide-react";
+import { IconNotifications as Bell, IconPortefeuille as Wallet } from "@/components/icons/AmachiaIcons";
 import { useEffect, useState } from "react";
 import { Container, SectionHeading } from "@/components/seller/site/ui";
 import { Reveal, useInView } from "@/components/seller/site/motion";

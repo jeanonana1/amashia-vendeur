@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Zap, Plus, X, Trash2, Clock } from "lucide-react";
+import { Zap } from "lucide-react";
+import { IconPlus as Plus, IconFermer as X, IconSupprimer as Trash2, IconHorloge as Clock } from "@/components/icons/AmachiaIcons";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { money } from "@/lib/sellerStats";

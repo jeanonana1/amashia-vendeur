@@ -2,7 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { askConfirm } from "@/lib/dialog";
 import { useEffect, useState } from "react";
 import { DashboardLayout } from "@/components/seller/dashboard/DashboardLayout";
-import { Check, X, Plus, Target, BarChart3, Eye, MousePointerClick } from "lucide-react";
+import { Check, Target, MousePointerClick } from "lucide-react";
+import { IconFermer as X, IconPlus as Plus, IconStatistiques as BarChart3, IconVoir as Eye } from "@/components/icons/AmachiaIcons";
 import { toast } from "sonner";
 import { Select } from "@/components/ui/app-select";
 

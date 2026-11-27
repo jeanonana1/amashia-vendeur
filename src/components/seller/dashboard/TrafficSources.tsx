@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link2, Copy, Check, Megaphone, Info } from "lucide-react";
+import { Check, Megaphone } from "lucide-react";
+import { IconLien as Link2, IconCopier as Copy, IconInfo as Info } from "@/components/icons/AmachiaIcons";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { MARKETPLACE_URL, money, num } from "@/lib/sellerStats";

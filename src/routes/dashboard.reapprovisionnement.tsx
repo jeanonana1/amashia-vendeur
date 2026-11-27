@@ -2,7 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { imgProps } from "@/lib/img";
 import { useEffect, useState } from "react";
 import { DashboardLayout } from "@/components/seller/dashboard/DashboardLayout";
-import { PackagePlus, Search } from "lucide-react";
+import { PackagePlus } from "lucide-react";
+import { IconRecherche as Search } from "@/components/icons/AmachiaIcons";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 

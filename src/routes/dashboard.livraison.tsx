@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { DashboardLayout } from "@/components/seller/dashboard/DashboardLayout";
-import { Truck, Package, MapPin, Clock, CheckCircle2, Loader2, Inbox } from "lucide-react";
+import { Loader2, Inbox } from "lucide-react";
+import { IconLivraison as Truck, IconColis as Package, IconLocalisation as MapPin, IconHorloge as Clock, IconValide as CheckCircle2 } from "@/components/icons/AmachiaIcons";
 import { supabase } from "@/integrations/supabase/client";
 import { ORDER_FIELDS, ORDER_STATUS, OrderDetailModal, OrderStatusTrack, type SellerOrderLine } from "@/components/seller/dashboard/OrderDetailModal";
 

@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { User, Store, ArrowRight } from "lucide-react";
+import { IconCompte as User, IconBoutique as Store, IconSuivant as ArrowRight } from "@/components/icons/AmachiaIcons";
 import { AuthSplit } from "@/components/seller/site/AuthSplit";
 
 export const Route = createFileRoute("/inscription")({

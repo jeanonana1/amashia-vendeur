@@ -1,4 +1,4 @@
-import { ShieldCheck, Lock, BadgeCheck, Headphones } from "lucide-react";
+import { IconPaiementSecurise as ShieldCheck, IconCadenas as Lock, IconVerifie as BadgeCheck, IconServiceClient as Headphones } from "@/components/icons/AmachiaIcons";
 import { Container, SectionHeading } from "@/components/seller/site/ui";
 import { Reveal } from "@/components/seller/site/motion";
 

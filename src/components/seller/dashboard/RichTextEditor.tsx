@@ -1,11 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { askText } from "@/lib/dialog";
 import { cleanEditorHtml, hasForeignFormatting } from "@/lib/richText";
-import {
-  Bold, Italic, Underline, Strikethrough, List, ListOrdered, Quote,
-  Heading1, Heading2, Heading3, Link as LinkIcon, Undo, Redo,
-  AlignLeft, AlignCenter, AlignRight, Type, Minus, Code, ChevronDown,
-} from "lucide-react";
+import { Bold, Italic, Underline, Strikethrough, ListOrdered, Quote, Heading1, Heading2, Heading3, Undo, Redo, AlignLeft, AlignCenter, AlignRight, Type, Code } from "lucide-react";
+import { IconVueListe as List, IconLien as LinkIcon, IconMoins as Minus, IconChevronBas as ChevronDown } from "@/components/icons/AmachiaIcons";
 
 type Props = { value: string; onChange: (html: string) => void; placeholder?: string };
 

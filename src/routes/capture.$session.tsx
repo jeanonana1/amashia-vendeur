@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Camera, Check, Images, Loader2 } from "lucide-react";
+import { Check, Images, Loader2 } from "lucide-react";
+import { IconAppareilPhoto as Camera } from "@/components/icons/AmachiaIcons";
 import { SellerLogo } from "@/components/seller/SellerLogo";
 
 export const Route = createFileRoute("/capture/$session")({

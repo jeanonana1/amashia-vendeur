@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { DashboardLayout } from "@/components/seller/dashboard/DashboardLayout";
-import { Megaphone, Plus, X, Trash2, Eye, MousePointerClick, ShoppingCart, BadgeCheck, Wallet, Pause, Play } from "lucide-react";
+import { Megaphone, MousePointerClick, Pause, Play } from "lucide-react";
+import { IconPlus as Plus, IconFermer as X, IconSupprimer as Trash2, IconVoir as Eye, IconPanier as ShoppingCart, IconVerifie as BadgeCheck, IconPortefeuille as Wallet } from "@/components/icons/AmachiaIcons";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { money, num } from "@/lib/sellerStats";

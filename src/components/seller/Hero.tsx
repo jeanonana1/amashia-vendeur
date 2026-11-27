@@ -75,7 +75,7 @@ function HeroSplit() {
         {/* halo orange derrière la photo */}
         <div aria-hidden className="glow-orb absolute -inset-8 -z-10 opacity-80" />
         <div aria-hidden className="absolute -right-3 -top-3 -z-10 h-full w-full rounded-[2rem] border border-primary/30 lg:-right-5 lg:-top-5" />
-        <HomePhoto slot="hero" priority width={828} sizes="(min-width: 1024px) 520px, 92vw" shade={false}
+        <HomePhoto slot="hero" priority original shade={false}
           className="aspect-[4/5] w-full rounded-[2rem] border border-border shadow-card [&_img]:object-[45%_25%]">
           <div aria-hidden className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/55 to-transparent" />
         </HomePhoto>

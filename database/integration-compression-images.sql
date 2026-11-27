@@ -42,6 +42,8 @@ create or replace function public.storage_image_enqueue() returns trigger langua
 declare _id bigint;
 begin
   if new.bucket_id <> 'product-images' or lower(new.name) !~ '\.(jpe?g|png|webp|avif)$' then return new; end if;
+  -- photos « qualité maximale » (ex. photo d'en-tête de l'accueil vendeur) : jamais recompressées
+  if new.name like '%/admin/qualite-max/%' then return new; end if;
   insert into image_compression_jobs (bucket, name, cache_control)
   values (new.bucket_id, new.name, new.metadata->>'cacheControl')
   on conflict (bucket, name) do nothing

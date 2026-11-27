@@ -49,8 +49,8 @@ function usePreview() {
  * Photo d'un emplacement. `className` donne la forme (proportions, arrondis) ; la photo remplit le cadre
  * (object-cover). `shade` assombrit légèrement le bas pour rester lisible sur le fond sombre du site.
  */
-export function HomePhoto({ slot, className = "", sizes, width = 828, priority = false, shade = true, children }: {
-  slot: HomeImageSlot; className?: string; sizes?: string; width?: number; priority?: boolean; shade?: boolean; children?: React.ReactNode;
+export function HomePhoto({ slot, className = "", sizes, width = 828, priority = false, shade = true, original = false, children }: {
+  slot: HomeImageSlot; className?: string; sizes?: string; width?: number; priority?: boolean; shade?: boolean; original?: boolean; children?: React.ReactNode;
 }) {
   const img = useContext(Ctx)[slot];
   const preview = usePreview();
@@ -64,7 +64,8 @@ export function HomePhoto({ slot, className = "", sizes, width = 828, priority =
   }
   return (
     <div className={`relative overflow-hidden bg-secondary ${className}`}>
-      <img {...imgProps(img.url, { width, sizes })} alt={img.alt || SLOT_LABELS[slot]} loading={priority ? "eager" : "lazy"} decoding="async"
+      {/* original : fichier d'origine, pleine résolution (aucun redimensionnement ni recompression) */}
+      <img {...(original ? { src: img.url } : imgProps(img.url, { width, sizes }))} alt={img.alt || SLOT_LABELS[slot]} loading={priority ? "eager" : "lazy"} decoding="async"
         {...(priority ? { fetchPriority: "high" as const } : {})} className="absolute inset-0 h-full w-full object-cover" />
       {shade && <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/5 to-transparent" />}
       {children}

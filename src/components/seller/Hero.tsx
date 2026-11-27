@@ -2,47 +2,119 @@ import { Bike, Bell, Sparkles, Smartphone, ShieldCheck, Truck, Wallet, BadgeChec
 import { useEffect, useState } from "react";
 import { Backdrop, Container, Eyebrow, GhostCta, PrimaryCta } from "@/components/seller/site/ui";
 import { HomePhoto, useHasHomeImage } from "@/components/seller/site/homeImages";
+import type React from "react";
 
-/** Page d'accueil — en-tête : promesse + maquette animée de l'espace vendeur. */
+/** Page d'accueil — en-tête : promesse + photo (si choisie dans l'admin) ou maquette animée de l'espace vendeur. */
 export function Hero() {
   const photo = useHasHomeImage("hero");
   return (
     <section className="relative isolate overflow-hidden pb-10 pt-12 md:pt-20">
       <Backdrop />
       <Container>
-        <div className="mx-auto max-w-4xl text-center animate-rise">
-          <Eyebrow>La plateforme des vendeurs Amachia · Cameroun</Eyebrow>
-          <h1 className="mt-6 font-extrabold leading-[1.05]">
-            <span className="block text-balance text-[clamp(2.2rem,10vw,3.4rem)] sm:whitespace-nowrap sm:text-[clamp(2rem,5.8vw,3.5rem)]">Vendez partout au Cameroun.</span>
-            <span className="mt-1 block text-balance text-[clamp(2.2rem,10vw,3.4rem)] text-gradient sm:text-[clamp(2rem,5.8vw,3.5rem)]">On s'occupe du reste.</span>
-          </h1>
-          <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-muted-foreground md:text-xl">
-            Publiez vos produits en quelques minutes, recevez vos commandes en temps réel. Le paiement et la livraison sont gérés par Amachia, de votre boutique jusqu'au client.
-          </p>
-          <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <PrimaryCta className="w-full sm:w-auto">Créer ma boutique gratuitement</PrimaryCta>
-            <GhostCta to="/comment-ca-marche" className="w-full sm:w-auto">Voir comment ça marche</GhostCta>
-          </div>
-          <ul className="mx-auto mt-8 flex max-w-2xl flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-muted-foreground">
-            {["Inscription gratuite", "Commission seulement sur les ventes", "Paiement à la livraison et Mobile Money"].map((t) => (
-              <li key={t} className="flex items-center gap-1.5"><BadgeCheck size={16} className="text-primary" />{t}</li>
-            ))}
-          </ul>
-        </div>
-        {/* photo d'en-tête (si choisie dans l'admin) : la maquette du tableau de bord vient se poser dessus */}
-        <HomePhoto slot="hero" priority width={1080} sizes="(min-width: 1024px) 1024px, 100vw"
-          className="mx-auto mt-12 aspect-[4/3] max-w-5xl rounded-[1.6rem] border border-border sm:aspect-[21/9]" />
-        <ProductMock overlap={photo} />
+        {photo ? <HeroSplit /> : (
+          <>
+            <div className="mx-auto max-w-4xl text-center animate-rise">
+              <Eyebrow>La plateforme des vendeurs Amachia · Cameroun</Eyebrow>
+              <h1 className="mt-6 font-extrabold leading-[1.05]">
+                <span className="block text-balance text-[clamp(2.2rem,10vw,3.4rem)] sm:whitespace-nowrap sm:text-[clamp(2rem,5.8vw,3.5rem)]">Vendez partout au Cameroun.</span>
+                <span className="mt-1 block text-balance text-[clamp(2.2rem,10vw,3.4rem)] text-gradient sm:text-[clamp(2rem,5.8vw,3.5rem)]">On s'occupe du reste.</span>
+              </h1>
+              <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-muted-foreground md:text-xl">{PITCH}</p>
+              <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row"><HeroCtas /></div>
+              <HeroTicks className="mx-auto mt-8 justify-center" />
+            </div>
+            <ProductMock />
+          </>
+        )}
       </Container>
       <PartnerMarquee />
     </section>
   );
 }
 
-/** Maquette (illustration) de l'espace vendeur : le graphique des ventes s'anime en boucle. */
-function ProductMock({ overlap = false }: { overlap?: boolean }) {
+const PITCH = "Publiez vos produits en quelques minutes, recevez vos commandes en temps réel. Le paiement et la livraison sont gérés par Amachia, de votre boutique jusqu'au client.";
+
+function HeroCtas() {
   return (
-    <div className={`relative mx-auto max-w-5xl animate-rise ${overlap ? "z-10 -mt-16 w-[92%] sm:-mt-28 md:w-[86%]" : "mt-16"}`} style={{ animationDelay: "0.15s" }}>
+    <>
+      <PrimaryCta className="w-full sm:w-auto">Créer ma boutique gratuitement</PrimaryCta>
+      <GhostCta to="/comment-ca-marche" className="w-full sm:w-auto">Voir comment ça marche</GhostCta>
+    </>
+  );
+}
+
+function HeroTicks({ className = "" }: { className?: string }) {
+  return (
+    <ul className={`flex max-w-2xl flex-wrap items-center gap-x-6 gap-y-2 text-sm text-muted-foreground ${className}`}>
+      {["Inscription gratuite", "Commission seulement sur les ventes", "Paiement à la livraison et Mobile Money"].map((t) => (
+        <li key={t} className="flex items-center gap-1.5"><BadgeCheck size={16} className="text-primary" />{t}</li>
+      ))}
+    </ul>
+  );
+}
+
+/**
+ * En-tête avec photo : texte à gauche, photo en portrait à droite (sur mobile : texte puis photo),
+ * entourée de petites notifications animées qui racontent le parcours d'une vente (illustration).
+ */
+function HeroSplit() {
+  return (
+    <div className="grid items-center gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:gap-10">
+      <div className="text-center animate-rise lg:text-left">
+        <Eyebrow>La plateforme des vendeurs Amachia · Cameroun</Eyebrow>
+        <h1 className="mt-6 text-[clamp(2.2rem,9vw,3.1rem)] font-extrabold leading-[1.06] lg:text-[clamp(2.4rem,3.7vw,3.5rem)]">
+          <span className="block text-balance">Vendez partout au Cameroun.</span>
+          <span className="mt-1 block text-balance text-gradient">On s'occupe du reste.</span>
+        </h1>
+        <p className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-muted-foreground md:text-lg lg:mx-0">{PITCH}</p>
+        <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center lg:justify-start"><HeroCtas /></div>
+        <HeroTicks className="mx-auto mt-7 justify-center lg:mx-0 lg:justify-start" />
+      </div>
+
+      <div className="relative mx-auto w-full max-w-[460px] animate-rise lg:max-w-none" style={{ animationDelay: "0.12s" }}>
+        {/* halo orange derrière la photo */}
+        <div aria-hidden className="glow-orb absolute -inset-8 -z-10 opacity-80" />
+        <div aria-hidden className="absolute -right-3 -top-3 -z-10 h-full w-full rounded-[2rem] border border-primary/30 lg:-right-5 lg:-top-5" />
+        <HomePhoto slot="hero" priority width={828} sizes="(min-width: 1024px) 520px, 92vw" shade={false}
+          className="aspect-[4/5] w-full rounded-[2rem] border border-border shadow-card [&_img]:object-[45%_25%]">
+          <div aria-hidden className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/55 to-transparent" />
+        </HomePhoto>
+
+        {/* notifications (illustration) */}
+        <FloatCard className="-left-2 -top-6 sm:-left-8 lg:-left-14 lg:top-[12%]" delay={0.5} bob={0}>
+          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-primary text-black"><Bell size={17} /></span>
+          <span className="min-w-0"><span className="block text-[11px] text-muted-foreground">Nouvelle commande</span><span className="block text-sm font-bold">Robe wax · 12 500 FCFA</span></span>
+        </FloatCard>
+        <FloatCard className="-right-3 top-[46%] sm:-right-8 lg:-right-10" delay={0.9} bob={1.6}>
+          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-emerald-500/15 text-emerald-500"><Wallet size={17} /></span>
+          <span className="min-w-0"><span className="block text-[11px] text-muted-foreground">Paiement reçu · Mobile Money</span><span className="block text-sm font-bold text-emerald-500">+ 22 500 FCFA</span></span>
+        </FloatCard>
+        <FloatCard className="bottom-5 left-4 sm:-left-6 lg:-left-12" delay={1.3} bob={3.2}>
+          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[#39bcf9]/15 text-[#39bcf9]"><Bike size={17} /></span>
+          <span className="min-w-0"><span className="block text-[11px] text-muted-foreground">Livraison Prime</span><span className="block text-sm font-bold">Colis récupéré, en route</span></span>
+        </FloatCard>
+      </div>
+    </div>
+  );
+}
+
+/** Petite carte flottante : apparaît puis flotte doucement. */
+function FloatCard({ className, delay, bob, children }: { className: string; delay: number; bob: number; children: React.ReactNode }) {
+  return (
+    <div aria-hidden className={`absolute z-10 ${className}`}>
+      <div className="animate-pop" style={{ animationDelay: `${delay}s` }}>
+        <div className="animate-bob flex max-w-[230px] items-center gap-2.5 rounded-2xl border border-border bg-card/90 px-3 py-2.5 shadow-card backdrop-blur-md" style={{ animationDelay: `${bob}s` }}>
+          {children}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/** Maquette (illustration) de l'espace vendeur : le graphique des ventes s'anime en boucle. */
+function ProductMock() {
+  return (
+    <div className="relative mx-auto mt-16 max-w-5xl animate-rise" style={{ animationDelay: "0.15s" }}>
       <div className="glow-orb absolute -inset-x-10 -top-10 bottom-0 -z-10 opacity-70" />
       <div className="ring-gradient relative overflow-hidden rounded-[1.6rem] border border-border bg-card shadow-card">
         {/* barre de fenêtre */}

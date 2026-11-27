@@ -1,9 +1,11 @@
 import { Bike, Bell, Sparkles, Smartphone, ShieldCheck, Truck, Wallet, BadgeCheck } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Backdrop, Container, Eyebrow, GhostCta, PrimaryCta } from "@/components/seller/site/ui";
+import { HomePhoto, useHasHomeImage } from "@/components/seller/site/homeImages";
 
 /** Page d'accueil — en-tête : promesse + maquette animée de l'espace vendeur. */
 export function Hero() {
+  const photo = useHasHomeImage("hero");
   return (
     <section className="relative isolate overflow-hidden pb-10 pt-12 md:pt-20">
       <Backdrop />
@@ -27,7 +29,10 @@ export function Hero() {
             ))}
           </ul>
         </div>
-        <ProductMock />
+        {/* photo d'en-tête (si choisie dans l'admin) : la maquette du tableau de bord vient se poser dessus */}
+        <HomePhoto slot="hero" priority width={1080} sizes="(min-width: 1024px) 1024px, 100vw"
+          className="mx-auto mt-12 aspect-[4/3] max-w-5xl rounded-[1.6rem] border border-border sm:aspect-[21/9]" />
+        <ProductMock overlap={photo} />
       </Container>
       <PartnerMarquee />
     </section>
@@ -35,9 +40,9 @@ export function Hero() {
 }
 
 /** Maquette (illustration) de l'espace vendeur : le graphique des ventes s'anime en boucle. */
-function ProductMock() {
+function ProductMock({ overlap = false }: { overlap?: boolean }) {
   return (
-    <div className="relative mx-auto mt-16 max-w-5xl animate-rise" style={{ animationDelay: "0.15s" }}>
+    <div className={`relative mx-auto max-w-5xl animate-rise ${overlap ? "z-10 -mt-16 w-[92%] sm:-mt-28 md:w-[86%]" : "mt-16"}`} style={{ animationDelay: "0.15s" }}>
       <div className="glow-orb absolute -inset-x-10 -top-10 bottom-0 -z-10 opacity-70" />
       <div className="ring-gradient relative overflow-hidden rounded-[1.6rem] border border-border bg-card shadow-card">
         {/* barre de fenêtre */}

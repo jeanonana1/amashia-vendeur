@@ -2,6 +2,7 @@ import { UserPlus, PackagePlus, Bell, Wallet } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Container, SectionHeading } from "@/components/seller/site/ui";
 import { Reveal, useInView } from "@/components/seller/site/motion";
+import { HomePhoto, type HomeImageSlot } from "@/components/seller/site/homeImages";
 
 export const STEPS = [
   { icon: UserPlus, title: "Créez votre compte", text: "Inscription gratuite : informations de la boutique, documents et moyen de versement. Amachia vérifie votre compte." },
@@ -34,6 +35,7 @@ export function HowItWorks() {
           </div>
           {STEPS.map((s, i) => (
             <Reveal as="li" key={s.title} variant="up" className={`step-card relative rounded-[1.4rem] border border-border bg-card p-6 shadow-card ${active === i ? "is-active" : ""}`}>
+              <HomePhoto slot={`etape${i + 1}` as HomeImageSlot} width={384} sizes="(min-width: 768px) 25vw, 100vw" className="-mx-6 -mt-6 mb-5 aspect-[16/10] rounded-t-[1.4rem]" />
               <div className="flex items-center justify-between">
                 <span className={`relative grid h-11 w-11 place-items-center rounded-xl transition-colors duration-500 ${i <= active ? "bg-primary text-black" : "bg-secondary text-muted-foreground"}`}>
                   {active === i && <span className="animate-ping-soft absolute inset-0 rounded-xl bg-primary/60" />}

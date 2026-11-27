@@ -10,6 +10,7 @@ import { SellerReviews } from "@/components/seller/site/SellerReviews";
 import { Faq } from "@/components/seller/site/Faq";
 import { Footer } from "@/components/seller/Footer";
 import { SectionDivider } from "@/components/seller/site/motion";
+import { HomeImagesProvider, loadHomeImages } from "@/components/seller/site/homeImages";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -28,11 +29,14 @@ export const Route = createFileRoute("/")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
+  loader: () => loadHomeImages(),
   component: Index,
 });
 
 function Index() {
+  const images = Route.useLoaderData();
   return (
+    <HomeImagesProvider value={images ?? {}}>
     <div className="min-h-screen overflow-x-clip bg-background">
       <Header />
       <main>
@@ -54,5 +58,6 @@ function Index() {
       </main>
       <Footer />
     </div>
+    </HomeImagesProvider>
   );
 }

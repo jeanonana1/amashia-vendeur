@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { imgProps } from "@/lib/img";
+import { HomePhoto, useHasHomeImage } from "@/components/seller/site/homeImages";
 
 /**
  * Section « Ils vendent sur Amachia » (maquette Claude Design « section-avis »).
@@ -26,6 +27,7 @@ function ago(iso: string) {
 export function SellerReviews() {
   const [data, setData] = useState<Data | null>(null);
   // vidéo choisie dans l'admin : elle remplace la pile de cartes, les vrais avis passent en dessous
+  const hasPhoto = useHasHomeImage("avis");
   const [video, setVideo] = useState<{ url?: string; poster?: string | null } | null>(null);
   useEffect(() => {
     void (supabase as any).rpc("seller_home_video").then(({ data }: { data: { url?: string } | null }) => setVideo(data ?? {}));
@@ -53,7 +55,9 @@ export function SellerReviews() {
             )}
           </div>
           {/* en face de la note : le cadre vidéo (lecture automatique en boucle, vidéo choisie dans l'admin) */}
-          <ReviewsVideo url={video?.url} poster={video?.poster ?? undefined} />
+          {!video?.url && hasPhoto
+            ? <HomePhoto slot="avis" width={640} sizes="(min-width: 1024px) 480px, 100vw" shade={false} className="avis-video mx-auto aspect-[4/5] w-full max-w-[480px] rounded-[1.6rem]" />
+            : <ReviewsVideo url={video?.url} poster={video?.poster ?? undefined} />}
         </div>
         {/* les vrais avis des vendeurs : un cadre par avis, sans image */}
         {data && data.items.length > 0 && (data.items.length >= 5 ? (

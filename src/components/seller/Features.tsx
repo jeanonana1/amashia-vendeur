@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Container, SectionHeading } from "@/components/seller/site/ui";
 import { Reveal } from "@/components/seller/site/motion";
 import { preferredLang } from "@/lib/sellerLang";
+import { HomePhoto } from "@/components/seller/site/homeImages";
 
 /** Grille « bento » des fonctionnalités, avec mini-interfaces illustratives. */
 export function Features() {
@@ -27,6 +28,7 @@ export function Features() {
             </div>
           </Tile>
           <Tile className="md:col-span-2" icon={<Bike size={18} />} title="Livraison Prime" text="Amachia envoie un livreur proche de votre boutique : il récupère le colis et le livre au client. Ailleurs, expédition par agence.">
+            <HomePhoto slot="prime" width={640} sizes="(min-width: 768px) 33vw, 100vw" className="mt-5 aspect-[16/9] rounded-xl" />
             <div className="mt-7 px-4">
               {/* le trait et le livreur avancent ensemble (même animation, même durée) */}
               <div className="relative h-1.5 rounded-full bg-secondary">

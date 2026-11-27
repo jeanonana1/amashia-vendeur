@@ -58,12 +58,13 @@ admin_invite = layout(
     small("Ce lien est personnel et expire dans 1 heure. Si vous n'attendiez pas cette invitation, ignorez simplement cet e-mail.") + link_fallback(URL),
 )
 seller_confirm = layout(
-    "Confirmez votre adresse e-mail pour ouvrir votre boutique.",
+    "Votre code de vérification pour ouvrir votre boutique : {{ .Token }}",
     "Bienvenue sur Amachia Seller !",
     p("Bonjour {{ .Data.first_name }},")
-    + p("Merci d'avoir créé votre compte vendeur. Confirmez votre adresse e-mail pour finaliser votre inscription et ouvrir votre boutique sur Amachia."),
-    ("Confirmer mon adresse e-mail", URL),
-    small("Ce lien expire dans 1 heure. Si vous n'êtes pas à l'origine de cette inscription, ignorez cet e-mail.") + link_fallback(URL),
+    + p("Merci d'avoir créé votre compte vendeur. Pour confirmer votre adresse e-mail, saisissez ce code sur la page d'inscription :")
+    + f'<p style="margin:18px 0;padding:16px 0;text-align:center;background:#fff4ec;border-radius:12px;font-size:34px;font-weight:800;letter-spacing:10px;color:#111827">{{{{ .Token }}}}</p>',
+    None,
+    small("Ce code expire dans 1 heure. Ne le communiquez à personne : Amachia ne vous le demandera jamais. Si vous n'êtes pas à l'origine de cette inscription, ignorez cet e-mail."),
 )
 client_confirm = layout(
     "Confirmez votre adresse e-mail pour activer votre compte.",
@@ -135,7 +136,7 @@ email_changed = layout(
 )
 
 templates = {
-    "mailer_subjects_confirmation": "{{ if .Data.amashia_invite }}Invitation à l'espace administrateur Amachia{{ else }}Confirmez votre adresse e-mail — Amachia{{ end }}",
+    "mailer_subjects_confirmation": "{{ if .Data.amashia_invite }}Invitation à l'espace administrateur Amachia{{ else if .Data.account_type }}{{ .Token }} est votre code Amachia Seller{{ else }}Confirmez votre adresse e-mail — Amachia{{ end }}",
     "mailer_templates_confirmation_content": confirmation,
     "mailer_subjects_recovery": "Réinitialisez votre mot de passe — Amachia",
     "mailer_templates_recovery_content": recovery,

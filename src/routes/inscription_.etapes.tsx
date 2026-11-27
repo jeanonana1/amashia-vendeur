@@ -12,6 +12,7 @@ import { PasswordInput } from "@/components/ui/password-input";
 import { PhoneInput } from "@/components/seller/PhoneInput";
 import { cmDigits, cmPhoneError, formatCm, toE164 } from "@/lib/phone";
 import { Select } from "@/components/ui/app-select";
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 
 type SearchParams = { type?: "particulier" | "entreprise" };
 
@@ -73,6 +74,14 @@ function Page() {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
+  const [otpState, setOtp] = useState("");
+  const [existing, setExisting] = useState(false); // e-mail déjà inscrit : pas de code, connexion avec le mot de passe
+  const [cooldown, setCooldown] = useState(0);
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const t = window.setTimeout(() => setCooldown((c) => c - 1), 1000);
+    return () => window.clearTimeout(t);
+  }, [cooldown]);
   const [data, setData] = useState<FormState>({
     firstName: "", lastName: "", email: "", phone: "", password: "", confirm: "",
     categories: [],
@@ -144,23 +153,30 @@ function Page() {
 
   async function sendCode() {
     if (!data.acceptTerms) { toast.error("Vous devez accepter les conditions"); return; }
+    if (cooldown > 0) return;
     setLoading(true);
     try {
       const metadata = { account_type: type, first_name: data.firstName, last_name: data.lastName, phone: formatCm(cmDigits(data.phone)), seller_profile: buildProfile() };
       const result = otpSent
         ? await supabase.auth.resend({ type: "signup", email: data.email, options: { emailRedirectTo: `${window.location.origin}/connexion` } })
         : await supabase.auth.signUp({ email: data.email, password: data.password, options: { data: metadata, emailRedirectTo: `${window.location.origin}/connexion` } });
-      if (result.error) throw result.error;
+      if (result.error) {
+        if (/rate limit|security purposes|seconds/i.test(result.error.message)) throw new Error("Trop de demandes d'envoi : patientez une minute avant de redemander un code.");
+        throw result.error;
+      }
       if ("session" in result.data && result.data.session) {
         toast.error("La confirmation email doit être activée sur votre service d’identification.");
         return;
       }
       setOtpSent(true);
+      setCooldown(60);
       if (!otpSent && "user" in result.data && result.data.user && result.data.user.identities?.length === 0) {
-        toast.info("Cet email a déjà un compte Amachia. Cliquez sur « J'ai confirmé mon email » pour continuer avec votre mot de passe.");
+        setExisting(true);
+        toast.info("Cet email a déjà un compte Amachia : continuez avec votre mot de passe.");
         return;
       }
-      toast.success("Le lien de confirmation a été envoyé par email.");
+      setOtp("");
+      toast.success(otpSent ? "Un nouveau code vient d'être envoyé." : "Le code de vérification a été envoyé par email.");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Envoi impossible.");
     } finally { setLoading(false); }
@@ -184,14 +200,23 @@ function Page() {
     };
   }
 
-  async function verifyCode() {
+  async function verifyCode(code?: string) {
+    if (loading) return;
+    const otp = code ?? otpState;
     setLoading(true);
     const profile = buildProfile();
     try {
-      const { error: signInError } = await supabase.auth.signInWithPassword({ email: data.email, password: data.password });
+      // code à 6 chiffres reçu par e-mail (sinon : compte déjà existant ou lien déjà cliqué → mot de passe)
+      let verified = false;
+      if (!existing && otp.length === 6) {
+        const { error: otpError } = await supabase.auth.verifyOtp({ email: data.email, token: otp, type: "signup" });
+        if (!otpError) verified = true;
+        else if (!/expired|invalid/i.test(otpError.message)) throw otpError;
+      }
+      const { error: signInError } = verified ? { error: null } : await supabase.auth.signInWithPassword({ email: data.email, password: data.password });
       if (signInError) {
         if (/not confirmed/i.test(signInError.message)) {
-          throw new Error("Email pas encore confirmé : cliquez d'abord sur le lien reçu par email, puis revenez ici.");
+          throw new Error(otp.length === 6 ? "Code incorrect ou expiré. Vérifiez le dernier e-mail reçu ou demandez un nouveau code." : "Saisissez le code à 6 chiffres reçu par email.");
         }
         if (/invalid login credentials/i.test(signInError.message)) {
           throw new Error("Mot de passe incorrect pour ce compte. Revenez à l'étape 1 pour le corriger.");
@@ -483,18 +508,31 @@ function Page() {
                   <div className="w-10 h-10 rounded-xl bg-primary/15 grid place-items-center"><Mail className="text-primary" size={18} /></div>
                   <div>
                     <p className="font-bold text-sm">Vérification par email</p>
-                    <p className="text-xs text-muted-foreground">Un lien de confirmation sera envoyé à <span className="text-primary font-semibold">{data.email}</span></p>
+                    <p className="text-xs text-muted-foreground">Un code à 6 chiffres sera envoyé à <span className="text-primary font-semibold">{data.email}</span></p>
                   </div>
                 </div>
                 {!otpSent ? (
-                  <button onClick={sendCode} disabled={loading || !data.acceptTerms} className="w-full py-3 rounded-full bg-primary/20 border border-primary/40 text-primary font-semibold hover:bg-primary/30 transition flex items-center justify-center gap-2 disabled:opacity-50">
-                    <Send size={16} /> {loading ? "Envoi..." : "Envoyer le lien de confirmation"}
+                  <button onClick={sendCode} disabled={loading || !data.acceptTerms} className="w-full py-3 rounded-full bg-primary text-black font-semibold hover:brightness-95 transition flex items-center justify-center gap-2 disabled:opacity-50">
+                    <Send size={16} /> {loading ? "Envoi..." : "Recevoir mon code"}
                   </button>
+                ) : existing ? (
+                  <p className="text-sm">Cette adresse a déjà un compte Amachia. Cliquez sur <span className="font-semibold">« Continuer »</span> pour vous connecter avec votre mot de passe.</p>
                 ) : (
-                  <div className="space-y-3 text-sm">
-                    <p>📩 Ouvrez l'email reçu à <span className="font-semibold">{data.email}</span> et cliquez sur le lien de confirmation (pensez à vérifier les spams).</p>
-                    <p>Revenez ensuite sur cette page et cliquez sur <span className="font-semibold">« J'ai confirmé mon email »</span>.</p>
-                    <button onClick={sendCode} disabled={loading} className="text-sm text-primary hover:underline">Renvoyer l'email</button>
+                  <div className="space-y-4 text-sm">
+                    <p>📩 Saisissez le code reçu par email (pensez à vérifier les spams et l'onglet Promotions).</p>
+                    <div className="flex justify-center">
+                      <InputOTP maxLength={6} value={otpState} onChange={(v) => setOtp(v.replace(/\D/g, ""))} inputMode="numeric" autoFocus
+                        onComplete={(v: string) => { if (/^\d{6}$/.test(v) && !loading) void verifyCode(v); }}>
+                        <InputOTPGroup>
+                          {[0, 1, 2, 3, 4, 5].map((i) => <InputOTPSlot key={i} index={i} className="w-11 h-12 text-lg font-bold" />)}
+                        </InputOTPGroup>
+                      </InputOTP>
+                    </div>
+                    <div className="text-center">
+                      <button onClick={sendCode} disabled={loading || cooldown > 0} className="text-sm text-primary hover:underline disabled:opacity-60 disabled:no-underline">
+                        {cooldown > 0 ? `Renvoyer un code dans ${cooldown} s` : "Renvoyer un code"}
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>
@@ -506,7 +544,7 @@ function Page() {
                 <input type="checkbox" checked={data.notifications} onChange={(e) => set("notifications", e.target.checked)} className="mt-1 accent-primary" />
                 <span>Recevoir des notifications sur les offres et nouveautés</span>
               </label>
-              <NavBtns back={back} next={verifyCode} disabled={!otpSent || loading} nextLabel={loading ? "Vérification..." : "J'ai confirmé mon email"} />
+              <NavBtns back={back} next={() => void verifyCode()} disabled={!otpSent || loading || (!existing && otpState.length !== 6)} nextLabel={loading ? "Vérification..." : existing ? "Continuer" : "Valider le code"} />
             </div>
           )}
 

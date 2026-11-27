@@ -205,15 +205,40 @@ async function preview(kind: string, orderId: string, sellerId?: string) {
   return m && !("skip" in m) ? { subject: m.subject, html: m.html } : m;
 }
 
+/** État de la connexion Brevo (sans envoi) : clé valide, expéditeur, domaine authentifié. */
+async function brevoStatus() {
+  if (!KEY) return { key: "absente" };
+  const get = async (path: string) => {
+    const r = await fetch(`https://api.brevo.com/v3${path}`, { headers: { "api-key": KEY, accept: "application/json" } });
+    return { status: r.status, data: await r.json().catch(() => null) };
+  };
+  const acc = await get("/account");
+  if (acc.status !== 200) return { key: "refusée", status: acc.status, message: acc.data?.message };
+  const senders = await get("/senders");
+  const domains = await get("/senders/domains");
+  const domain = FROM.split("@")[1];
+  const d = (domains.data?.domains ?? []).find((x: { domain_name: string }) => x.domain_name === domain);
+  const detail = d ? await get(`/senders/domains/${domain}`) : null;
+  return {
+    key: "valide",
+    plans: (acc.data?.plan ?? []).map((p: { type: string; credits: number; creditsType: string }) => ({ type: p.type, credits: p.credits, creditsType: p.creditsType })),
+    from: FROM,
+    sender: (senders.data?.senders ?? []).map((s: { email: string; name: string; active: boolean }) => ({ email: s.email, name: s.name, active: s.active })),
+    domain: d ? { name: d.domain_name, authenticated: d.authenticated, verified: d.verified } : "absent",
+    dns: detail?.data?.dns_records ? Object.fromEntries(Object.entries(detail.data.dns_records).map(([k, v]) => [k, (v as { status?: boolean } | null)?.status ?? null])) : null,
+  };
+}
+
 Deno.serve(async (req) => {
   if (req.method !== "POST") return json({ error: "POST uniquement" }, 405);
   const body = await req.json().catch(() => ({}));
   // aperçu réservé au service (clé de service dans l'en-tête)
-  if (body?.preview) {
+  if (body?.preview || body?.check) {
     // la clé fournie doit pouvoir lire la file d'envoi, ce que seule la clé de service peut faire
     const token = (req.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, "");
     const check = await fetch(`${Deno.env.get("SUPABASE_URL")}/rest/v1/email_outbox?select=id&limit=1`, { headers: { apikey: token, Authorization: `Bearer ${token}` } }).catch(() => null);
     if (!token || !check?.ok) return json({ error: "non autorisé" }, 401);
+    if (body.check) return json(await brevoStatus().catch((e) => ({ error: String(e?.stack ?? e) })));
     return json(await preview(String(body.preview), String(body.order_id ?? ""), body.seller_id ? String(body.seller_id) : undefined));
   }
   // réponse immédiate : l'envoi continue en arrière-plan

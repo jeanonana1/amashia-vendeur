@@ -13,8 +13,9 @@ export function AuthSplit({ children, wide = false }: { children: ReactNode; wid
           <Link to="/" aria-label="Accueil amachia seller"><SellerLogo className="h-[22px] sm:h-[26px]" /></Link>
           <Link to="/" className="text-sm font-medium text-muted-foreground hover:text-foreground">← Retour au site</Link>
         </div>
-        <div className="flex flex-1 items-center justify-center py-10">
-          <div className={`w-full ${wide ? "max-w-3xl" : "max-w-md"}`}>{children}</div>
+        <div className={`flex flex-1 items-center justify-center ${wide ? "py-5 sm:py-10" : "py-10"}`}>
+          {/* mobile : formulaire d'inscription en pleine largeur (bord à bord) */}
+          <div className={wide ? "-mx-5 w-[calc(100%+2.5rem)] max-w-none sm:mx-0 sm:w-full sm:max-w-3xl" : "w-full max-w-md"}>{children}</div>
         </div>
         <p className="text-center text-xs text-muted-foreground">© {new Date().getFullYear()} Amachia · Vendez partout au Cameroun</p>
       </div>

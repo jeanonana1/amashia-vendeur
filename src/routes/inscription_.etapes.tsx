@@ -14,6 +14,7 @@ import { PhoneInput } from "@/components/seller/PhoneInput";
 import { cmDigits, cmPhoneError, formatCm, toE164 } from "@/lib/phone";
 import { Select } from "@/components/ui/app-select";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
+import { compressImage, MAX_IMAGE_BYTES } from "@/lib/imageCompress";
 
 type SearchParams = { type?: "particulier" | "entreprise" };
 
@@ -74,6 +75,9 @@ function Page() {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
+  // avancement de la création du compte (affiché sur le bouton) et documents déjà envoyés (pas renvoyés si on réessaie)
+  const [progress, setProgress] = useState("");
+  const uploadedDocs = useRef<Set<string>>(new Set());
   const [otpSent, setOtpSent] = useState(false);
   const [otpState, setOtp] = useState("");
   const [existing, setExisting] = useState(false); // e-mail déjà inscrit : pas de code, connexion avec le mot de passe
@@ -205,6 +209,7 @@ function Page() {
     if (loading) return;
     const otp = code ?? otpState;
     setLoading(true);
+    setProgress("Vérification du code…");
     const profile = buildProfile();
     try {
       // code à 6 chiffres reçu par e-mail (sinon : compte déjà existant ou lien déjà cliqué → mot de passe)
@@ -236,18 +241,28 @@ function Page() {
           ["patente", data.docs.patente],
           ["cni_gerant", data.docs.cniGerant],
         ];
-        for (const [docType, file] of docEntries) {
-          if (!file) continue;
+        // documents envoyés un par un, avec une limite de temps : la page ne reste jamais bloquée sans message
+        const todo = docEntries.filter((e): e is [string, DocFile] => !!e[1] && !uploadedDocs.current.has(e[0]));
+        let n = 0;
+        for (const [docType, file] of todo) {
+          n++;
+          setProgress(`Envoi des documents ${n}/${todo.length}…`);
           const blob = await (await fetch(file.dataUrl)).blob();
           const ext = file.name.split(".").pop() || "jpg";
           const path = `${user.id}/${docType}-${Date.now()}.${ext}`;
-          const { error: upErr } = await supabase.storage.from("seller-documents").upload(path, blob, { upsert: true });
-          if (!upErr) {
-            await supabase.from("seller_documents").insert({ user_id: user.id, doc_type: docType, file_url: path });
+          let upErr: unknown = null;
+          for (let attempt = 0; attempt < 2; attempt++) {
+            const res = await withTimeout(supabase.storage.from("seller-documents").upload(path, blob, { upsert: true, contentType: blob.type || undefined }), 60_000).catch((err: unknown) => ({ error: err }));
+            upErr = res.error;
+            if (!upErr) break;
           }
+          if (upErr) throw new Error("L'envoi de vos documents n'a pas abouti (connexion trop lente). Vérifiez votre connexion puis appuyez à nouveau sur « Valider le code ».");
+          await supabase.from("seller_documents").insert({ user_id: user.id, doc_type: docType, file_url: path });
+          uploadedDocs.current.add(docType);
         }
 
-        const { error: profileError } = await supabase.from("seller_profiles").upsert({ id: user.id, ...profile } as never);
+        setProgress("Création de votre boutique…");
+        const { error: profileError } = await withTimeout(supabase.from("seller_profiles").upsert({ id: user.id, ...profile } as never), 30_000);
         if (profileError) throw profileError;
       }
     } catch (e) {
@@ -256,6 +271,7 @@ function Page() {
       return;
     } finally {
       setLoading(false);
+      setProgress("");
     }
     setStep(7);
     toast.success("Compte créé, ouverture du tableau de bord");
@@ -545,7 +561,7 @@ function Page() {
                 <input type="checkbox" checked={data.notifications} onChange={(e) => set("notifications", e.target.checked)} className="mt-1 accent-primary" />
                 <span>Recevoir des notifications sur les offres et nouveautés</span>
               </label>
-              <NavBtns back={back} next={() => void verifyCode()} disabled={!otpSent || loading || (!existing && otpState.length !== 6)} nextLabel={loading ? "Vérification..." : existing ? "Continuer" : "Valider le code"} />
+              <NavBtns back={back} next={() => void verifyCode()} disabled={!otpSent || loading || (!existing && otpState.length !== 6)} nextLabel={loading ? (progress || "Vérification...") : existing ? "Continuer" : "Valider le code"} />
             </div>
           )}
 
@@ -575,18 +591,18 @@ function Page() {
   );
 }
 
-const inputCls = "w-full bg-background border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary disabled:opacity-50";
+const inputCls = "w-full bg-background border border-border rounded-xl px-4 py-4 text-base sm:py-3 sm:text-sm focus:outline-none focus:border-primary disabled:opacity-50";
 const ctaCls = "cta-sweep w-full py-3.5 rounded-full bg-gradient-primary text-black font-semibold shadow-elegant hover:shadow-glow transition";
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return <div><label className="block text-sm font-medium mb-2">{label}</label>{children}</div>;
+  return <div><label className="block text-base font-semibold mb-2 sm:text-sm sm:font-medium">{label}</label>{children}</div>;
 }
 
 function NavBtns({ back, next, disabled, nextLabel = "Continuer" }: { back: () => void; next: () => void; disabled?: boolean; nextLabel?: string }) {
   return (
     <div className="grid grid-cols-2 gap-3 pt-2">
-      <button onClick={back} className="py-3.5 rounded-full bg-secondary text-foreground font-semibold hover:opacity-90 transition">Précédent</button>
-      <button onClick={next} disabled={disabled} className="cta-sweep py-3.5 rounded-full bg-gradient-primary text-black font-semibold shadow-elegant hover:shadow-glow transition disabled:opacity-50 disabled:cursor-not-allowed">{nextLabel}</button>
+      <button onClick={back} className="py-4 text-base sm:py-3.5 sm:text-sm rounded-full bg-secondary text-foreground font-semibold hover:opacity-90 transition">Précédent</button>
+      <button onClick={next} disabled={disabled} className="cta-sweep py-4 text-base sm:py-3.5 sm:text-sm rounded-full bg-gradient-primary text-black font-semibold shadow-elegant hover:shadow-glow transition disabled:opacity-50 disabled:cursor-not-allowed">{nextLabel}</button>
     </div>
   );
 }
@@ -604,9 +620,12 @@ function PayCard({ active, onClick, icon, title, subtitle }: { active: boolean; 
 function DocUpload({ label, file, onFile }: { label: string; file?: DocFile; onFile: (f: DocFile | undefined) => void }) {
   const galleryRef = useRef<HTMLInputElement>(null);
   const cameraRef = useRef<HTMLInputElement>(null);
-  function handle(f: File | undefined) {
-    if (!f) return;
-    if (f.size > 5 * 1024 * 1024) { toast.error("Fichier trop volumineux (max 5MB)"); return; }
+  async function handle(original: File | undefined) {
+    if (!original) return;
+    const isImage = original.type.startsWith("image/");
+    if (original.size > (isImage ? MAX_IMAGE_BYTES : 5 * 1024 * 1024)) { toast.error(isImage ? "Photo trop lourde (20 Mo maximum)" : "Fichier trop volumineux (5 Mo maximum)"); return; }
+    // photo de téléphone (3 à 15 Mo) réduite à quelques centaines de Ko, texte de la pièce toujours lisible
+    const f = isImage ? await compressImage(original, 2000, 0.85) : original;
     const reader = new FileReader();
     reader.onload = () => onFile({ name: f.name, dataUrl: reader.result as string });
     reader.readAsDataURL(f);
@@ -741,4 +760,12 @@ function LocationInfoModal({ onCancel, onConfirm }: { onCancel: () => void; onCo
       </div>
     </div>
   );
+}
+
+/** Échoue au bout de `ms` millisecondes au lieu d'attendre indéfiniment (réseau mobile coupé). */
+function withTimeout<T>(p: PromiseLike<T>, ms: number): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const t = setTimeout(() => reject(new Error("La connexion est trop lente. Vérifiez votre réseau puis réessayez.")), ms);
+    Promise.resolve(p).then((v) => { clearTimeout(t); resolve(v); }, (e) => { clearTimeout(t); reject(e); });
+  });
 }

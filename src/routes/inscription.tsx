@@ -18,7 +18,7 @@ function Page() {
   const go = (type: "particulier" | "entreprise") => navigate({ to: "/inscription/etapes", search: { type } });
   return (
     <AuthSplit wide>
-      <div>
+      <div className="px-5 sm:px-0">
         <p className="eyebrow">Inscription gratuite</p>
         <h1 className="mt-3 text-3xl font-extrabold sm:text-4xl">Quel compte souhaitez-vous créer ?</h1>
         <p className="mt-2 text-muted-foreground">Vous pourrez compléter les informations de votre boutique à l'étape suivante.</p>

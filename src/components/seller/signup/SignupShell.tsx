@@ -7,7 +7,7 @@ const STEPS = ["Infos", "Détails", "Documents", "Paiement", "Localisation", "V�
 export function SignupShell({ step, children, onBack }: { step: number; children: React.ReactNode; onBack?: () => void }) {
   const progress = (step / STEPS.length) * 100;
   return (
-    <div className="w-full rounded-[1.6rem] border border-border bg-card p-6 shadow-card sm:p-8 md:p-10">
+    <div className="w-full rounded-none border-y border-border bg-card px-4 py-6 shadow-card sm:rounded-[1.6rem] sm:border sm:p-8 md:p-10">
       {onBack ? (
         <button onClick={onBack} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary mb-4">
           <ArrowLeft size={16} /> Retour
@@ -27,7 +27,7 @@ export function SignupShell({ step, children, onBack }: { step: number; children
           const active = num === step;
           return (
             <div key={label} className="flex flex-col items-center text-center">
-              <div className={`w-9 h-9 rounded-full grid place-items-center text-xs font-bold mb-1.5 transition ${done || active ? "bg-gradient-primary text-black" : "bg-secondary text-muted-foreground"}`}>
+              <div className={`w-10 h-10 sm:w-9 sm:h-9 rounded-full grid place-items-center text-sm sm:text-xs font-bold mb-1.5 transition ${done || active ? "bg-gradient-primary text-black" : "bg-secondary text-muted-foreground"}`}>
                 {done ? <Check size={16} /> : num}
               </div>
               {/* mobile : seul le titre de l'étape en cours s'affiche ; ordinateur : tous les titres */}

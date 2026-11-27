@@ -45,6 +45,7 @@ const NOTIFS: { key: string; label: string; desc: string }[] = [
   { key: "payout", label: "Paiements et retraits", desc: "Suivi de vos demandes de retrait" },
   { key: "follower", label: "Nouveaux abonnés", desc: "Quand un client suit votre boutique" },
   { key: "published", label: "Produits publiés", desc: "Confirmation de mise en ligne" },
+  { key: "email_orders", label: "E-mail à chaque nouvelle commande", desc: "Un e-mail récapitulatif à votre adresse de connexion (sans les coordonnées du client)" },
 ];
 
 const PERIODS = [{ v: 1, l: "Jour" }, { v: 7, l: "Semaine" }, { v: 30, l: "Mois" }, { v: 365, l: "Année" }];
@@ -203,7 +204,7 @@ function NotifsTab({ p, save }: { p: Profile; save: SaveFn }) {
   return (
     <div className="space-y-2">
       <h3 className="font-bold text-lg">Notifications</h3>
-      <p className="mb-2 text-sm text-muted-foreground">Choisissez les alertes qui apparaissent dans votre cloche et votre page Notifications. Une alerte désactivée n'est plus créée.</p>
+      <p className="mb-2 text-sm text-muted-foreground">Choisissez les alertes qui apparaissent dans votre cloche et votre page Notifications (et l'e-mail de nouvelle commande). Une alerte désactivée n'est plus créée.</p>
       {NOTIFS.map((n) => (
         <div key={n.key} className="flex justify-between items-center gap-4 py-3 border-b border-border last:border-0">
           <div><p className="font-semibold text-sm">{n.label}</p><p className="text-xs text-muted-foreground">{n.desc}</p></div>

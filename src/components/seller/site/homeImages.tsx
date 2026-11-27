@@ -72,6 +72,11 @@ export function HomePhoto({ slot, className = "", sizes, width = 828, priority =
   );
 }
 
+/** Toutes les photos choisies. */
+export function useHomeImages() {
+  return useContext(Ctx);
+}
+
 /** Vrai si l'emplacement a une photo (ou si l'aperçu des emplacements est actif). */
 export function useHasHomeImage(slot: HomeImageSlot) {
   const img = useContext(Ctx)[slot];

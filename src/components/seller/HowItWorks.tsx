@@ -2,7 +2,7 @@ import { UserPlus, PackagePlus, Bell, Wallet } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Container, SectionHeading } from "@/components/seller/site/ui";
 import { Reveal, useInView } from "@/components/seller/site/motion";
-import { HomePhoto, type HomeImageSlot } from "@/components/seller/site/homeImages";
+import { HomePhoto, useHomeImages, type HomeImageSlot } from "@/components/seller/site/homeImages";
 
 export const STEPS = [
   { icon: UserPlus, title: "Créez votre compte", text: "Inscription gratuite : informations de la boutique, documents et moyen de versement. Amachia vérifie votre compte." },
@@ -14,6 +14,9 @@ export const STEPS = [
 export function HowItWorks() {
   const { ref, inView } = useInView<HTMLOListElement>(0.3);
   const [active, setActive] = useState(-1);
+  // dès qu'une étape a une photo, les étapes sans photo reçoivent un visuel de même hauteur (cartes alignées)
+  const imgs = useHomeImages();
+  const anyPhoto = STEPS.some((_, i) => imgs[`etape${i + 1}` as HomeImageSlot]?.url);
   // une fois la section à l'écran, les étapes s'allument l'une après l'autre, en boucle
   useEffect(() => {
     if (!inView) return;
@@ -35,7 +38,13 @@ export function HowItWorks() {
           </div>
           {STEPS.map((s, i) => (
             <Reveal as="li" key={s.title} variant="up" className={`step-card relative rounded-[1.4rem] border border-border bg-card p-6 shadow-card ${active === i ? "is-active" : ""}`}>
-              <HomePhoto slot={`etape${i + 1}` as HomeImageSlot} width={384} sizes="(min-width: 768px) 25vw, 100vw" className="-mx-6 -mt-6 mb-5 aspect-[16/10] rounded-t-[1.4rem]" />
+              {anyPhoto && !imgs[`etape${i + 1}` as HomeImageSlot]?.url ? (
+                <div aria-hidden className="relative -mx-6 -mt-6 mb-5 grid aspect-[16/10] place-items-center overflow-hidden rounded-t-[1.4rem] bg-[radial-gradient(ellipse_at_30%_20%,color-mix(in_oklab,var(--primary)_28%,transparent),transparent_65%)] bg-secondary">
+                  <s.icon size={56} strokeWidth={1.4} className="text-primary/70" />
+                </div>
+              ) : (
+                <HomePhoto slot={`etape${i + 1}` as HomeImageSlot} width={384} sizes="(min-width: 768px) 25vw, 100vw" className="-mx-6 -mt-6 mb-5 aspect-[16/10] rounded-t-[1.4rem]" />
+              )}
               <div className="flex items-center justify-between">
                 <span className={`relative grid h-11 w-11 place-items-center rounded-xl transition-colors duration-500 ${i <= active ? "bg-primary text-black" : "bg-secondary text-muted-foreground"}`}>
                   {active === i && <span className="animate-ping-soft absolute inset-0 rounded-xl bg-primary/60" />}

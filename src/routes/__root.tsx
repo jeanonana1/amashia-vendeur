@@ -102,6 +102,21 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "icon", type: "image/png", sizes: "192x192", href: "/icon-192.png" },
       { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
       // police du logo (Ubuntu Bold), limitée aux lettres de « amachia »
+      // police de marque Amachia : préchargée pour s'afficher dès le premier rendu
+      {
+        rel: "preload",
+        href: "/fonts/Amachia-Regular.woff2",
+        as: "font",
+        type: "font/woff2",
+        crossOrigin: "anonymous",
+      },
+      {
+        rel: "preload",
+        href: "/fonts/Amachia-Bold.woff2",
+        as: "font",
+        type: "font/woff2",
+        crossOrigin: "anonymous",
+      },
       { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Ubuntu:wght@700&text=amchis&display=swap" },
       { rel: "manifest", href: "/manifest.webmanifest" },
       {

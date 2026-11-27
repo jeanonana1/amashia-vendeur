@@ -1,8 +1,40 @@
 @import "tailwindcss" source(none);
 @source "../src";
 @import "tw-animate-css";
-@import "@fontsource-variable/inter";
-@import "@fontsource-variable/plus-jakarta-sans";
+/* Police de marque Amachia (voir docs/TYPOGRAPHY.md) — 4 graisses : Regular 400, Medium 500, SemiBold 600, Bold 700 */
+/* size-adjust : lettres dessinées un peu plus petites que la police précédente → même taille visible à l'écran */
+@font-face {
+  font-family: "Amachia";
+  src: url("/fonts/Amachia-Regular.woff2") format("woff2"), url("/fonts/Amachia-Regular.woff") format("woff");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  size-adjust: 108%;
+}
+@font-face {
+  font-family: "Amachia";
+  src: url("/fonts/Amachia-Medium.woff2") format("woff2"), url("/fonts/Amachia-Medium.woff") format("woff");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+  size-adjust: 107%;
+}
+@font-face {
+  font-family: "Amachia";
+  src: url("/fonts/Amachia-SemiBold.woff2") format("woff2"), url("/fonts/Amachia-SemiBold.woff") format("woff");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+  size-adjust: 105%;
+}
+@font-face {
+  font-family: "Amachia";
+  src: url("/fonts/Amachia-Bold.woff2") format("woff2"), url("/fonts/Amachia-Bold.woff") format("woff");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+  size-adjust: 103%;
+}
 
 @custom-variant dark (&:is(.dark *));
 
@@ -35,8 +67,8 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
-  --font-display: "Plus Jakarta Sans Variable", "Plus Jakarta Sans", "Inter Variable", sans-serif;
-  --font-sans: "Inter Variable", "Inter", system-ui, sans-serif;
+  --font-display: "Amachia", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --font-sans: "Amachia", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
   --shadow-elegant: 0 25px 60px -20px color-mix(in oklab, var(--primary) 45%, transparent);
   --shadow-glow: 0 0 80px color-mix(in oklab, var(--primary) 35%, transparent);
   --shadow-soft: 0 4px 20px -4px oklch(0 0 0 / 0.4);
@@ -106,7 +138,7 @@
 
 @layer base {
   * { border-color: var(--color-border); }
-  html { scroll-behavior: smooth; }
+  html { scroll-behavior: smooth; font-synthesis: none; /* pas de faux gras / faux italique */ }
   body {
     background: var(--color-background);
     color: var(--color-foreground);

@@ -555,3 +555,13 @@ begin
                 from shipping_agencies a where a.is_active and (_city = any(a.cities) or a.cities is null)),
     'prime', (select jsonb_build_object('formulation_obligatoire', 'Livraison incluse avec Prime (ne jamais dire gratuit)', 'proposee', ps.enabled, 'abonnement_des_fcfa_par_mois', (select min(round(pl.price::numeric / greatest(1, coalesce(round(pl.duration_days / 30.0), pl.months, 1)))) from prime_plans pl where pl.is_active), 'villes_a_domicile', ps.home_cities, 'agences_incluses', ps.agencies_included, 'minimum_commande_fcfa', ps.min_order_fcfa, 'livraisons_incluses_par_mois', ps.monthly_quota, 'conditions', 'https://amachia.com/legal/prime') from prime_settings ps where ps.id = 1));
 end $function$;
+
+-- ---------- Bandeau d'annonce enregistré (désactivé) : vocabulaire Prime ----------
+-- Texte « Livraison gratuite avec Prime » remplacé (rien n'est supprimé ; le bandeau reste désactivé).
+do $$ begin
+  if to_regclass('public.site_settings') is not null then
+    update public.site_settings
+       set value = jsonb_set(value, '{announcement,text}', to_jsonb('Livraison incluse avec Prime — dès 2 500 FCFA/mois'::text))
+     where key = 'theme' and value #>> '{announcement,text}' ilike '%gratuit%prime%';
+  end if;
+end $$;

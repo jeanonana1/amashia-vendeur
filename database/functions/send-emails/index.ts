@@ -13,7 +13,7 @@ const SELLER_SITE = "https://seller.amachia.com";
 const LOGO = `${SITE}/email-logo-amachia.png`;
 const json = (b: unknown, status = 200) => new Response(JSON.stringify(b), { status, headers: { "Content-Type": "application/json" } });
 
-type Job = { id: number; kind: string; order_id: string; seller_id: string | null; created_at: string };
+type Job = { id: number; kind: string; order_id: string | null; seller_id: string | null; prime_subscription_id?: string | null; created_at: string };
 type Item = { product_id: string; seller_id: string | null; product_title: string; unit_price_fcfa: number; quantity: number; color: string | null; size: string | null; discount_fcfa: number | null };
 class Pause extends Error {}
 
@@ -75,6 +75,37 @@ async function userEmail(userId: string | null) {
 }
 
 // ---------------------------------------------------------------- e-mails
+/** Prime : accusé de réception de la demande (en attente de paiement) et confirmation d'activation. */
+async function buildPrimeEmail(kind: string, subId: string) {
+  if (!subId) return null;
+  const { data: sub } = await db.from("prime_subscriptions").select("*").eq("id", subId).maybeSingle();
+  if (!sub) return null;
+  const to = await userEmail(sub.user_id);
+  if (!to) return null;
+  const { data: plan } = sub.plan_id ? await db.from("prime_plans").select("name, price").eq("id", sub.plan_id).maybeSingle() : { data: null };
+  const { data: prof } = await db.from("profiles").select("full_name").eq("id", sub.user_id).maybeSingle();
+  const first = String(prof?.full_name ?? "").trim().split(/\s+/)[0] || "";
+  const hello = p(`Bonjour${first ? ` ${esc(first)}` : ""},`);
+  const terms = p(`Conditions de l'abonnement : <a href="${SITE}/legal/prime">${SITE}/legal/prime</a>. Vous pouvez désactiver le renouvellement ou résilier à tout moment depuis « Mon compte ».`);
+  const name = esc(plan?.name ?? "Prime");
+  const price = fcfa(sub.price_fcfa ?? sub.amount_paid ?? plan?.price ?? 0);
+  if (kind === "prime_requested") {
+    return { to, name: prof?.full_name ?? null, subject: "Votre demande d'abonnement Prime — Amachia", html: layout(
+      "Nous avons bien reçu votre demande d'abonnement Prime.", "Demande d'abonnement Prime reçue",
+      hello + p(`Nous avons bien reçu votre demande d'abonnement <strong>${name}</strong> (${price} TTC), paiement par ${esc(sub.payment_method ?? "")}.`)
+        + p("Votre abonnement est <strong>en attente de paiement</strong> : notre équipe vous contacte pour le règlement, puis l'active. La livraison incluse avec Prime s'applique à partir de l'activation.")
+        + terms, ["Voir mon abonnement", `${SITE}/account/prime`]) };
+  }
+  if (kind === "prime_activated") {
+    return { to, name: prof?.full_name ?? null, subject: "Votre abonnement Prime est actif — Amachia", html: layout(
+      "Votre abonnement Prime est actif.", "Bienvenue dans Prime",
+      hello + p(`Votre abonnement <strong>${name}</strong> est actif jusqu'au <strong>${day(sub.expires_at)}</strong>.`)
+        + p("Vos commandes éligibles bénéficient de la livraison incluse avec Prime, dans les zones couvertes. Le détail est affiché au panier avant chaque paiement.")
+        + terms, ["Voir mon abonnement", `${SITE}/account/prime`]) };
+  }
+  return null;
+}
+
 async function buildClientEmail(kind: string, order: NonNullable<Awaited<ReturnType<typeof loadOrder>>>) {
   const { o, items, images } = order;
   const to = (o.contact_email as string | null) || (await userEmail(o.user_id));
@@ -86,9 +117,10 @@ async function buildClientEmail(kind: string, order: NonNullable<Awaited<ReturnT
   const delivery = o.shipping_mode === "agency"
     ? `Retrait en agence : <strong>${esc(o.shipping_agency_name ?? "")}</strong>${o.city ? ` (${esc(o.city)})` : ""}`
     : `Livraison à domicile : ${esc([o.address_details, o.district, o.city].filter(Boolean).join(", "))}`;
-  const fees = (o.shipping_fee_fcfa ?? 0) + (o.agency_fee_fcfa ?? 0) + (o.dropoff_fee_fcfa ?? 0);
+  // shipping_fee_fcfa contient déjà les frais d'agence et de dépôt (ne pas les additionner une 2e fois)
+  const fees = o.shipping_fee_fcfa ?? 0;
   const totals = `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:6px 0 14px">
-${line("Sous-total", fcfa(o.subtotal_fcfa))}${line("Livraison", fees > 0 ? fcfa(fees) : "Offerte")}${(o.discount_fcfa ?? 0) > 0 ? line(`Réduction${o.coupon_code ? ` (${esc(o.coupon_code)})` : ""}`, `− ${fcfa(o.discount_fcfa)}`) : ""}${(o.points_used ?? 0) > 0 ? line("Points récompense utilisés", `${o.points_used}`) : ""}${line("Total", fcfa(o.total_fcfa), true)}</table>`;
+${line("Sous-total", fcfa(o.subtotal_fcfa))}${line("Livraison", fees > 0 ? fcfa(fees) : o.prime_delivery_included ? "Incluse avec Prime" : "Offerte")}${(o.discount_fcfa ?? 0) > 0 ? line(`Réduction${o.coupon_code ? ` (${esc(o.coupon_code)})` : ""}`, `− ${fcfa(o.discount_fcfa)}`) : ""}${(o.points_used ?? 0) > 0 ? line("Points récompense utilisés", `${o.points_used}`) : ""}${line("Total", fcfa(o.total_fcfa), true)}</table>`;
   const recap = `${itemsTable(items, images)}${totals}<p style="margin:0 0 6px;font-size:14px;color:#4b5563">${delivery}</p><p style="margin:0 0 6px;font-size:14px;color:#4b5563">Paiement : ${esc(o.payment_method ?? "")}</p>`;
 
   switch (kind) {
@@ -158,6 +190,13 @@ async function finish(id: number, patch: Record<string, unknown>) {
 async function process(job: Job) {
   // un e-mail resté en attente plus de 48 h (clé ajoutée tardivement, panne…) n'a plus de sens : il n'est pas envoyé
   if (Date.now() - new Date(job.created_at).getTime() > 48 * 3600_000) return finish(job.id, { status: "skipped", error: "trop ancien (plus de 48 h)" });
+  if (job.kind.startsWith("prime_")) {
+    const mail = await buildPrimeEmail(job.kind, job.prime_subscription_id ?? "");
+    if (!mail) return finish(job.id, { status: "skipped", error: "abonnement ou adresse e-mail introuvable" });
+    await sendBrevo(mail, job.kind);
+    return finish(job.id, { status: "sent", sent_at: new Date().toISOString(), error: null });
+  }
+  if (!job.order_id) return finish(job.id, { status: "skipped", error: "commande absente" });
   const order = await loadOrder(job.order_id);
   if (!order) return finish(job.id, { status: "skipped", error: "commande introuvable" });
   if (job.kind === "order_confirmed") {

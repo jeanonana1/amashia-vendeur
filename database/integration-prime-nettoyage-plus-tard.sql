@@ -1,0 +1,12 @@
+-- =====================================================================================
+-- Amachia Prime — NETTOYAGE PROPOSÉ POUR PLUS TARD (NE PAS APPLIQUER MAINTENANT)
+--
+-- À n'exécuter qu'après validation du propriétaire, une fois integration-prime-livraison-incluse.sql
+-- appliquée et le nouveau modèle vérifié en production pendant quelques semaines.
+-- Supprime les anciens réglages Prime devenus inutiles (le prix de l'abonnement est dans prime_plans,
+-- l'activation de la livraison incluse dans prime_settings.enabled).
+-- Il n'y a jamais eu de colonne « prix Prime » sur les produits : rien à supprimer côté produits.
+-- =====================================================================================
+-- alter table public.platform_settings drop column if exists prime_price;
+-- alter table public.platform_settings drop column if exists prime_free_shipping;
+-- drop function if exists public.delivery_quote_v2(text, integer, text, uuid);   -- une fois tous les appels passés à delivery_quote_v3

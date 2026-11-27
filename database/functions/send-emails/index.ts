@@ -239,7 +239,13 @@ Deno.serve(async (req) => {
     const check = await fetch(`${Deno.env.get("SUPABASE_URL")}/rest/v1/email_outbox?select=id&limit=1`, { headers: { apikey: token, Authorization: `Bearer ${token}` } }).catch(() => null);
     if (!token || !check?.ok) return json({ error: "non autorisé" }, 401);
     if (body.check) return json(await brevoStatus().catch((e) => ({ error: String(e?.stack ?? e) })));
-    return json(await preview(String(body.preview), String(body.order_id ?? ""), body.seller_id ? String(body.seller_id) : undefined));
+    const pv = await preview(String(body.preview), String(body.order_id ?? ""), body.seller_id ? String(body.seller_id) : undefined);
+    // test : envoie l'aperçu à une adresse donnée (jamais au vrai client / vendeur)
+    if (body.test_to && pv && "html" in pv) {
+      try { await sendBrevo({ to: String(body.test_to), subject: `[TEST] ${pv.subject}`, html: pv.html }, "test"); return json({ sent: true, subject: pv.subject }); }
+      catch (e) { return json({ sent: false, error: e instanceof Error ? e.message : String(e) }); }
+    }
+    return json(pv);
   }
   // réponse immédiate : l'envoi continue en arrière-plan
   const task = run().catch((e) => console.error("send-emails", e));

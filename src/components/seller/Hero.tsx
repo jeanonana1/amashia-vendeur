@@ -1,12 +1,14 @@
 import { Bike, Bell, Sparkles, Smartphone, ShieldCheck, Truck, Wallet, BadgeCheck } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Backdrop, Container, Eyebrow, GhostCta, PrimaryCta } from "@/components/seller/site/ui";
-import { HomePhoto, useHasHomeImage } from "@/components/seller/site/homeImages";
+import { HomePhoto, useHasHomeImage, useHomeImages, useHomePreview, type HomeImageSlot } from "@/components/seller/site/homeImages";
 import type React from "react";
 
 /** Page d'accueil — en-tête : promesse + photo (si choisie dans l'admin) ou maquette animée de l'espace vendeur. */
 export function Hero() {
-  const photo = useHasHomeImage("hero");
+  // carrousel dès qu'au moins une des 3 photos d'en-tête est choisie
+  const h1 = useHasHomeImage("hero"), h2 = useHasHomeImage("hero2"), h3 = useHasHomeImage("hero3");
+  const photo = h1 || h2 || h3;
   return (
     <section className="relative isolate overflow-hidden pb-10 pt-12 md:pt-20">
       <Backdrop />
@@ -74,11 +76,7 @@ function HeroSplit() {
       <div className="relative mx-auto w-full max-w-[460px] animate-rise lg:max-w-none" style={{ animationDelay: "0.12s" }}>
         {/* halo orange derrière la photo */}
         <div aria-hidden className="glow-orb absolute -inset-8 -z-10 opacity-80" />
-        <div aria-hidden className="absolute -right-3 -top-3 -z-10 h-full w-full rounded-[2rem] border border-primary/30 lg:-right-5 lg:-top-5" />
-        <HomePhoto slot="hero" priority original shade={false}
-          className="aspect-[4/5] w-full rounded-[2rem] border border-border shadow-card [&_img]:object-[45%_25%]">
-          <div aria-hidden className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/55 to-transparent" />
-        </HomePhoto>
+        <HeroDeck />
 
         {/* notifications (illustration) */}
         <FloatCard className="-left-2 -top-6 sm:-left-8 lg:-left-14 lg:top-[12%]" delay={0.5} bob={0}>
@@ -94,6 +92,57 @@ function HeroSplit() {
           <span className="min-w-0"><span className="block text-[11px] text-muted-foreground">Livraison Prime</span><span className="block text-sm font-bold">Colis récupéré, en route</span></span>
         </FloatCard>
       </div>
+    </div>
+  );
+}
+
+/**
+ * Carrousel de l'en-tête : jusqu'à 3 photos en cartes empilées (la carte du dessus passe derrière toutes les 5 s).
+ * Pause au survol ; arrêt du défilement si l'utilisateur préfère réduire les animations. Les photos sont servies
+ * en qualité maximale (fichier d'origine).
+ */
+const DECK: HomeImageSlot[] = ["hero", "hero2", "hero3"];
+function HeroDeck() {
+  const imgs = useHomeImages();
+  const preview = useHomePreview();
+  const slides = DECK.filter((s) => imgs[s]?.url || preview);
+  const n = slides.length;
+  const [idx, setIdx] = useState(0);
+  const [paused, setPaused] = useState(false);
+  useEffect(() => {
+    if (n < 2 || paused) return;
+    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
+    const t = window.setInterval(() => setIdx((i) => (i + 1) % n), 5000);
+    return () => window.clearInterval(t);
+  }, [n, paused]);
+  // position de chaque carte dans la pile : 0 = dessus, 1 = juste derrière (à droite), 2 = au fond (à gauche)
+  const pose = ["z-30 translate-x-0 translate-y-0 rotate-0 scale-100 opacity-100",
+    "z-20 translate-x-[7%] -translate-y-[3%] rotate-[5deg] scale-[.93] opacity-90",
+    "z-10 -translate-x-[7%] -translate-y-[1%] -rotate-[5deg] scale-[.88] opacity-75"];
+  return (
+    <div className="relative isolate" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)}>
+      <div className="relative aspect-[4/5] w-full">
+        {slides.map((slot, i) => {
+          const rel = (i - idx + n) % n;
+          return (
+            <div key={slot} aria-hidden={rel !== 0}
+              className={`absolute inset-0 transition-[transform,opacity] duration-700 ease-[cubic-bezier(.22,1,.36,1)] will-change-transform ${pose[Math.min(rel, 2)]}`}>
+              <HomePhoto slot={slot} priority={i === 0} original shade={false}
+                className="h-full w-full rounded-[2rem] border border-border shadow-[0_30px_60px_-25px_rgba(0,0,0,.7)] [&_img]:object-[45%_25%]">
+                <div aria-hidden className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/55 to-transparent" />
+              </HomePhoto>
+            </div>
+          );
+        })}
+      </div>
+      {n > 1 && (
+        <div className="mt-6 flex justify-center gap-2">
+          {slides.map((s, i) => (
+            <button key={s} type="button" onClick={() => setIdx(i)} aria-label={`Photo ${i + 1} sur ${n}`}
+              className={`h-2 rounded-full transition-all duration-500 ${i === idx ? "w-7 bg-primary" : "w-2 bg-foreground/25 hover:bg-foreground/40"}`} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

@@ -6,12 +6,14 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { imgProps } from "@/lib/img";
 
-export type HomeImageSlot = "hero" | "etape1" | "etape2" | "etape3" | "etape4" | "prime" | "avis" | "cta";
+export type HomeImageSlot = "hero" | "hero2" | "hero3" | "etape1" | "etape2" | "etape3" | "etape4" | "prime" | "avis" | "cta";
 export type HomeImages = Partial<Record<HomeImageSlot, { url: string; alt?: string }>>;
 
 /** Libellés des emplacements (aperçu et admin). */
 export const SLOT_LABELS: Record<HomeImageSlot, string> = {
-  hero: "En-tête : vendeur·se dans sa boutique, téléphone en main",
+  hero: "En-tête, carte 1 : vendeur·se dans sa boutique, téléphone en main",
+  hero2: "En-tête, carte 2 : préparation d'une commande",
+  hero3: "En-tête, carte 3 : remise du colis au livreur Prime",
   etape1: "Étape 1 : création du compte sur téléphone",
   etape2: "Étape 2 : photo d'un produit pour le publier",
   etape3: "Étape 3 : préparation du colis",
@@ -72,6 +74,9 @@ export function HomePhoto({ slot, className = "", sizes, width = 828, priority =
     </div>
   );
 }
+
+/** Vrai si l'aperçu des emplacements est demandé (?apercu=images). */
+export { usePreview as useHomePreview };
 
 /** Toutes les photos choisies. */
 export function useHomeImages() {

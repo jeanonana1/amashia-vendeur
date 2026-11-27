@@ -1,6 +1,6 @@
 -- Photos de la page d'accueil du site vendeur, choisies depuis l'admin (Avis vendeurs › Images de l'accueil).
 -- Un emplacement vide n'affiche rien : la page reste telle quelle tant qu'aucune photo n'est ajoutée.
---   hero : en-tête · etape1..etape4 : « Comment ça marche » · prime : carte Livraison Prime
+--   hero, hero2, hero3 : carrousel de l'en-tête (qualité maximale) · etape1..etape4 : « Comment ça marche » · prime : carte Livraison Prime
 --   avis : section avis (si aucune vidéo) · cta : dernier appel à l'action
 create or replace function public.seller_home_images() returns jsonb
 language sql stable security definer set search_path = public as $$
@@ -13,7 +13,7 @@ language plpgsql security definer set search_path = public as $$
 declare cur jsonb;
 begin
   perform admin_guard('admin_save_seller_home_image');
-  if _slot not in ('hero', 'etape1', 'etape2', 'etape3', 'etape4', 'prime', 'avis', 'cta') then raise exception 'Emplacement inconnu.'; end if;
+  if _slot not in ('hero', 'hero2', 'hero3', 'etape1', 'etape2', 'etape3', 'etape4', 'prime', 'avis', 'cta') then raise exception 'Emplacement inconnu.'; end if;
   if coalesce(_url, '') <> '' and _url !~ '^https://' then raise exception 'Adresse d''image invalide.'; end if;
   cur := coalesce((select value from site_settings where key = 'seller_home_images'), '{}'::jsonb);
   cur := case when coalesce(_url, '') = '' then cur - _slot

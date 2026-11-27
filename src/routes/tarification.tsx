@@ -21,7 +21,7 @@ export const Route = createFileRoute("/tarification")({
 
 const FAQ_PRICE = [
   { q: "Quand la commission est-elle prélevée ?", a: "Uniquement sur les commandes livrées. Une commande annulée ne vous coûte rien." },
-  { q: "Les frais de livraison sont-ils à ma charge ?", a: "Non : les frais de livraison sont payés par le client au moment de la commande (gratuits pour lui au-delà d'un certain montant ou avec Prime)." },
+  { q: "Les frais de livraison sont-ils à ma charge ?", a: "Non : les frais de livraison sont payés par le client au moment de la commande (offerts au-delà d'un certain montant). Pour les membres Prime, la livraison incluse avec Prime est prise en charge par Amachia, jamais par le vendeur." },
   { q: "Où voir le détail de ce que je paie ?", a: "Dans votre espace, la page « Commissions » détaille, commande par commande, le taux appliqué, le montant prélevé et ce que vous recevez." },
   { q: "Les taux peuvent-ils changer ?", a: "Les taux sont fixés par catégorie par Amachia. Cette page affiche toujours les taux en vigueur, lus directement dans notre base." },
 ];

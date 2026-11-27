@@ -1142,9 +1142,9 @@ function AddProductPage() {
               </div>
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm mb-2">Prix de vente (FCFA) *</label>
+                  <label className="block text-sm mb-2">Prix de vente (FCFA, TTC) *</label>
                   <input type="number" value={form.price} onChange={(e) => set("price", e.target.value)} className={inp} />
-                  <p className="text-[11px] text-muted-foreground mt-1">Prix affiché et payé par le client.</p>
+                  <p className="text-[11px] text-muted-foreground mt-1">Prix unique, affiché et payé par tous les clients (membres Prime ou non).</p>
                   {charm && (
                     <button type="button" onClick={() => set("price", String(charm))} className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-primary/15 px-3 py-1 text-xs font-semibold text-primary hover:bg-primary/25">
                       <Sparkles size={12} /> Essayer {fmtFCFA(charm)} FCFA (prix psychologique)

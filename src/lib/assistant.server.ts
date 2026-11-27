@@ -25,7 +25,7 @@ const tools: Anthropic.Tool[] = [
     input_schema: { type: "object", properties: { recherche: { type: "string", description: "mots-clés : nom, marque ou catégorie (ex. « samsung a15 », « écouteurs »)" } }, required: ["recherche"] } },
   { name: "suivre_commande", description: "Statut exact d'une commande. Il faut le numéro de commande (ex. AMA-XXXX) ET le téléphone ou l'e-mail utilisé pour la commande. Ne jamais deviner : demander ces deux informations au client.",
     input_schema: { type: "object", properties: { numero: { type: "string" }, contact: { type: "string", description: "téléphone (9 chiffres) ou e-mail de la commande" } }, required: ["numero", "contact"] } },
-  { name: "infos_livraison", description: "Frais et délai de livraison pour une ville (et un quartier), mode (domicile ou agence), agences d'expédition, seuil de livraison gratuite, abonnement Prime.",
+  { name: "infos_livraison", description: "Frais et délai de livraison pour une ville (et un quartier), mode (domicile ou agence), agences d'expédition, seuil au-delà duquel la livraison est offerte, abonnement Prime (livraison incluse avec Prime).",
     input_schema: { type: "object", properties: { ville: { type: "string" }, quartier: { type: "string" } }, required: ["ville"] } },
   { name: "transmettre_a_l_equipe", description: "Enregistre un message pour le service client Amachia (réclamation, problème, demande que l'assistant ne peut pas régler). Demander d'abord le nom et un téléphone ou e-mail.",
     input_schema: { type: "object", properties: { nom: { type: "string" }, telephone: { type: "string" }, email: { type: "string" }, sujet: { type: "string" }, numero_commande: { type: "string" }, message: { type: "string" } }, required: ["nom", "message"] } },
@@ -57,7 +57,8 @@ INFORMATIONS GÉNÉRALES FIABLES
 - Étapes d'une commande : Commande reçue → En préparation → En cours de livraison → Livrée.
 - Retours : page « Retours » (/returns) et « Comment retourner un article » (/how-to-return) ; politique complète sur /legal/returns.
 - Mot de passe oublié : page /forgot-password.
-- Livraison : à domicile par les livreurs Amachia (Prime) dans les villes couvertes, sinon expédition par agence de voyage ; utilise toujours l'outil infos_livraison pour les frais et délais exacts.`;
+- Livraison : à domicile par les livreurs Amachia (Prime) dans les villes couvertes, sinon expédition par agence de voyage ; utilise toujours l'outil infos_livraison pour les frais et délais exacts.
+- Prime : dis toujours « Livraison incluse avec Prime » (jamais « gratuit », « free delivery » ou « free shipping »), donne toujours le prix de l'abonnement à côté (« dès X FCFA/mois ») et précise que le prix des articles est le même pour tous. Conditions : https://amachia.com/legal/prime`;
 
 export type ChatMsg = { role: "user" | "assistant"; content: string };
 

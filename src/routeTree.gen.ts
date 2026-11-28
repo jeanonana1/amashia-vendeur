@@ -26,6 +26,7 @@ import { Route as DashboardAnalytiqueRouteImport } from './routes/dashboard.anal
 import { Route as DashboardApplicationsRouteImport } from './routes/dashboard.applications'
 import { Route as DashboardAvisRouteImport } from './routes/dashboard.avis'
 import { Route as DashboardBoutiqueRouteImport } from './routes/dashboard.boutique'
+import { Route as DashboardCandidatureRouteImport } from './routes/dashboard.candidature'
 import { Route as DashboardClientsRouteImport } from './routes/dashboard.clients'
 import { Route as DashboardCommandesRouteImport } from './routes/dashboard.commandes'
 import { Route as DashboardCommissionsRouteImport } from './routes/dashboard.commissions'
@@ -38,6 +39,7 @@ import { Route as DashboardReapprovisionnementRouteImport } from './routes/dashb
 import { Route as DashboardRetoursRouteImport } from './routes/dashboard.retours'
 import { Route as DashboardSignalementsRouteImport } from './routes/dashboard.signalements'
 import { Route as DashboardSponsoringRouteImport } from './routes/dashboard.sponsoring'
+import { Route as InscriptionBoutiqueRouteImport } from './routes/inscription_.boutique'
 import { Route as InscriptionEtapesRouteImport } from './routes/inscription_.etapes'
 import { Route as DashboardProduitsIndexRouteImport } from './routes/dashboard.produits.index'
 import { Route as DashboardProduitsAjouterRouteImport } from './routes/dashboard.produits.ajouter'
@@ -127,6 +129,11 @@ const DashboardBoutiqueRoute = DashboardBoutiqueRouteImport.update({
   path: '/boutique',
   getParentRoute: () => DashboardRoute,
 } as any)
+const DashboardCandidatureRoute = DashboardCandidatureRouteImport.update({
+  id: '/candidature',
+  path: '/candidature',
+  getParentRoute: () => DashboardRoute,
+} as any)
 const DashboardClientsRoute = DashboardClientsRouteImport.update({
   id: '/clients',
   path: '/clients',
@@ -188,6 +195,11 @@ const DashboardSponsoringRoute = DashboardSponsoringRouteImport.update({
   path: '/sponsoring',
   getParentRoute: () => DashboardRoute,
 } as any)
+const InscriptionBoutiqueRoute = InscriptionBoutiqueRouteImport.update({
+  id: '/inscription_/boutique',
+  path: '/inscription/boutique',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const InscriptionEtapesRoute = InscriptionEtapesRouteImport.update({
   id: '/inscription_/etapes',
   path: '/inscription/etapes',
@@ -222,6 +234,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/applications': typeof DashboardApplicationsRoute
   '/dashboard/avis': typeof DashboardAvisRoute
   '/dashboard/boutique': typeof DashboardBoutiqueRoute
+  '/dashboard/candidature': typeof DashboardCandidatureRoute
   '/dashboard/clients': typeof DashboardClientsRoute
   '/dashboard/commandes': typeof DashboardCommandesRoute
   '/dashboard/commissions': typeof DashboardCommissionsRoute
@@ -234,6 +247,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/retours': typeof DashboardRetoursRoute
   '/dashboard/signalements': typeof DashboardSignalementsRoute
   '/dashboard/sponsoring': typeof DashboardSponsoringRoute
+  '/inscription/boutique': typeof InscriptionBoutiqueRoute
   '/inscription/etapes': typeof InscriptionEtapesRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/dashboard/produits/ajouter': typeof DashboardProduitsAjouterRoute
@@ -255,6 +269,7 @@ export interface FileRoutesByTo {
   '/dashboard/applications': typeof DashboardApplicationsRoute
   '/dashboard/avis': typeof DashboardAvisRoute
   '/dashboard/boutique': typeof DashboardBoutiqueRoute
+  '/dashboard/candidature': typeof DashboardCandidatureRoute
   '/dashboard/clients': typeof DashboardClientsRoute
   '/dashboard/commandes': typeof DashboardCommandesRoute
   '/dashboard/commissions': typeof DashboardCommissionsRoute
@@ -267,6 +282,7 @@ export interface FileRoutesByTo {
   '/dashboard/retours': typeof DashboardRetoursRoute
   '/dashboard/signalements': typeof DashboardSignalementsRoute
   '/dashboard/sponsoring': typeof DashboardSponsoringRoute
+  '/inscription/boutique': typeof InscriptionBoutiqueRoute
   '/inscription/etapes': typeof InscriptionEtapesRoute
   '/dashboard': typeof DashboardIndexRoute
   '/dashboard/produits/ajouter': typeof DashboardProduitsAjouterRoute
@@ -290,6 +306,7 @@ export interface FileRoutesById {
   '/dashboard/applications': typeof DashboardApplicationsRoute
   '/dashboard/avis': typeof DashboardAvisRoute
   '/dashboard/boutique': typeof DashboardBoutiqueRoute
+  '/dashboard/candidature': typeof DashboardCandidatureRoute
   '/dashboard/clients': typeof DashboardClientsRoute
   '/dashboard/commandes': typeof DashboardCommandesRoute
   '/dashboard/commissions': typeof DashboardCommissionsRoute
@@ -302,6 +319,7 @@ export interface FileRoutesById {
   '/dashboard/retours': typeof DashboardRetoursRoute
   '/dashboard/signalements': typeof DashboardSignalementsRoute
   '/dashboard/sponsoring': typeof DashboardSponsoringRoute
+  '/inscription_/boutique': typeof InscriptionBoutiqueRoute
   '/inscription_/etapes': typeof InscriptionEtapesRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/dashboard/produits/ajouter': typeof DashboardProduitsAjouterRoute
@@ -326,6 +344,7 @@ export interface FileRouteTypes {
     | '/dashboard/applications'
     | '/dashboard/avis'
     | '/dashboard/boutique'
+    | '/dashboard/candidature'
     | '/dashboard/clients'
     | '/dashboard/commandes'
     | '/dashboard/commissions'
@@ -338,6 +357,7 @@ export interface FileRouteTypes {
     | '/dashboard/retours'
     | '/dashboard/signalements'
     | '/dashboard/sponsoring'
+    | '/inscription/boutique'
     | '/inscription/etapes'
     | '/dashboard/'
     | '/dashboard/produits/ajouter'
@@ -359,6 +379,7 @@ export interface FileRouteTypes {
     | '/dashboard/applications'
     | '/dashboard/avis'
     | '/dashboard/boutique'
+    | '/dashboard/candidature'
     | '/dashboard/clients'
     | '/dashboard/commandes'
     | '/dashboard/commissions'
@@ -371,6 +392,7 @@ export interface FileRouteTypes {
     | '/dashboard/retours'
     | '/dashboard/signalements'
     | '/dashboard/sponsoring'
+    | '/inscription/boutique'
     | '/inscription/etapes'
     | '/dashboard'
     | '/dashboard/produits/ajouter'
@@ -393,6 +415,7 @@ export interface FileRouteTypes {
     | '/dashboard/applications'
     | '/dashboard/avis'
     | '/dashboard/boutique'
+    | '/dashboard/candidature'
     | '/dashboard/clients'
     | '/dashboard/commandes'
     | '/dashboard/commissions'
@@ -405,6 +428,7 @@ export interface FileRouteTypes {
     | '/dashboard/retours'
     | '/dashboard/signalements'
     | '/dashboard/sponsoring'
+    | '/inscription_/boutique'
     | '/inscription_/etapes'
     | '/dashboard/'
     | '/dashboard/produits/ajouter'
@@ -424,6 +448,7 @@ export interface RootRouteChildren {
   ApiAssistantRoute: typeof ApiAssistantRoute
   ApiTranslateRoute: typeof ApiTranslateRoute
   CaptureSessionRoute: typeof CaptureSessionRoute
+  InscriptionBoutiqueRoute: typeof InscriptionBoutiqueRoute
   InscriptionEtapesRoute: typeof InscriptionEtapesRoute
 }
 
@@ -548,6 +573,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardBoutiqueRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/dashboard/candidature': {
+      id: '/dashboard/candidature'
+      path: '/candidature'
+      fullPath: '/dashboard/candidature'
+      preLoaderRoute: typeof DashboardCandidatureRouteImport
+      parentRoute: typeof DashboardRoute
+    }
     '/dashboard/clients': {
       id: '/dashboard/clients'
       path: '/clients'
@@ -632,6 +664,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardSponsoringRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/inscription_/boutique': {
+      id: '/inscription_/boutique'
+      path: '/inscription/boutique'
+      fullPath: '/inscription/boutique'
+      preLoaderRoute: typeof InscriptionBoutiqueRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/inscription_/etapes': {
       id: '/inscription_/etapes'
       path: '/inscription/etapes'
@@ -661,6 +700,7 @@ interface DashboardRouteChildren {
   DashboardApplicationsRoute: typeof DashboardApplicationsRoute
   DashboardAvisRoute: typeof DashboardAvisRoute
   DashboardBoutiqueRoute: typeof DashboardBoutiqueRoute
+  DashboardCandidatureRoute: typeof DashboardCandidatureRoute
   DashboardClientsRoute: typeof DashboardClientsRoute
   DashboardCommandesRoute: typeof DashboardCommandesRoute
   DashboardCommissionsRoute: typeof DashboardCommissionsRoute
@@ -683,6 +723,7 @@ const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardApplicationsRoute: DashboardApplicationsRoute,
   DashboardAvisRoute: DashboardAvisRoute,
   DashboardBoutiqueRoute: DashboardBoutiqueRoute,
+  DashboardCandidatureRoute: DashboardCandidatureRoute,
   DashboardClientsRoute: DashboardClientsRoute,
   DashboardCommandesRoute: DashboardCommandesRoute,
   DashboardCommissionsRoute: DashboardCommissionsRoute,
@@ -717,6 +758,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAssistantRoute: ApiAssistantRoute,
   ApiTranslateRoute: ApiTranslateRoute,
   CaptureSessionRoute: CaptureSessionRoute,
+  InscriptionBoutiqueRoute: InscriptionBoutiqueRoute,
   InscriptionEtapesRoute: InscriptionEtapesRoute,
 }
 export const routeTree = rootRouteImport

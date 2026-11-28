@@ -48,6 +48,7 @@ const NAV = GROUPS.flatMap((g) => g.items);
 
 import { NewOrderAlarm } from "@/components/seller/dashboard/NewOrderAlarm";
 import { PickupReminder } from "@/components/seller/dashboard/PickupReminder";
+import { KycRejectedGate } from "@/components/seller/dashboard/KycRejectedGate";
 import { PushAlertsButton } from "@/components/seller/dashboard/PushAlertsButton";
 import { registerAppPush } from "@/lib/nativeApp";
 import type { AnyIcon } from "@/components/icons/AmachiaIcons";
@@ -93,7 +94,9 @@ export function DashboardLayout({ title, subtitle, actions, children }: { title:
       if (!mounted) return;
       if (!user) { navigate({ to: "/connexion", replace: true }); return; }
       await ensureSellerProfile(user);
-      const { data } = await (supabase as any).from("seller_profiles").select("first_name, avatar_url, language").eq("id", user.id).maybeSingle();
+      const { data } = await (supabase as any).from("seller_profiles").select("first_name, avatar_url, language, shop_name, neighborhood").eq("id", user.id).maybeSingle();
+      // inscription pas terminée (boutique jamais renseignée) : retour à la page « Ma boutique »
+      if (data && !data.shop_name && !data.neighborhood) { navigate({ to: "/inscription/boutique" as never, replace: true }); return; }
       if (data?.first_name) setName(data.first_name);
       // langue choisie par le vendeur (inscription / paramètres) : appliquée sur un nouvel appareil
       try {
@@ -132,7 +135,7 @@ export function DashboardLayout({ title, subtitle, actions, children }: { title:
   const SidebarInner = (
     <>
       <div className="flex h-[4.5rem] items-center px-5">
-        <Link to="/" className="flex items-center" aria-label="Accueil amachia seller"><SellerLogo className="h-6" /></Link>
+        <span className="flex items-center" aria-label="amachia seller"><SellerLogo className="h-6" /></span>
       </div>
       <nav className="flex-1 space-y-5 overflow-y-auto px-3 pb-4 pt-2">
         {GROUPS.map((g) => (
@@ -205,7 +208,7 @@ export function DashboardLayout({ title, subtitle, actions, children }: { title:
         <header className="sticky top-0 z-30 border-b border-border bg-background">
           <div className="mx-auto flex h-16 max-w-[1440px] items-center gap-3 px-4 sm:px-6 lg:px-8">
             <button onClick={() => setDrawerOpen(true)} className={`${iconBtn} lg:hidden`} aria-label="Ouvrir le menu"><Menu size={18} /></button>
-            <Link to="/" className="flex min-w-0 items-center lg:hidden" aria-label="Accueil amachia seller"><SellerLogo className="h-5 max-w-full" /></Link>
+            <span className="flex min-w-0 items-center lg:hidden" aria-label="amachia seller"><SellerLogo className="h-5 max-w-full" /></span>
             <div className="hidden min-w-0 items-center gap-2 text-sm text-muted-foreground lg:flex">
               <span>Espace vendeur</span><span className="text-border">/</span><span className="truncate font-semibold text-foreground">{current?.label ?? title}</span>
             </div>
@@ -242,6 +245,7 @@ export function DashboardLayout({ title, subtitle, actions, children }: { title:
             {actions && <div className="shrink-0">{actions}</div>}
           </div>
           {uid && <PickupReminder />}
+          {uid && <KycRejectedGate />}
           {children}
           {uid && <ReviewPrompt uid={uid} />}
           {uid && <NewOrderAlarm uid={uid} />}

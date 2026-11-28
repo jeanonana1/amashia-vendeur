@@ -2,7 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { Check } from "lucide-react";
 import { IconRetour as ArrowLeft } from "@/components/icons/AmachiaIcons";
 
-const STEPS = ["Infos", "Détails", "Documents", "Paiement", "Localisation", "Vérif.", "Fini"];
+const STEPS = ["Infos", "Détails", "Documents", "Vérif.", "Boutique"];
 
 export function SignupShell({ step, children, onBack }: { step: number; children: React.ReactNode; onBack?: () => void }) {
   const progress = (step / STEPS.length) * 100;
@@ -20,7 +20,7 @@ export function SignupShell({ step, children, onBack }: { step: number; children
       <div className="h-1.5 bg-secondary rounded-full overflow-hidden mb-4">
         <div className="h-full bg-gradient-primary transition-all duration-500" style={{ width: `${progress}%` }} />
       </div>
-      <div className="grid grid-cols-7 gap-1 mb-8">
+      <div className="grid grid-cols-5 gap-1 mb-8">
         {STEPS.map((label, i) => {
           const num = i + 1;
           const done = num < step;

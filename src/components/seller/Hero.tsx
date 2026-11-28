@@ -19,8 +19,8 @@ export function Hero() {
             <div className="mx-auto max-w-4xl text-center animate-rise">
               <Eyebrow>La plateforme des vendeurs Amachia · Cameroun</Eyebrow>
               <h1 className="mt-6 font-extrabold leading-[1.05]">
-                <span className="block text-balance text-[clamp(2.2rem,10vw,3.4rem)] sm:whitespace-nowrap sm:text-[clamp(2rem,5.8vw,3.5rem)]">Vendez partout au Cameroun.</span>
-                <span className="mt-1 block text-balance text-[clamp(2.2rem,10vw,3.4rem)] text-gradient sm:text-[clamp(2rem,5.8vw,3.5rem)]">On s'occupe du reste.</span>
+                <span className="block text-balance text-[clamp(2.2rem,10vw,3.4rem)] sm:whitespace-nowrap sm:text-[clamp(2rem,5.8vw,3.5rem)]">Votre boutique ne ferme jamais.</span>
+                <span className="mt-1 block text-balance text-[clamp(2.2rem,10vw,3.4rem)] text-gradient sm:text-[clamp(2rem,5.8vw,3.5rem)]">Vendez même quand vous dormez.</span>
               </h1>
               <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-muted-foreground md:text-xl">{PITCH}</p>
               <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row"><HeroCtas /></div>
@@ -35,7 +35,7 @@ export function Hero() {
   );
 }
 
-const PITCH = "Publiez vos produits en quelques minutes, recevez vos commandes en temps réel. Le paiement et la livraison sont gérés par Amachia, de votre boutique jusqu'au client.";
+const PITCH = "Sur Amachia, vos clients commandent jour et nuit, partout au Cameroun. Vous dormez, Amachia vend et livre pour vous.";
 
 function HeroCtas() {
   return (
@@ -66,8 +66,8 @@ function HeroSplit() {
       <div className="text-center animate-rise lg:text-left">
         <Eyebrow>La plateforme des vendeurs Amachia · Cameroun</Eyebrow>
         <h1 className="mt-6 text-[clamp(2.2rem,9vw,3.1rem)] font-extrabold leading-[1.06] lg:text-[clamp(2.4rem,3.7vw,3.5rem)]">
-          <span className="block text-balance">Vendez partout au Cameroun.</span>
-          <span className="mt-1 block text-balance text-gradient">On s'occupe du reste.</span>
+          <span className="block text-balance">Votre boutique ne ferme jamais.</span>
+          <span className="mt-1 block text-balance text-gradient">Vendez même quand vous dormez.</span>
         </h1>
         <p className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-muted-foreground md:text-lg lg:mx-0">{PITCH}</p>
         <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center lg:justify-start"><HeroCtas /></div>

@@ -109,24 +109,27 @@ function HeroDeck() {
   const go = (d: number) => n > 1 && setIdx((i) => (i + d + n) % n);
   // position de chaque carte : 0 = dessus ; les suivantes dépassent UNIQUEMENT à droite (pas en haut, en bas ni à gauche)
   // seule la photo principale est visible ; les suivantes restent cachées (floues et transparentes) jusqu'à leur tour
-  const pose = ["z-30 scale-100 opacity-100 blur-0",
-    "z-20 scale-[1.04] opacity-0 blur-xl",
-    "z-10 scale-[1.04] opacity-0 blur-xl"];
+  // pile de cartes : les 2 suivantes dépassent à droite, mais leur photo est masquée (voile blanc dépoli)
+  const pose = ["z-30 translate-x-0 scale-100",
+    "z-20 translate-x-[6%] scale-[.94]",
+    "z-10 translate-x-[11%] scale-[.88]"];
   return (
     <div className="relative isolate" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)}
       onTouchStart={(e) => { touchX.current = e.touches[0].clientX; setPaused(true); }}
       onTouchEnd={(e) => { const x0 = touchX.current; touchX.current = null; setPaused(false); if (x0 == null) return; const dx = e.changedTouches[0].clientX - x0; if (Math.abs(dx) > 40) go(dx < 0 ? 1 : -1); }}>
       {/* léger zoom continu sur la photo affichée (effet vivant) */}
-      <style>{`.deck-live img{animation:deck-zoom 4.6s ease-out both}@keyframes deck-zoom{from{transform:scale(1.08)}to{transform:scale(1)}}@media (prefers-reduced-motion:reduce){.deck-live img{animation:none}}`}</style>
+      <style>{`.deck-live img{animation:deck-zoom 1.1s cubic-bezier(.22,1,.36,1) both}@keyframes deck-zoom{from{transform:scale(1.12)}to{transform:scale(1)}}@media (prefers-reduced-motion:reduce){.deck-live img{animation:none}}`}</style>
       <div className="relative aspect-[4/5] w-full">
         {slides.map((slot, i) => {
           const rel = (i - idx + n) % n;
           return (
             <div key={slot} aria-hidden={rel !== 0}
-              className={`absolute inset-0 transition-[transform,opacity,filter] ${rel === 0 ? "deck-live" : ""} duration-[1100ms] ease-[cubic-bezier(.16,1,.3,1)] will-change-transform ${pose[Math.min(rel, 2)]}`}>
+              className={`absolute inset-0 origin-right transition-transform ${rel === 0 ? "deck-live" : ""} duration-[800ms] ease-[cubic-bezier(.22,1,.36,1)] will-change-transform ${pose[Math.min(rel, 2)]}`}>
               <HomePhoto slot={slot} priority={i === 0} original shade={false}
                 className="h-full w-full overflow-hidden rounded-[2rem] border border-border shadow-[0_30px_60px_-25px_rgba(0,0,0,.7)] [&_img]:object-[45%_25%]">
                 <div aria-hidden className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/55 to-transparent" />
+                {/* cartes en attente : photo cachée par un voile blanc dépoli ; il disparaît quand la carte passe devant */}
+                <div aria-hidden className={`absolute inset-0 bg-white/85 backdrop-blur-2xl transition-opacity duration-500 ${rel === 0 ? "opacity-0" : "opacity-100"}`} />
               </HomePhoto>
             </div>
           );

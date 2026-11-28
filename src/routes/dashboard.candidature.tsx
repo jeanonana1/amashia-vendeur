@@ -53,17 +53,24 @@ function ResubmitPage() {
     if (required.some((k) => !files[k])) return toast.error("Ajoutez à nouveau les documents obligatoires (*), lisibles et en entier.");
     setBusy(true);
     try {
-      for (const [docType, file] of Object.entries(files)) {
-        if (!file) continue;
-        const f = file.type.startsWith("image/") ? await compressImage(file, 2000, 0.85) : file;
+      // envoi rapide : documents compressés et envoyés en même temps (et non plus un par un), informations enregistrées en parallèle
+      const stamp = Date.now();
+      const uploads = Object.entries(files).filter((e): e is [string, File] => !!e[1]).map(async ([docType, file]) => {
+        const f = file.type.startsWith("image/") ? await compressImage(file, 1600, 0.82) : file;
         const ext = (f.name.split(".").pop() || "jpg").toLowerCase();
-        const path = `${uid}/${docType}-${Date.now()}.${ext}`;
+        const path = `${uid}/${docType}-${stamp}.${ext}`;
         const { error } = await supabase.storage.from("seller-documents").upload(path, f, { upsert: true, contentType: f.type || undefined });
         if (error) throw new Error("Envoi d'un document impossible. Vérifiez votre connexion et réessayez.");
-        await supabase.from("seller_documents").insert({ user_id: uid, doc_type: docType, file_url: path });
-      }
-      const { error: pe } = await supabase.from("seller_profiles").update({ first_name: form.first_name.trim(), last_name: form.last_name.trim(), niu: form.niu.trim() || null } as never).eq("id", uid);
+        return { user_id: uid, doc_type: docType, file_url: path };
+      });
+      const profile = supabase.from("seller_profiles").update({ first_name: form.first_name.trim(), last_name: form.last_name.trim(), niu: form.niu.trim() || null } as never).eq("id", uid);
+      const [rows, { error: pe }] = await Promise.all([Promise.all(uploads), profile]);
       if (pe) throw new Error(pe.message);
+      // les nouveaux documents remplacent automatiquement les anciens du même type (seuls les nouveaux sont affichés à Amachia)
+      if (rows.length) {
+        const { error: de } = await supabase.from("seller_documents").insert(rows);
+        if (de) throw new Error(de.message);
+      }
       const { error } = await db.rpc("seller_kyc_resubmit");
       if (error) throw new Error(error.message);
       window.dispatchEvent(new Event("kyc:changed"));
@@ -105,7 +112,7 @@ function ResubmitPage() {
 
         <button type="button" onClick={() => void submit()} disabled={busy || kyc?.status !== "rejected"}
           className="flex w-full items-center justify-center gap-2 rounded-full bg-primary py-4 text-base font-bold text-black disabled:opacity-50">
-          {busy ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}Renvoyer mon dossier
+          {busy ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}{busy ? "Envoi en cours…" : "Renvoyer mon dossier"}
         </button>
       </div>
     </DashboardLayout>

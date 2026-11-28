@@ -1,6 +1,6 @@
 import { Sparkles } from "lucide-react";
 import { IconLivreurMoto as Bike, IconNotifications as Bell, IconMobileMoney as Smartphone, IconPaiementSecurise as ShieldCheck, IconLivraison as Truck, IconPortefeuille as Wallet, IconVerifie as BadgeCheck } from "@/components/icons/AmachiaIcons";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Backdrop, Container, Eyebrow, GhostCta, PrimaryCta } from "@/components/seller/site/ui";
 import { HomePhoto, useHasHomeImage, useHomeImages, useHomePreview, type HomeImageSlot } from "@/components/seller/site/homeImages";
 import type React from "react";
@@ -113,23 +113,30 @@ function HeroDeck() {
   useEffect(() => {
     if (n < 2 || paused) return;
     if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
-    const t = window.setInterval(() => setIdx((i) => (i + 1) % n), 5000);
+    const t = window.setInterval(() => setIdx((i) => (i + 1) % n), 4200);
     return () => window.clearInterval(t);
-  }, [n, paused]);
-  // position de chaque carte dans la pile : 0 = dessus, 1 = juste derrière (à droite), 2 = au fond (à gauche)
-  const pose = ["z-30 translate-x-0 translate-y-0 rotate-0 scale-100 opacity-100",
-    "z-20 translate-x-[7%] -translate-y-[3%] rotate-[5deg] scale-[.93] opacity-90",
-    "z-10 -translate-x-[7%] -translate-y-[1%] -rotate-[5deg] scale-[.88] opacity-75"];
+  }, [n, paused, idx]);
+  // balayage au doigt (mobile) : carte suivante / précédente
+  const touchX = useRef<number | null>(null);
+  const go = (d: number) => n > 1 && setIdx((i) => (i + d + n) % n);
+  // position de chaque carte : 0 = dessus ; les suivantes dépassent UNIQUEMENT à droite (pas en haut, en bas ni à gauche)
+  const pose = ["z-30 translate-x-0 scale-100 opacity-100",
+    "z-20 translate-x-[6%] scale-[.94] opacity-80",
+    "z-10 translate-x-[11%] scale-[.88] opacity-55"];
   return (
-    <div className="relative isolate" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)}>
+    <div className="relative isolate" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)}
+      onTouchStart={(e) => { touchX.current = e.touches[0].clientX; setPaused(true); }}
+      onTouchEnd={(e) => { const x0 = touchX.current; touchX.current = null; setPaused(false); if (x0 == null) return; const dx = e.changedTouches[0].clientX - x0; if (Math.abs(dx) > 40) go(dx < 0 ? 1 : -1); }}>
+      {/* léger zoom continu sur la photo affichée (effet vivant) */}
+      <style>{`.deck-live img{animation:deck-zoom 4.6s ease-out both}@keyframes deck-zoom{from{transform:scale(1.08)}to{transform:scale(1)}}@media (prefers-reduced-motion:reduce){.deck-live img{animation:none}}`}</style>
       <div className="relative aspect-[4/5] w-full">
         {slides.map((slot, i) => {
           const rel = (i - idx + n) % n;
           return (
             <div key={slot} aria-hidden={rel !== 0}
-              className={`absolute inset-0 transition-[transform,opacity] duration-700 ease-[cubic-bezier(.22,1,.36,1)] will-change-transform ${pose[Math.min(rel, 2)]}`}>
+              className={`absolute inset-0 origin-right transition-[transform,opacity] ${rel === 0 ? "deck-live" : ""} duration-[900ms] ease-[cubic-bezier(.16,1,.3,1)] will-change-transform ${pose[Math.min(rel, 2)]}`}>
               <HomePhoto slot={slot} priority={i === 0} original shade={false}
-                className="h-full w-full rounded-[2rem] border border-border shadow-[0_30px_60px_-25px_rgba(0,0,0,.7)] [&_img]:object-[45%_25%]">
+                className="h-full w-full overflow-hidden rounded-[2rem] border border-border shadow-[0_30px_60px_-25px_rgba(0,0,0,.7)] [&_img]:object-[45%_25%]">
                 <div aria-hidden className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/55 to-transparent" />
               </HomePhoto>
             </div>

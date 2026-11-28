@@ -47,6 +47,7 @@ const GROUPS: { title: string; items: NavItem[] }[] = [
 const NAV = GROUPS.flatMap((g) => g.items);
 
 import { NewOrderAlarm } from "@/components/seller/dashboard/NewOrderAlarm";
+import { PickupReminder } from "@/components/seller/dashboard/PickupReminder";
 import { PushAlertsButton } from "@/components/seller/dashboard/PushAlertsButton";
 import { registerAppPush } from "@/lib/nativeApp";
 import type { AnyIcon } from "@/components/icons/AmachiaIcons";
@@ -240,6 +241,7 @@ export function DashboardLayout({ title, subtitle, actions, children }: { title:
             </div>
             {actions && <div className="shrink-0">{actions}</div>}
           </div>
+          {uid && <PickupReminder />}
           {children}
           {uid && <ReviewPrompt uid={uid} />}
           {uid && <NewOrderAlarm uid={uid} />}

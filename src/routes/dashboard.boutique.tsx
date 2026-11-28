@@ -378,6 +378,7 @@ function PickupCard() {
     if (error) return toast.error(error.message.replace(/^.*?:\s(?=[A-ZÀ-Ü])/, ""));
     toast.success("Point de retrait enregistré", { description: "Vos commandes seront proposées aux livreurs les plus proches." });
     setPos(null); void load();
+    window.dispatchEvent(new Event("pickup:saved"));
   };
 
   const shown = pos ?? (pk?.lat != null && pk?.lng != null ? { lat: pk.lat, lng: pk.lng, acc: 0 } : null);

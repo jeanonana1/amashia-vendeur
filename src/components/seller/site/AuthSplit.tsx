@@ -7,8 +7,8 @@ import { SellerLogo } from "@/components/seller/SellerLogo";
 /** Mise en page des écrans de connexion / inscription : formulaire à gauche, panneau de marque à droite. */
 export function AuthSplit({ children, wide = false }: { children: ReactNode; wide?: boolean }) {
   return (
-    <div className="grid min-h-screen bg-background lg:grid-cols-[1fr_minmax(0,0.9fr)]">
-      <div className="relative flex flex-col px-5 py-6 sm:px-10">
+    <div className="grid min-h-screen grid-cols-1 bg-background lg:grid-cols-[minmax(0,1fr)_minmax(0,0.9fr)]">
+      <div className="relative flex min-w-0 flex-col px-5 py-6 sm:px-10">
         <div className="flex items-center justify-between">
           <Link to="/" aria-label="Accueil amachia seller"><SellerLogo className="h-[22px] sm:h-[26px]" /></Link>
           <Link to="/" className="text-sm font-medium text-muted-foreground hover:text-foreground">← Retour au site</Link>

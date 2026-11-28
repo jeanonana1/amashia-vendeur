@@ -28,16 +28,6 @@ export const Route = createFileRoute("/inscription_/etapes")({
   component: Page,
 });
 
-const CATEGORIES = [
-  "Mode & Vêtements",
-  "Électronique",
-  "Beauté & Cosmétiques",
-  "Alimentation",
-  "Maison & Décoration",
-  "Services",
-  "Bijoux & Accessoires",
-  "Sports & Loisirs",
-];
 
 interface DocFile { name: string; dataUrl: string; }
 interface DocsState {
@@ -264,6 +254,10 @@ function Page() {
         setProgress("Création de votre boutique…");
         const { error: profileError } = await withTimeout(supabase.from("seller_profiles").upsert({ id: user.id, ...profile } as never), 30_000);
         if (profileError) throw profileError;
+        // position de la boutique partagée pendant l'inscription : enregistrée comme point de retrait (sinon, à faire depuis le tableau de bord)
+        if (data.shareLocation && data.latitude != null && data.longitude != null) {
+          await supabase.rpc("seller_set_pickup" as never, { _lat: data.latitude, _lng: data.longitude, _address: null } as never).then(() => {}, () => {});
+        }
       }
     } catch (e) {
       console.error(e);
@@ -278,15 +272,7 @@ function Page() {
     navigate({ to: "/dashboard", replace: true });
   }
 
-  function toggleCategory(cat: string) {
-    setData((d) => {
-      if (isBusiness) {
-        return { ...d, categories: d.categories.includes(cat) ? d.categories.filter((c) => c !== cat) : [...d.categories, cat] };
-      } else {
-        return { ...d, categories: d.categories[0] === cat ? [] : [cat] };
-      }
-    });
-  }
+
 
   return (
     <AuthSplit wide>
@@ -314,23 +300,10 @@ function Page() {
             </div>
           )}
 
-          {/* STEP 2 — Détails + Catégories */}
+          {/* STEP 2 — Détails personnels (les catégories sont déduites automatiquement des produits) */}
           {step === 2 && (
             <div className="space-y-5 animate-fade-up">
               <h2 className="text-2xl font-extrabold mb-2">Détails personnels</h2>
-              <Field label={isBusiness ? "Catégories d'activité * (plusieurs autorisées)" : "Catégorie d'activité * (une seule)"}>
-                <div className="grid grid-cols-2 gap-2">
-                  {CATEGORIES.map((c) => {
-                    const active = data.categories.includes(c);
-                    return (
-                      <button key={c} type="button" onClick={() => toggleCategory(c)}
-                        className={`text-left text-sm px-3 py-2.5 rounded-xl border transition ${active ? "border-primary bg-primary/15 text-foreground" : "border-border bg-background hover:border-primary/50"}`}>
-                        {active && "✓ "}{c}
-                      </button>
-                    );
-                  })}
-                </div>
-              </Field>
               <Field label="Genre *">
                 <div className="grid grid-cols-2 gap-2">
                   {["Homme", "Femme"].map((g) => (
@@ -352,7 +325,7 @@ function Page() {
                 <Field label="Ville (résidence) *">
                   <Select title="Ville de résidence" value={data.city} onChange={(e) => set("city", e.target.value)} className={inputCls} disabled={data.country !== "Cameroun"}>
                     <option value="">{data.country === "Cameroun" ? "Sélectionner" : "Choisissez d'abord le Cameroun"}</option>
-                    {allCities.map((c) => <option key={c} value={c}>{isOpenCity(c) ? c : `${c} — bientôt`}</option>)}
+                    {allCities.map((c) => <option key={c} value={c} disabled={!isOpenCity(c)}>{isOpenCity(c) ? c : `${c} — non disponible`}</option>)}
                   </Select>
                 </Field>
               </div>
@@ -364,7 +337,6 @@ function Page() {
                 </Select>
               </Field>
               <NavBtns back={back} next={() => {
-                if (data.categories.length === 0) return toast.error("Sélectionnez au moins une catégorie");
                 if (!data.gender) return toast.error("Sélectionnez votre genre");
                 if (!data.birthDate) return toast.error("Indiquez votre date de naissance complète");
                 { const age = (Date.now() - new Date(data.birthDate).getTime()) / (365.25 * 864e5); if (age < 18) return toast.error("Vous devez avoir au moins 18 ans pour ouvrir une boutique"); }
@@ -461,14 +433,14 @@ function Page() {
               <Field label="Région *">
                 <Select title="Région" value={data.region} onChange={(e) => { set("region", e.target.value); set("shopCity", ""); set("neighborhood", ""); }} className={inputCls} disabled={!loc}>
                   <option value="">{loc ? "Sélectionner une région" : "Chargement…"}</option>
-                  {regions.map((r) => <option key={r} value={r}>{(loc?.citiesByRegion[r] ?? []).some(isOpenCity) ? r : `${r} — bientôt`}</option>)}
+                  {regions.map((r) => <option key={r} value={r} disabled={!(loc?.citiesByRegion[r] ?? []).some(isOpenCity)}>{(loc?.citiesByRegion[r] ?? []).some(isOpenCity) ? r : `${r} — non disponible`}</option>)}
                 </Select>
               </Field>
 
               <Field label="Ville *">
                 <Select title="Ville de la boutique" value={data.shopCity} onChange={(e) => { set("shopCity", e.target.value); set("neighborhood", ""); }} className={inputCls} disabled={!data.region}>
                   <option value="">{data.region ? "Sélectionner une ville" : "Choisissez d'abord une région"}</option>
-                  {cities.map((c) => <option key={c} value={c}>{isOpenCity(c) ? c : `${c} — bientôt`}</option>)}
+                  {cities.map((c) => <option key={c} value={c} disabled={!isOpenCity(c)}>{isOpenCity(c) ? c : `${c} — non disponible`}</option>)}
                 </Select>
               </Field>
               {data.region && !cities.some(isOpenCity) && <SoonNote place={`la région ${data.region}`} />}
@@ -486,8 +458,8 @@ function Page() {
                 <div className="flex items-start gap-3 p-4">
                   <span className={`grid h-11 w-11 shrink-0 place-items-center rounded-xl ${data.shareLocation ? "bg-primary text-black" : "bg-primary/15 text-primary"}`}><LocateFixed size={20} /></span>
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-semibold">Position GPS de récupération</p>
-                    <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">Le livreur Amachia viendra récupérer vos colis à cette position exacte.</p>
+                    <p className="text-sm font-semibold">Position GPS de récupération <span className="font-normal text-muted-foreground">(facultatif)</span></p>
+                    <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">Le livreur Amachia viendra récupérer vos colis à cette position exacte. Vous n'êtes pas dans votre boutique ? Laissez désactivé : vous pourrez la partager plus tard depuis votre tableau de bord.</p>
                   </div>
                 </div>
                 {data.shareLocation && data.latitude && data.longitude && (
@@ -641,7 +613,7 @@ function DocUpload({ label, file, onFile }: { label: string; file?: DocFile; onF
             <div className="grid h-16 w-16 shrink-0 place-items-center rounded-lg bg-secondary"><FileText size={20} /></div>
           )}
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold truncate">{file.name}</p>
+            <p className="text-sm font-semibold truncate [overflow-wrap:anywhere]" title={file.name}>{file.name}</p>
             <p className="text-xs text-emerald-400">✓ Prêt à être téléversé</p>
           </div>
           <button type="button" onClick={() => onFile(undefined)} aria-label="Retirer" className="w-8 h-8 shrink-0 grid place-items-center rounded-lg hover:bg-destructive/20 text-destructive"><X size={14} /></button>

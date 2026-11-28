@@ -1,10 +1,12 @@
 import { Link } from "@tanstack/react-router";
 import { Check } from "lucide-react";
 import { IconRetour as ArrowLeft } from "@/components/icons/AmachiaIcons";
+import { useFramedFields } from "@/lib/framedFields";
 
 const STEPS = ["Infos", "Détails", "Documents", "Vérif.", "Boutique"];
 
 export function SignupShell({ step, children, onBack }: { step: number; children: React.ReactNode; onBack?: () => void }) {
+  useFramedFields();
   const progress = (step / STEPS.length) * 100;
   return (
     <div className="w-full rounded-none border-y border-border bg-card px-4 py-6 shadow-card sm:rounded-[1.6rem] sm:border sm:p-8 md:p-10">

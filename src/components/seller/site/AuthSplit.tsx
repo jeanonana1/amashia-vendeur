@@ -3,9 +3,11 @@ import type { ReactNode } from "react";
 import { Sparkles } from "lucide-react";
 import { IconNotifications as Bell, IconLivreurMoto as Bike, IconPortefeuille as Wallet } from "@/components/icons/AmachiaIcons";
 import { SellerLogo } from "@/components/seller/SellerLogo";
+import { useFramedFields } from "@/lib/framedFields";
 
 /** Mise en page des écrans de connexion / inscription : formulaire à gauche, panneau de marque à droite. */
 export function AuthSplit({ children, wide = false }: { children: ReactNode; wide?: boolean }) {
+  useFramedFields();
   return (
     <div className="grid min-h-screen grid-cols-1 bg-background lg:grid-cols-[minmax(0,1fr)_minmax(0,0.9fr)]">
       <div className="relative flex min-w-0 flex-col px-5 py-6 sm:px-10">

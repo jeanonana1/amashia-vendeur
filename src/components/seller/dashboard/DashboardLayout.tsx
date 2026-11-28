@@ -52,6 +52,7 @@ import { KycRejectedGate } from "@/components/seller/dashboard/KycRejectedGate";
 import { PushAlertsButton } from "@/components/seller/dashboard/PushAlertsButton";
 import { registerAppPush } from "@/lib/nativeApp";
 import type { AnyIcon } from "@/components/icons/AmachiaIcons";
+import { useFramedFields } from "@/lib/framedFields";
 /** Application Android Amachia Seller : enregistre ce téléphone pour les alertes de commandes. */
 function AppPushRegister({ uid }: { uid: string }) {
   useEffect(() => { void registerAppPush(); }, [uid]);
@@ -59,6 +60,7 @@ function AppPushRegister({ uid }: { uid: string }) {
 }
 
 export function DashboardLayout({ title, subtitle, actions, children }: { title: string; subtitle?: string; actions?: ReactNode; children: ReactNode }) {
+  useFramedFields();
   const badges = useNavBadges();
   // sons de l'espace vendeur : activés par défaut, coupables d'un clic
   const [sound, setSound] = useState(true);

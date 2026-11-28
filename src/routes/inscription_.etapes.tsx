@@ -4,7 +4,7 @@ import { SignupShell } from "@/components/seller/signup/SignupShell";
 import { AuthSplit } from "@/components/seller/site/AuthSplit";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Send, Check, FileText, Loader2, LocateFixed } from "lucide-react";
+import { Send, Check, FileText, Loader2, LocateFixed, Pencil } from "lucide-react";
 import { IconMobileMoney as Smartphone, IconCarteBancaire as CreditCard, IconLocalisation as MapPin, IconPaiementSecurise as ShieldCheck, IconEmail as Mail, IconImporter as Upload, IconAppareilPhoto as Camera, IconFermer as X, IconBoutique as Store, IconAccueil as Home, IconHorloge as Clock } from "@/components/icons/AmachiaIcons";
 import { OPEN_CITIES, isOpenCity, useCmLocations } from "@/lib/cmLocations";
 import { accountHint, signInSeller, type AccountHint } from "@/lib/sellerLogin";
@@ -69,6 +69,8 @@ function Page() {
   const [progress, setProgress] = useState("");
   const uploadedDocs = useRef<Set<string>>(new Set());
   const [otpSent, setOtpSent] = useState(false);
+  const [editEmail, setEditEmail] = useState(false);
+  const [newEmail, setNewEmail] = useState("");
   const [otpState, setOtp] = useState("");
   const [existing, setExisting] = useState(false); // e-mail déjà inscrit : pas de code, connexion avec le mot de passe
   const [cooldown, setCooldown] = useState(0);
@@ -146,15 +148,18 @@ function Page() {
     return () => window.clearTimeout(t);
   }, [data.email, data.phone, step]);
 
-  async function sendCode() {
+  async function sendCode(emailOverride?: string) {
     if (!data.acceptTerms) { toast.error("Vous devez accepter les conditions"); return; }
-    if (cooldown > 0) return;
+    const fresh = !!emailOverride;
+    const email = emailOverride ?? data.email;
+    const resend = otpSent && !fresh;
+    if (cooldown > 0 && !fresh) return;
     setLoading(true);
     try {
       const metadata = { account_type: type, first_name: data.firstName, last_name: data.lastName, phone: formatCm(cmDigits(data.phone)), seller_profile: buildProfile() };
-      const result = otpSent
-        ? await supabase.auth.resend({ type: "signup", email: data.email, options: { emailRedirectTo: `${window.location.origin}/connexion` } })
-        : await supabase.auth.signUp({ email: data.email, password: data.password, options: { data: metadata, emailRedirectTo: `${window.location.origin}/connexion` } });
+      const result = resend
+        ? await supabase.auth.resend({ type: "signup", email, options: { emailRedirectTo: `${window.location.origin}/connexion` } })
+        : await supabase.auth.signUp({ email, password: data.password, options: { data: metadata, emailRedirectTo: `${window.location.origin}/connexion` } });
       if (result.error) {
         if (/rate limit|security purposes|seconds/i.test(result.error.message)) throw new Error("Trop de demandes d'envoi : patientez une minute avant de redemander un code.");
         throw result.error;
@@ -165,16 +170,34 @@ function Page() {
       }
       setOtpSent(true);
       setCooldown(60);
-      if (!otpSent && "user" in result.data && result.data.user && result.data.user.identities?.length === 0) {
+      if (!resend && "user" in result.data && result.data.user && result.data.user.identities?.length === 0) {
         setExisting(true);
         toast.info("Cet email a déjà un compte Amachia : continuez avec votre mot de passe.");
         return;
       }
       setOtp("");
-      toast.success(otpSent ? "Un nouveau code vient d'être envoyé." : "Le code de vérification a été envoyé par email.");
+      toast.success(resend ? "Un nouveau code vient d'être envoyé." : `Le code de vérification a été envoyé à ${email}.`);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Envoi impossible.");
     } finally { setLoading(false); }
+  }
+
+  /** Corriger l'adresse e-mail depuis la page du code : nouvelle vérification, puis nouveau code envoyé à la bonne adresse. */
+  async function changeEmail() {
+    const email = newEmail.trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) { toast.error("Adresse e-mail invalide."); return; }
+    if (email === data.email.trim().toLowerCase()) { setEditEmail(false); return; }
+    setLoading(true);
+    const h = await accountHint({ email });
+    setLoading(false);
+    if (h.exists) {
+      toast.error("Cette adresse e-mail est déjà utilisée par un compte Amachia.");
+      setHint({ ...h, key: `e:${email}` }); setHintOpen(true); return;
+    }
+    set("email", email);
+    setEditEmail(false); setExisting(false); setOtp(""); setCooldown(0);
+    if (otpSent) await sendCode(email);
+    else toast.success("Adresse e-mail modifiée.");
   }
 
   function buildProfile() {
@@ -391,11 +414,31 @@ function Page() {
                   <div className="w-10 h-10 rounded-xl bg-primary/15 grid place-items-center"><Mail className="text-primary" size={18} /></div>
                   <div>
                     <p className="font-bold text-sm">Vérification par email</p>
-                    <p className="text-xs text-muted-foreground">Un code à 6 chiffres sera envoyé à <span className="text-primary font-semibold">{data.email}</span></p>
+                    <p className="text-xs text-muted-foreground break-all">Un code à 6 chiffres {otpSent ? "a été envoyé" : "sera envoyé"} à <span className="text-primary font-semibold">{data.email}</span></p>
+                    {!editEmail && (
+                      <button type="button" onClick={() => { setNewEmail(data.email); setEditEmail(true); }} disabled={loading}
+                        className="mt-1 inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline disabled:opacity-50">
+                        <Pencil size={12} /> Modifier l'adresse e-mail
+                      </button>
+                    )}
                   </div>
                 </div>
+                {editEmail && (
+                  <div className="mb-4 space-y-2 rounded-xl border border-primary/40 bg-primary/5 p-3">
+                    <label className="block text-sm font-semibold" htmlFor="new-email">Nouvelle adresse e-mail</label>
+                    <input id="new-email" type="email" inputMode="email" autoComplete="email" value={newEmail} autoFocus
+                      onChange={(e) => setNewEmail(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") void changeEmail(); }} className={inputCls} />
+                    <p className="text-xs text-muted-foreground">{otpSent ? "Un nouveau code sera envoyé à cette adresse ; l'ancien code ne sera plus valable." : "Le code sera envoyé à cette adresse."}</p>
+                    <div className="grid grid-cols-2 gap-2">
+                      <button type="button" onClick={() => setEditEmail(false)} className="rounded-full bg-secondary py-2.5 text-sm font-semibold">Annuler</button>
+                      <button type="button" onClick={() => void changeEmail()} disabled={loading} className="flex items-center justify-center gap-1.5 rounded-full bg-primary py-2.5 text-sm font-semibold text-black disabled:opacity-50">
+                        {loading ? <Loader2 size={15} className="animate-spin" /> : <Check size={15} />} {otpSent ? "Enregistrer et renvoyer" : "Enregistrer"}
+                      </button>
+                    </div>
+                  </div>
+                )}
                 {!otpSent ? (
-                  <button onClick={sendCode} disabled={loading || !data.acceptTerms} className="w-full py-3 rounded-full bg-primary text-black font-semibold hover:brightness-95 transition flex items-center justify-center gap-2 disabled:opacity-50">
+                  <button onClick={() => void sendCode()} disabled={loading || !data.acceptTerms || editEmail} className="w-full py-3 rounded-full bg-primary text-black font-semibold hover:brightness-95 transition flex items-center justify-center gap-2 disabled:opacity-50">
                     <Send size={16} /> {loading ? "Envoi..." : "Recevoir mon code"}
                   </button>
                 ) : existing ? (
@@ -412,7 +455,7 @@ function Page() {
                       </InputOTP>
                     </div>
                     <div className="text-center">
-                      <button onClick={sendCode} disabled={loading || cooldown > 0} className="text-sm text-primary hover:underline disabled:opacity-60 disabled:no-underline">
+                      <button onClick={() => void sendCode()} disabled={loading || cooldown > 0} className="text-sm text-primary hover:underline disabled:opacity-60 disabled:no-underline">
                         {cooldown > 0 ? `Renvoyer un code dans ${cooldown} s` : "Renvoyer un code"}
                       </button>
                     </div>

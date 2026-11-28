@@ -513,3 +513,12 @@ html.light[data-tr="wait"]::after { background: #fff; color: #0b1f3a; }
 @keyframes avis-shimmer { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
 .avis-entrance .avis-deck { max-width: none; }
 @media (prefers-reduced-motion: reduce) { .avis-entrance > .avis-deck { opacity: 1; transform: none; transition: none; } .avis-entrance .avis-card__stars, .avis-entrance .avis-card__text, .avis-entrance .avis-card__who { animation: none; } }
+
+/* Formulaires (tableaux de bord, inscription vendeur) : chaque champ dans son propre cadre, comme les cases d'un tableau. */
+html.fields-framed label.block:has(input:not([type="checkbox"], [type="radio"], [type="hidden"], [type="file"]), textarea, select, button[role="combobox"]),
+html.fields-framed div:has(> label.block:first-child + :is(input, textarea, select, button, div)) {
+  border: 1px solid color-mix(in oklab, var(--foreground) 16%, transparent);
+  border-radius: 14px;
+  padding: 12px;
+  background: color-mix(in oklab, var(--foreground) 3%, transparent);
+}

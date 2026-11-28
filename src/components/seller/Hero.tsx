@@ -80,18 +80,6 @@ function HeroSplit() {
         <HeroDeck />
 
         {/* notifications (illustration) */}
-        <FloatCard className="-left-2 -top-6 sm:-left-8 lg:-left-14 lg:top-[12%]" delay={0.5} bob={0}>
-          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-primary text-black"><Bell size={17} /></span>
-          <span className="min-w-0"><span className="block text-[11px] text-muted-foreground">Nouvelle commande</span><span className="block text-sm font-bold">Robe wax · 12 500 FCFA</span></span>
-        </FloatCard>
-        <FloatCard className="-right-3 top-[46%] sm:-right-8 lg:-right-10" delay={0.9} bob={1.6}>
-          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-emerald-500/15 text-emerald-500"><Wallet size={17} /></span>
-          <span className="min-w-0"><span className="block text-[11px] text-muted-foreground">Paiement reçu · Mobile Money</span><span className="block text-sm font-bold text-emerald-500">+ 22 500 FCFA</span></span>
-        </FloatCard>
-        <FloatCard className="bottom-5 left-4 sm:-left-6 lg:-left-12" delay={1.3} bob={3.2}>
-          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[#39bcf9]/15 text-[#39bcf9]"><Bike size={17} /></span>
-          <span className="min-w-0"><span className="block text-[11px] text-muted-foreground">Livraison Prime</span><span className="block text-sm font-bold">Colis récupéré, en route</span></span>
-        </FloatCard>
       </div>
     </div>
   );
@@ -120,9 +108,10 @@ function HeroDeck() {
   const touchX = useRef<number | null>(null);
   const go = (d: number) => n > 1 && setIdx((i) => (i + d + n) % n);
   // position de chaque carte : 0 = dessus ; les suivantes dépassent UNIQUEMENT à droite (pas en haut, en bas ni à gauche)
-  const pose = ["z-30 translate-x-0 scale-100 opacity-100",
-    "z-20 translate-x-[6%] scale-[.94] opacity-80",
-    "z-10 translate-x-[11%] scale-[.88] opacity-55"];
+  // seule la photo principale est visible ; les suivantes restent cachées (floues et transparentes) jusqu'à leur tour
+  const pose = ["z-30 scale-100 opacity-100 blur-0",
+    "z-20 scale-[1.04] opacity-0 blur-xl",
+    "z-10 scale-[1.04] opacity-0 blur-xl"];
   return (
     <div className="relative isolate" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)}
       onTouchStart={(e) => { touchX.current = e.touches[0].clientX; setPaused(true); }}
@@ -134,7 +123,7 @@ function HeroDeck() {
           const rel = (i - idx + n) % n;
           return (
             <div key={slot} aria-hidden={rel !== 0}
-              className={`absolute inset-0 origin-right transition-[transform,opacity] ${rel === 0 ? "deck-live" : ""} duration-[900ms] ease-[cubic-bezier(.16,1,.3,1)] will-change-transform ${pose[Math.min(rel, 2)]}`}>
+              className={`absolute inset-0 transition-[transform,opacity,filter] ${rel === 0 ? "deck-live" : ""} duration-[1100ms] ease-[cubic-bezier(.16,1,.3,1)] will-change-transform ${pose[Math.min(rel, 2)]}`}>
               <HomePhoto slot={slot} priority={i === 0} original shade={false}
                 className="h-full w-full overflow-hidden rounded-[2rem] border border-border shadow-[0_30px_60px_-25px_rgba(0,0,0,.7)] [&_img]:object-[45%_25%]">
                 <div aria-hidden className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/55 to-transparent" />
@@ -151,19 +140,6 @@ function HeroDeck() {
           ))}
         </div>
       )}
-    </div>
-  );
-}
-
-/** Petite carte flottante : apparaît puis flotte doucement. */
-function FloatCard({ className, delay, bob, children }: { className: string; delay: number; bob: number; children: React.ReactNode }) {
-  return (
-    <div aria-hidden className={`absolute z-10 ${className}`}>
-      <div className="animate-pop" style={{ animationDelay: `${delay}s` }}>
-        <div className="animate-bob flex max-w-[230px] items-center gap-2.5 rounded-2xl border border-border bg-card/90 px-3 py-2.5 shadow-card backdrop-blur-md" style={{ animationDelay: `${bob}s` }}>
-          {children}
-        </div>
-      </div>
     </div>
   );
 }

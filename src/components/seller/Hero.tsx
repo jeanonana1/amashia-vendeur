@@ -125,11 +125,11 @@ function HeroDeck() {
           return (
             <div key={slot} aria-hidden={rel !== 0}
               className={`absolute inset-0 origin-right transition-transform ${rel === 0 ? "deck-live" : ""} duration-[800ms] ease-[cubic-bezier(.22,1,.36,1)] will-change-transform ${pose[Math.min(rel, 2)]}`}>
-              <HomePhoto slot={slot} priority={i === 0} original shade={false}
+              <HomePhoto slot={slot} priority original shade={false}
                 className="h-full w-full overflow-hidden rounded-[2rem] border border-border shadow-[0_30px_60px_-25px_rgba(0,0,0,.7)] [&_img]:object-[45%_25%]">
                 <div aria-hidden className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/55 to-transparent" />
                 {/* cartes en attente : photo cachée par un voile blanc dépoli ; il disparaît quand la carte passe devant */}
-                <div aria-hidden className={`absolute inset-0 bg-white/85 backdrop-blur-2xl transition-opacity duration-500 ${rel === 0 ? "opacity-0" : "opacity-100"}`} />
+                <div aria-hidden className={`absolute inset-0 bg-white/85 backdrop-blur-2xl ${rel === 0 ? "opacity-0 duration-0" : "opacity-100 transition-opacity duration-300 delay-200"}`} />
               </HomePhoto>
             </div>
           );
